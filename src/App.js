@@ -19,6 +19,14 @@ import part6 from './images/partner6.jpg'
 import logo from './images/CYFORCE 2-1.jpg'
 import GoogleStarsBadge from './GoogleStarsBadge';
 import AIChatbot from './AIChatbot';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import ServicesPage from './ServicesPage';
+import AboutPage from './AboutPage';
+// Add this import with your other imports
+import ProductsPage from './ProductsPage';
+import LoginPage from './LoginPage';
+import RegisterPage from "./RegisterPage";
+
 
 
 // ─── SERVICES DATA ───────────────────────────────────────────────────────────
@@ -126,6 +134,8 @@ function useInView(threshold = 0.12) {
   }, []);
   return [ref, inView];
 }
+
+export { useInView };
 
 // ─── ANIMATED CANVAS ─────────────────────────────────────────────────────────
 function AnimatedCanvas() {
@@ -328,6 +338,12 @@ const inputStyle = {
 
 // ─── NAVBAR ───────────────────────────────────────────────────────────────────
 function NavBar({ scrolled, onAuth }) {
+  const location = useLocation();
+
+  const isActive = (path) => {
+    return location.pathname === path;
+  };
+
   return (
       <nav style={{
         position: "fixed", top: 0, left: 0, right: 0, zIndex: 200,
@@ -338,17 +354,13 @@ function NavBar({ scrolled, onAuth }) {
         borderBottom: scrolled ? "0.5px solid rgba(99,179,237,0.12)" : "none",
         transition: "all 0.3s ease",
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          {/* Company Logo Image */}
-          <img
-              src={logo}
-              alt="CyForce Technologies Logo"
-              style={{
-                height: "40px",
-                width: "auto",
-                objectFit: "contain",
-              }}
-          />
+        {/* Logo - Now links to home */}
+        <Link
+            to="/"
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 12 }}
+        >
+          <img src={logo} alt="CyForce Technologies Logo" style={{ height: "40px", width: "auto", objectFit: "contain" }} />
           <div>
             <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 16, color: "#fff", lineHeight: 1.1 }}>
               CyForce <span style={{ color: "#38BDF8" }}>Technologies</span>
@@ -357,34 +369,97 @@ function NavBar({ scrolled, onAuth }) {
               Smart Tech Solutions
             </div>
           </div>
-        </div>
+        </Link>
 
-        {/* Links */}
+        {/* Navigation Links */}
         <div style={{ display: "flex", gap: 30, alignItems: "center" }}>
-          {["Services", "About", "Partners", "Contact"].map(l => (
-              <a key={l} href={`#${l.toLowerCase()}`} style={{ color: "rgba(255,255,255,0.55)", fontSize: 13, textDecoration: "none", fontFamily: "'DM Sans',sans-serif", transition: "color 0.2s" }}
-                 onMouseEnter={e => e.target.style.color = "#fff"}
-                 onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.55)"}
-              >{l}</a>
-          ))}
-          <button onClick={() => onAuth("login")} style={{
-            background: "transparent", color: "rgba(255,255,255,0.7)",
-            border: "0.5px solid rgba(255,255,255,0.2)", borderRadius: 7,
-            padding: "8px 18px", fontSize: 13, fontFamily: "'DM Sans',sans-serif",
-            cursor: "pointer", transition: "all 0.2s",
+          <Link to="/services" style={{
+            color: isActive("/services") ? "#38BDF8" : "rgba(255,255,255,0.55)",
+            fontSize: 13,
+            textDecoration: "none",
+            fontFamily: "'DM Sans',sans-serif",
+            transition: "color 0.2s"
           }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(56,189,248,0.4)"; e.currentTarget.style.color = "#fff"; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)"; e.currentTarget.style.color = "rgba(255,255,255,0.7)"; }}
-          >Log In</button>
-          <button onClick={() => onAuth("signup")} style={{
-            background: "#2B5CE6", color: "#fff", border: "none", borderRadius: 7,
-            padding: "8px 20px", fontSize: 13, fontFamily: "'DM Sans',sans-serif",
-            cursor: "pointer", transition: "background 0.2s",
-            boxShadow: "0 0 16px rgba(43,92,230,0.35)",
+                onMouseEnter={e => e.target.style.color = "#fff"}
+                onMouseLeave={e => e.target.style.color = isActive("/services") ? "#38BDF8" : "rgba(255,255,255,0.55)"}>
+            Services
+          </Link>
+
+          <Link to="/about" style={{
+            color: isActive("/about") ? "#38BDF8" : "rgba(255,255,255,0.55)",
+            fontSize: 13,
+            textDecoration: "none",
+            fontFamily: "'DM Sans',sans-serif",
+            transition: "color 0.2s"
           }}
-                  onMouseEnter={e => e.currentTarget.style.background = "#3b6ef0"}
-                  onMouseLeave={e => e.currentTarget.style.background = "#2B5CE6"}
-          >Sign Up</button>
+                onMouseEnter={e => e.target.style.color = "#fff"}
+                onMouseLeave={e => e.target.style.color = isActive("/about") ? "#38BDF8" : "rgba(255,255,255,0.55)"}>
+            About
+          </Link>
+
+          <Link to="/products" style={{
+            color: isActive("/products") ? "#38BDF8" : "rgba(255,255,255,0.55)",
+            fontSize: 13,
+            textDecoration: "none",
+            fontFamily: "'DM Sans',sans-serif",
+            transition: "color 0.2s"
+          }}
+                onMouseEnter={e => e.target.style.color = "#fff"}
+                onMouseLeave={e => e.target.style.color = isActive("/products") ? "#38BDF8" : "rgba(255,255,255,0.55)"}>
+            Products
+          </Link>
+
+          <a href="#partners" style={{
+            color: "rgba(255,255,255,0.55)",
+            fontSize: 13,
+            textDecoration: "none",
+            fontFamily: "'DM Sans',sans-serif",
+            transition: "color 0.2s"
+          }}
+             onMouseEnter={e => e.target.style.color = "#fff"}
+             onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.55)"}>
+            Partners
+          </a>
+
+          <a href="#contact" style={{
+            color: "rgba(255,255,255,0.55)",
+            fontSize: 13,
+            textDecoration: "none",
+            fontFamily: "'DM Sans',sans-serif",
+            transition: "color 0.2s"
+          }}
+             onMouseEnter={e => e.target.style.color = "#fff"}
+             onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.55)"}>
+            Contact
+          </a>
+
+          <Link to="/login" style={{
+            background: "transparent",
+            color: "rgba(255,255,255,0.7)",
+            border: "0.5px solid rgba(255,255,255,0.2)",
+            borderRadius: 7,
+            padding: "8px 18px",
+            fontSize: 13,
+            fontFamily: "'DM Sans',sans-serif",
+            textDecoration: "none",
+            transition: "all 0.2s",
+          }}>
+            Log In
+          </Link>
+
+          <Link to="/register" style={{
+            background: "transparent",
+            color: "rgba(255,255,255,0.7)",
+            border: "0.5px solid rgba(255,255,255,0.2)",
+            borderRadius: 7,
+            padding: "8px 20px",
+            fontSize: 13,
+            fontFamily: "'DM Sans',sans-serif",
+            textDecoration: "none",
+            transition: "all 0.2s",
+          }}>
+            Sign Up
+          </Link>
         </div>
       </nav>
   );
@@ -794,6 +869,52 @@ function CTASection({ onAuth }) {
   );
 }
 
+function ContactSection() {
+  const [ref, inView] = useInView();
+
+  return (
+      <section id="contact" style={{ background: "#060B1A", padding: "80px 48px" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto", textAlign: "center" }}>
+          <div ref={ref} style={{
+            opacity: inView ? 1 : 0,
+            transform: inView ? "none" : "translateY(30px)",
+            transition: "all 0.7s ease"
+          }}>
+            <div style={{ fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", color: "#38BDF8", marginBottom: 12 }}>
+              Get In Touch
+            </div>
+            <h2 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 38, color: "#fff", marginBottom: 40 }}>
+              Contact Us
+            </h2>
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+              gap: 30
+            }}>
+              <div>
+                <div style={{ fontSize: 32, marginBottom: 15 }}>📍</div>
+                <h3 style={{ color: "#fff", marginBottom: 10 }}>Visit Us</h3>
+                <p style={{ color: "rgba(255,255,255,0.5)" }}>
+                  Broadway Mall, No3 Yisa Braimoh Street<br />Kaura-District, Abuja-FCT
+                </p>
+              </div>
+              <div>
+                <div style={{ fontSize: 32, marginBottom: 15 }}>📞</div>
+                <h3 style={{ color: "#fff", marginBottom: 10 }}>Call Us</h3>
+                <p style={{ color: "rgba(255,255,255,0.5)" }}>+234 (0) 901 066 9297</p>
+              </div>
+              <div>
+                <div style={{ fontSize: 32, marginBottom: 15 }}>✉️</div>
+                <h3 style={{ color: "#fff", marginBottom: 10 }}>Email Us</h3>
+                <p style={{ color: "rgba(255,255,255,0.5)" }}>info@cyforcetech.com</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+  );
+}
+
 // ─── FOOTER ───────────────────────────────────────────────────────────────────
 function Footer() {
   return (
@@ -968,24 +1089,70 @@ function Footer() {
                 letterSpacing: "0.05em"
               }}>Quick Links</h4>
               <ul style={{ listStyle: "none", padding: 0 }}>
-                {["Services", "About Us", "Partners", "Contact"].map(link => (
-                    <li key={link} style={{ marginBottom: 12 }}>
-                      <a
-                          href={`#${link.toLowerCase()}`}
-                          style={{
-                            fontSize: 13,
-                            color: "rgba(255,255,255,0.4)",
-                            textDecoration: "none",
-                            fontFamily: "'DM Sans',sans-serif",
-                            transition: "color 0.2s"
-                          }}
-                          onMouseEnter={e => e.target.style.color = "#38BDF8"}
-                          onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.4)"}
-                      >
-                        {link}
-                      </a>
-                    </li>
-                ))}
+                <li style={{ marginBottom: 12 }}>
+                  <Link
+                      to="/services"
+                      style={{
+                        fontSize: 13,
+                        color: "rgba(255,255,255,0.4)",
+                        textDecoration: "none",
+                        fontFamily: "'DM Sans',sans-serif",
+                        transition: "color 0.2s"
+                      }}
+                      onMouseEnter={e => e.target.style.color = "#38BDF8"}
+                      onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.4)"}
+                  >
+                    Services
+                  </Link>
+                </li>
+                <li style={{ marginBottom: 12 }}>
+                  <Link
+                      to="/about"
+                      style={{
+                        fontSize: 13,
+                        color: "rgba(255,255,255,0.4)",
+                        textDecoration: "none",
+                        fontFamily: "'DM Sans',sans-serif",
+                        transition: "color 0.2s"
+                      }}
+                      onMouseEnter={e => e.target.style.color = "#38BDF8"}
+                      onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.4)"}
+                  >
+                    About Us
+                  </Link>
+                </li>
+                <li style={{ marginBottom: 12 }}>
+                  <a
+                      href="#partners"
+                      style={{
+                        fontSize: 13,
+                        color: "rgba(255,255,255,0.4)",
+                        textDecoration: "none",
+                        fontFamily: "'DM Sans',sans-serif",
+                        transition: "color 0.2s"
+                      }}
+                      onMouseEnter={e => e.target.style.color = "#38BDF8"}
+                      onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.4)"}
+                  >
+                    Partners
+                  </a>
+                </li>
+                <li style={{ marginBottom: 12 }}>
+                  <a
+                      href="#contact"
+                      style={{
+                        fontSize: 13,
+                        color: "rgba(255,255,255,0.4)",
+                        textDecoration: "none",
+                        fontFamily: "'DM Sans',sans-serif",
+                        transition: "color 0.2s"
+                      }}
+                      onMouseEnter={e => e.target.style.color = "#38BDF8"}
+                      onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.4)"}
+                  >
+                    Contact
+                  </a>
+                </li>
               </ul>
             </div>
 
@@ -999,24 +1166,86 @@ function Footer() {
                 letterSpacing: "0.05em"
               }}>Our Services</h4>
               <ul style={{ listStyle: "none", padding: 0 }}>
-                {SERVICES.slice(0, 5).map(service => (
-                    <li key={service.id} style={{ marginBottom: 12 }}>
-                      <a
-                          href="#services"
-                          style={{
-                            fontSize: 13,
-                            color: "rgba(255,255,255,0.4)",
-                            textDecoration: "none",
-                            fontFamily: "'DM Sans',sans-serif",
-                            transition: "color 0.2s"
-                          }}
-                          onMouseEnter={e => e.target.style.color = "#38BDF8"}
-                          onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.4)"}
-                      >
-                        {service.title}
-                      </a>
-                    </li>
-                ))}
+                <li style={{ marginBottom: 12 }}>
+                  <Link
+                      to="/services"
+                      style={{
+                        fontSize: 13,
+                        color: "rgba(255,255,255,0.4)",
+                        textDecoration: "none",
+                        fontFamily: "'DM Sans',sans-serif",
+                        transition: "color 0.2s"
+                      }}
+                      onMouseEnter={e => e.target.style.color = "#38BDF8"}
+                      onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.4)"}
+                  >
+                    Cyber Security Services
+                  </Link>
+                </li>
+                <li style={{ marginBottom: 12 }}>
+                  <Link
+                      to="/services"
+                      style={{
+                        fontSize: 13,
+                        color: "rgba(255,255,255,0.4)",
+                        textDecoration: "none",
+                        fontFamily: "'DM Sans',sans-serif",
+                        transition: "color 0.2s"
+                      }}
+                      onMouseEnter={e => e.target.style.color = "#38BDF8"}
+                      onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.4)"}
+                  >
+                    ICT Services
+                  </Link>
+                </li>
+                <li style={{ marginBottom: 12 }}>
+                  <Link
+                      to="/services"
+                      style={{
+                        fontSize: 13,
+                        color: "rgba(255,255,255,0.4)",
+                        textDecoration: "none",
+                        fontFamily: "'DM Sans',sans-serif",
+                        transition: "color 0.2s"
+                      }}
+                      onMouseEnter={e => e.target.style.color = "#38BDF8"}
+                      onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.4)"}
+                  >
+                    Solar Energy Solutions
+                  </Link>
+                </li>
+                <li style={{ marginBottom: 12 }}>
+                  <Link
+                      to="/services"
+                      style={{
+                        fontSize: 13,
+                        color: "rgba(255,255,255,0.4)",
+                        textDecoration: "none",
+                        fontFamily: "'DM Sans',sans-serif",
+                        transition: "color 0.2s"
+                      }}
+                      onMouseEnter={e => e.target.style.color = "#38BDF8"}
+                      onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.4)"}
+                  >
+                    Automation & Security
+                  </Link>
+                </li>
+                <li style={{ marginBottom: 12 }}>
+                  <Link
+                      to="/services"
+                      style={{
+                        fontSize: 13,
+                        color: "rgba(255,255,255,0.4)",
+                        textDecoration: "none",
+                        fontFamily: "'DM Sans',sans-serif",
+                        transition: "color 0.2s"
+                      }}
+                      onMouseEnter={e => e.target.style.color = "#38BDF8"}
+                      onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.4)"}
+                  >
+                    Certificate Management
+                  </Link>
+                </li>
               </ul>
             </div>
 
@@ -1083,37 +1312,55 @@ export default function App() {
   }, []);
 
   return (
-      <>
-        <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap');
-        *{margin:0;padding:0;box-sizing:border-box;}
-        body{background:#060B1A;overflow-x:hidden;}
-        @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
-        @keyframes pulse{0%,100%{box-shadow:0 0 8px #38BDF8;opacity:1}50%{box-shadow:0 0 18px #38BDF8;opacity:0.55}}
-        @keyframes scrollDrop{
-          0%{transform:scaleY(0);transform-origin:top}
-          50%{transform:scaleY(1);transform-origin:top}
-          51%{transform:scaleY(1);transform-origin:bottom}
-          100%{transform:scaleY(0);transform-origin:bottom}
-        }
-        @keyframes kenBurnsA{from{transform:scale(1) translate(0,0)}to{transform:scale(1.08) translate(-1%,-1%)}}
-        @keyframes kenBurnsB{from{transform:scale(1) translate(0,0)}to{transform:scale(1.08) translate(1%,1%)}}
-        @keyframes modalIn{from{opacity:0;transform:scale(0.94) translateY(12px)}to{opacity:1;transform:none}}
-        input:focus{border-color:rgba(56,189,248,0.5)!important;outline:none!important;}
-        ::-webkit-scrollbar{width:5px}
-        ::-webkit-scrollbar-track{background:#04080F}
-        ::-webkit-scrollbar-thumb{background:#1e3a5f;border-radius:4px}
-      `}</style>
+      <Router>
+        <>
+          <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+          *{margin:0;padding:0;box-sizing:border-box;}
+          body{background:#060B1A;overflow-x:hidden;}
+          @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+          @keyframes pulse{0%,100%{box-shadow:0 0 8px #38BDF8;opacity:1}50%{box-shadow:0 0 18px #38BDF8;opacity:0.55}}
+          @keyframes scrollDrop{
+            0%{transform:scaleY(0);transform-origin:top}
+            50%{transform:scaleY(1);transform-origin:top}
+            51%{transform:scaleY(1);transform-origin:bottom}
+            100%{transform:scaleY(0);transform-origin:bottom}
+          }
+          @keyframes kenBurnsA{from{transform:scale(1) translate(0,0)}to{transform:scale(1.08) translate(-1%,-1%)}}
+          @keyframes kenBurnsB{from{transform:scale(1) translate(0,0)}to{transform:scale(1.08) translate(1%,1%)}}
+          @keyframes modalIn{from{opacity:0;transform:scale(0.94) translateY(12px)}to{opacity:1;transform:none}}
+          input:focus{border-color:rgba(56,189,248,0.5)!important;outline:none!important;}
+          ::-webkit-scrollbar{width:5px}
+          ::-webkit-scrollbar-track{background:#04080F}
+          ::-webkit-scrollbar-thumb{background:#1e3a5f;border-radius:4px}
+        `}</style>
 
-        {auth && <AuthModal mode={auth} onClose={() => setAuth(null)} />}
-        <NavBar scrolled={scrolled} onAuth={setAuth} />
-        <HeroSection onAuth={setAuth} />
-        <ServicesSection />
-        <AboutSection />
-        <PartnersSection />
-        <CTASection onAuth={setAuth} />
-        <Footer />
-        <AIChatbot />
-      </>
+          {auth && <AuthModal mode={auth} onClose={() => setAuth(null)} />}
+          <NavBar scrolled={scrolled} onAuth={setAuth} />
+
+          <Routes>
+            <Route path="/" element={
+              <>
+                <HeroSection onAuth={setAuth} />
+                <ServicesSection />
+                <AboutSection />
+                <PartnersSection />
+                <CTASection onAuth={setAuth} />
+                <ContactSection />
+              </>
+            } />
+            <Route path="/services" element={<ServicesPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/products" element={<ProductsPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+          </Routes>
+
+          <Footer />
+          <AIChatbot />
+        </>
+      </Router>
   );
+
+
 }
