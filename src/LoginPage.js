@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from './images/CYFORCE 2-1.jpg';
+import { API_BASE, getPostAuthPath, storeAuthSession } from './utils/authFlow';
 
 // Animated Particle Background
 function ParticleBackground() {
@@ -128,33 +129,57 @@ function LoginPage() {
         setError("");
         setIsLoading(true);
 
-        // Mock login - in production would authenticate
-        setTimeout(() => {
-            setIsLoading(false);
+        try {
+            const response = await fetch(`${API_BASE}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email,
+                    password,
+                    role: selectedRole,
+                }),
+            });
 
-            localStorage.setItem("authToken", "mock-token-123");
-            localStorage.setItem("userRole", selectedRole);
-            if (rememberMe) {
-                localStorage.setItem("rememberedEmail", email);
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Login failed');
             }
 
-            // Redirect to dashboard
-            navigate("/dashboard");
-        }, 2000);
+            storeAuthSession(data);
+            if (rememberMe) {
+                localStorage.setItem('rememberedEmail', email);
+            }
+
+            navigate(getPostAuthPath(data));
+        } catch (loginError) {
+            setError(loginError.message);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
-    const handleSSOLogin = (provider) => {
+    const handleSSOLogin = async (provider) => {
         if (!selectedRole) {
             setError("Please select your role before using SSO.");
             return;
         }
 
+        setError("");
         setIsLoading(true);
-        setTimeout(() => {
-            localStorage.setItem("authToken", "mock-sso-token-123");
-            localStorage.setItem("userRole", selectedRole);
-            navigate("/dashboard");
-        }, 1500);
+
+        try {
+            const { signInWithGoogle, signInWithMicrosoft } = await import('./utils/sso');
+            const result = provider === 'google'
+                ? await signInWithGoogle(selectedRole)
+                : await signInWithMicrosoft(selectedRole);
+
+            navigate(result.nextPath);
+        } catch (loginError) {
+            setError(loginError.message || 'Sign-in failed. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -518,6 +543,7 @@ function LoginPage() {
                             <button
                                 type="button"
                                 onClick={() => handleSSOLogin("google")}
+                                disabled={isLoading}
                                 style={{
                                     display: "flex",
                                     alignItems: "center",
@@ -526,17 +552,16 @@ function LoginPage() {
                                     border: "1px solid rgba(51,65,85,1)",
                                     borderRadius: "10px",
                                     background: "rgba(15,23,42,0.5)",
-                                    cursor: "pointer",
+                                    cursor: isLoading ? "not-allowed" : "pointer",
                                     transition: "all 0.2s",
-                                    gap: "8px"
+                                    gap: "8px",
+                                    opacity: isLoading ? 0.7 : 1
                                 }}
                                 onMouseEnter={(e) => {
-                                    e.currentTarget.style.background = "rgba(51,65,85,0.5)";
-                                    e.currentTarget.style.borderColor = "rgba(71,85,105,1)";
+                                    if (!isLoading) e.currentTarget.style.background = "rgba(51,65,85,0.5)";
                                 }}
                                 onMouseLeave={(e) => {
                                     e.currentTarget.style.background = "rgba(15,23,42,0.5)";
-                                    e.currentTarget.style.borderColor = "rgba(51,65,85,1)";
                                 }}
                             >
                                 <span style={{ fontSize: "18px" }}>G</span>

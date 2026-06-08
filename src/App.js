@@ -22,10 +22,14 @@ import AIChatbot from './AIChatbot';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import ServicesPage from './ServicesPage';
 import AboutPage from './AboutPage';
-// Add this import with your other imports
 import ProductsPage from './ProductsPage';
 import LoginPage from './LoginPage';
 import RegisterPage from "./RegisterPage";
+import EmailVerificationPage from './EmailVerificationPage';
+import MFASetupPage from './MFASetupPage';
+import TermsPage from './TermsPage';
+import PrivacyPage from './PrivacyPage';
+
 
 
 
@@ -337,8 +341,10 @@ const inputStyle = {
 };
 
 // ─── NAVBAR ───────────────────────────────────────────────────────────────────
+// ─── NAVBAR ───────────────────────────────────────────────────────────────────
 function NavBar({ scrolled, onAuth }) {
   const location = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const isActive = (path) => {
     return location.pathname === path;
@@ -347,14 +353,15 @@ function NavBar({ scrolled, onAuth }) {
   return (
       <nav style={{
         position: "fixed", top: 0, left: 0, right: 0, zIndex: 200,
-        padding: scrolled ? "12px 48px" : "20px 48px",
+        padding: scrolled ? "12px 24px" : "20px 32px",
         display: "flex", alignItems: "center", justifyContent: "space-between",
         background: scrolled ? "rgba(6,11,26,0.94)" : "transparent",
         backdropFilter: scrolled ? "blur(16px)" : "none",
         borderBottom: scrolled ? "0.5px solid rgba(99,179,237,0.12)" : "none",
         transition: "all 0.3s ease",
+        flexWrap: "wrap"
       }}>
-        {/* Logo - Now links to home */}
+        {/* Logo */}
         <Link
             to="/"
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
@@ -362,20 +369,49 @@ function NavBar({ scrolled, onAuth }) {
         >
           <img src={logo} alt="CyForce Technologies Logo" style={{ height: "40px", width: "auto", objectFit: "contain" }} />
           <div>
-            <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 16, color: "#fff", lineHeight: 1.1 }}>
+            <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: "clamp(14px, 4vw, 16px)", color: "#fff", lineHeight: 1.1 }}>
               CyForce <span style={{ color: "#38BDF8" }}>Technologies</span>
             </div>
-            <div style={{ fontSize: 9, letterSpacing: "0.13em", color: "rgba(255,255,255,0.3)", textTransform: "uppercase", fontFamily: "'DM Sans',sans-serif" }}>
+            <div style={{ fontSize: "clamp(8px, 2vw, 9px)", letterSpacing: "0.13em", color: "rgba(255,255,255,0.3)", textTransform: "uppercase", fontFamily: "'DM Sans',sans-serif" }}>
               Smart Tech Solutions
             </div>
           </div>
         </Link>
 
+        {/* Mobile Menu Button */}
+        <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            style={{
+              display: "none",
+              background: "transparent",
+              border: "none",
+              color: "#fff",
+              fontSize: "24px",
+              cursor: "pointer",
+              "@media (max-width: 768px)": { display: "block" }
+            }}
+        >
+          ☰
+        </button>
+
         {/* Navigation Links */}
-        <div style={{ display: "flex", gap: 30, alignItems: "center" }}>
+        <div style={{
+          display: "flex",
+          gap: 30,
+          alignItems: "center",
+          flexWrap: "wrap",
+          transition: "all 0.3s ease",
+          "@media (max-width: 768px)": {
+            display: isMobileMenuOpen ? "flex" : "none",
+            flexDirection: "column",
+            width: "100%",
+            marginTop: "20px",
+            gap: "15px"
+          }
+        }}>
           <Link to="/services" style={{
             color: isActive("/services") ? "#38BDF8" : "rgba(255,255,255,0.55)",
-            fontSize: 13,
+            fontSize: "clamp(12px, 3vw, 13px)",
             textDecoration: "none",
             fontFamily: "'DM Sans',sans-serif",
             transition: "color 0.2s"
@@ -387,7 +423,7 @@ function NavBar({ scrolled, onAuth }) {
 
           <Link to="/about" style={{
             color: isActive("/about") ? "#38BDF8" : "rgba(255,255,255,0.55)",
-            fontSize: 13,
+            fontSize: "clamp(12px, 3vw, 13px)",
             textDecoration: "none",
             fontFamily: "'DM Sans',sans-serif",
             transition: "color 0.2s"
@@ -399,7 +435,7 @@ function NavBar({ scrolled, onAuth }) {
 
           <Link to="/products" style={{
             color: isActive("/products") ? "#38BDF8" : "rgba(255,255,255,0.55)",
-            fontSize: 13,
+            fontSize: "clamp(12px, 3vw, 13px)",
             textDecoration: "none",
             fontFamily: "'DM Sans',sans-serif",
             transition: "color 0.2s"
@@ -411,7 +447,7 @@ function NavBar({ scrolled, onAuth }) {
 
           <a href="#partners" style={{
             color: "rgba(255,255,255,0.55)",
-            fontSize: 13,
+            fontSize: "clamp(12px, 3vw, 13px)",
             textDecoration: "none",
             fontFamily: "'DM Sans',sans-serif",
             transition: "color 0.2s"
@@ -423,7 +459,7 @@ function NavBar({ scrolled, onAuth }) {
 
           <a href="#contact" style={{
             color: "rgba(255,255,255,0.55)",
-            fontSize: 13,
+            fontSize: "clamp(12px, 3vw, 13px)",
             textDecoration: "none",
             fontFamily: "'DM Sans',sans-serif",
             transition: "color 0.2s"
@@ -439,25 +475,42 @@ function NavBar({ scrolled, onAuth }) {
             border: "0.5px solid rgba(255,255,255,0.2)",
             borderRadius: 7,
             padding: "8px 18px",
-            fontSize: 13,
+            fontSize: "clamp(12px, 3vw, 13px)",
             fontFamily: "'DM Sans',sans-serif",
             textDecoration: "none",
             transition: "all 0.2s",
-          }}>
+          }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.borderColor = "rgba(56,189,248,0.4)";
+                  e.currentTarget.style.color = "#fff";
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)";
+                  e.currentTarget.style.color = "rgba(255,255,255,0.7)";
+                }}>
             Log In
           </Link>
 
           <Link to="/register" style={{
-            background: "transparent",
-            color: "rgba(255,255,255,0.7)",
-            border: "0.5px solid rgba(255,255,255,0.2)",
+            background: "#2B5CE6",
+            color: "#fff",
+            border: "none",
             borderRadius: 7,
             padding: "8px 20px",
-            fontSize: 13,
+            fontSize: "clamp(12px, 3vw, 13px)",
             fontFamily: "'DM Sans',sans-serif",
             textDecoration: "none",
             transition: "all 0.2s",
-          }}>
+            boxShadow: "0 0 16px rgba(43,92,230,0.35)",
+          }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = "#3b6ef0";
+                  e.currentTarget.style.transform = "scale(1.02)";
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = "#2B5CE6";
+                  e.currentTarget.style.transform = "scale(1)";
+                }}>
             Sign Up
           </Link>
         </div>
@@ -479,7 +532,7 @@ function HeroSection({ onAuth }) {
         <AnimatedCanvas />
         <div style={{ position: "absolute", inset: 0, zIndex: 1, backgroundImage: "repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px)", pointerEvents: "none" }} />
 
-        <div style={{ position: "relative", zIndex: 2, textAlign: "center", padding: "0 24px", maxWidth: 800 }}>
+        <div style={{ position: "relative", zIndex: 2, textAlign: "center", padding: "0 clamp(16px, 5vw, 24px)", maxWidth: "min(800px, 90%)" }}>
           <div style={{
             display: "inline-flex", alignItems: "center", gap: 8,
             border: "0.5px solid rgba(99,179,237,0.3)", borderRadius: 24,
@@ -488,7 +541,7 @@ function HeroSection({ onAuth }) {
             transition: "all 0.7s ease 0.1s",
           }}>
             <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#38BDF8", boxShadow: "0 0 8px #38BDF8", animation: "pulse 2s ease-in-out infinite" }} />
-            <span style={{ fontSize: 11, letterSpacing: "0.12em", color: "#63B3ED", textTransform: "uppercase", fontFamily: "'DM Sans',sans-serif" }}>Abuja's Premier Technology Partner</span>
+            <span style={{ fontSize: "clamp(10px, 3vw, 11px)", letterSpacing: "0.12em", color: "#63B3ED", textTransform: "uppercase", fontFamily: "'DM Sans',sans-serif" }}>Abuja's Premier Technology Partner</span>
           </div>
 
           <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
@@ -497,7 +550,7 @@ function HeroSection({ onAuth }) {
 
           <h1 style={{
             fontFamily: "'Syne',sans-serif", fontWeight: 800,
-            fontSize: "clamp(36px,5.5vw,70px)", color: "#fff", lineHeight: 1.06, margin: "0 0 8px",
+            fontSize: "clamp(32px, 6vw, 70px)", color: "#fff", lineHeight: 1.06, margin: "0 0 8px",
             opacity: vis ? 1 : 0, transform: vis ? "none" : "translateY(30px)",
             transition: "all 0.8s ease 0.25s",
           }}>
@@ -505,7 +558,7 @@ function HeroSection({ onAuth }) {
           </h1>
 
           <p style={{
-            fontSize: 16, color: "rgba(255,255,255,0.48)", lineHeight: 1.75, maxWidth: 540, margin: "20px auto 38px",
+            fontSize: "clamp(14px, 4vw, 16px)", color: "rgba(255,255,255,0.48)", lineHeight: 1.75, maxWidth: "min(540px, 90%)", margin: "20px auto 38px",
             fontFamily: "'DM Sans',sans-serif",
             opacity: vis ? 1 : 0, transform: vis ? "none" : "translateY(20px)",
             transition: "all 0.8s ease 0.42s",
@@ -514,14 +567,17 @@ function HeroSection({ onAuth }) {
           </p>
 
           <div style={{
-            display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap",
+            display: "flex", gap: "clamp(10px, 3vw, 12px)", justifyContent: "center", flexWrap: "wrap",
             opacity: vis ? 1 : 0, transform: vis ? "none" : "translateY(20px)",
             transition: "all 0.8s ease 0.56s",
           }}>
             <button style={{
               background: "#2B5CE6", color: "#fff", border: "none", borderRadius: 9,
-              padding: "14px 34px", fontSize: 15, fontFamily: "'DM Sans',sans-serif", fontWeight: 500,
+              padding: "clamp(10px, 3vw, 14px) clamp(20px, 5vw, 34px)",
+              fontSize: "clamp(13px, 3.5vw, 15px)",
+              fontFamily: "'DM Sans',sans-serif", fontWeight: 500,
               cursor: "pointer", boxShadow: "0 0 28px rgba(43,92,230,0.45)", transition: "all 0.2s",
+              whiteSpace: "nowrap"
             }}
                     onMouseEnter={e => { e.currentTarget.style.background = "#3b6ef0"; e.currentTarget.style.transform = "translateY(-2px)"; }}
                     onMouseLeave={e => { e.currentTarget.style.background = "#2B5CE6"; e.currentTarget.style.transform = "none"; }}
@@ -529,7 +585,10 @@ function HeroSection({ onAuth }) {
             <button onClick={() => onAuth("signup")} style={{
               background: "transparent", color: "rgba(255,255,255,0.72)",
               border: "0.5px solid rgba(255,255,255,0.18)", borderRadius: 9,
-              padding: "14px 30px", fontSize: 15, fontFamily: "'DM Sans',sans-serif", cursor: "pointer", transition: "all 0.2s",
+              padding: "clamp(10px, 3vw, 14px) clamp(18px, 4vw, 30px)",
+              fontSize: "clamp(13px, 3.5vw, 15px)",
+              fontFamily: "'DM Sans',sans-serif", cursor: "pointer", transition: "all 0.2s",
+              whiteSpace: "nowrap"
             }}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(56,189,248,0.45)"; e.currentTarget.style.color = "#fff"; }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.18)"; e.currentTarget.style.color = "rgba(255,255,255,0.72)"; }}
@@ -541,14 +600,16 @@ function HeroSection({ onAuth }) {
             display: "flex", flexWrap: "wrap", justifyContent: "center", marginTop: 64,
             borderTop: "0.5px solid rgba(99,179,237,0.1)", paddingTop: 36,
             opacity: vis ? 1 : 0, transition: "all 0.8s ease 0.78s",
+            gap: "clamp(16px, 4vw, 0)"
           }}>
             {STATS.map((s, i) => (
                 <div key={s.label} style={{
-                  textAlign: "center", padding: "0 32px",
+                  textAlign: "center", padding: "0 clamp(16px, 4vw, 32px)",
                   borderRight: i < STATS.length - 1 ? "0.5px solid rgba(99,179,237,0.1)" : "none",
+                  "@media (max-width: 600px)": { borderRight: "none" }
                 }}>
-                  <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 26, color: "#fff" }}>{s.value}</div>
-                  <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginTop: 3, fontFamily: "'DM Sans',sans-serif" }}>{s.label}</div>
+                  <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: "clamp(22px, 5vw, 26px)", color: "#fff" }}>{s.value}</div>
+                  <div style={{ fontSize: "clamp(10px, 2.5vw, 11px)", color: "rgba(255,255,255,0.35)", marginTop: 3, fontFamily: "'DM Sans',sans-serif" }}>{s.label}</div>
                 </div>
             ))}
           </div>
@@ -586,7 +647,7 @@ function ServiceCard({ svc, index }) {
             boxShadow: hov ? `0 20px 50px rgba(0,0,0,0.5), 0 0 0 1px ${svc.accent}22` : "none",
           }}>
         {/* Animated image */}
-        <div style={{ position: "relative", height: 210, overflow: "hidden" }}>
+        <div style={{ position: "relative", height: "clamp(160px, 25vw, 210px)", overflow: "hidden" }}>
           <img
               src={svc.img}
               alt={svc.title}
@@ -605,27 +666,27 @@ function ServiceCard({ svc, index }) {
             position: "absolute", top: 14, left: 14,
             background: "rgba(4,10,21,0.78)", backdropFilter: "blur(10px)",
             border: `0.5px solid ${svc.accent}44`, borderRadius: 20,
-            padding: "4px 12px", fontSize: 10, color: svc.accent,
+            padding: "4px 12px", fontSize: "clamp(9px, 2.5vw, 10px)", color: svc.accent,
             letterSpacing: "0.09em", textTransform: "uppercase", fontFamily: "'DM Sans',sans-serif",
           }}>{svc.tag}</div>
           {/* Icon */}
           <div style={{
-            position: "absolute", top: 12, right: 14, fontSize: 22,
+            position: "absolute", top: 12, right: 14, fontSize: "clamp(18px, 4vw, 22px)",
             transform: hov ? "scale(1.2) rotate(8deg)" : "scale(1) rotate(0deg)",
             transition: "transform 0.4s ease",
           }}>{svc.icon}</div>
         </div>
 
         {/* Body */}
-        <div style={{ padding: "20px 22px 26px" }}>
-          <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 17, color: "#fff", marginBottom: 10, lineHeight: 1.25 }}>
+        <div style={{ padding: "clamp(16px, 4vw, 20px) clamp(16px, 4vw, 22px) clamp(20px, 5vw, 26px)" }}>
+          <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: "clamp(16px, 3.5vw, 17px)", color: "#fff", marginBottom: 10, lineHeight: 1.25 }}>
             {svc.title}
           </h3>
-          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.42)", lineHeight: 1.68, fontFamily: "'DM Sans',sans-serif", marginBottom: 18 }}>
+          <p style={{ fontSize: "clamp(12px, 3vw, 13px)", color: "rgba(255,255,255,0.42)", lineHeight: 1.68, fontFamily: "'DM Sans',sans-serif", marginBottom: 18 }}>
             {svc.desc}
           </p>
           <div style={{
-            display: "flex", alignItems: "center", gap: 6, fontSize: 13,
+            display: "flex", alignItems: "center", gap: 6, fontSize: "clamp(12px, 3vw, 13px)",
             color: svc.accent, fontFamily: "'DM Sans',sans-serif",
             opacity: hov ? 1 : 0.35, transform: hov ? "translateX(6px)" : "none",
             transition: "all 0.3s ease",
@@ -648,20 +709,24 @@ function ServiceCard({ svc, index }) {
 function ServicesSection() {
   const [ref, inView] = useInView();
   return (
-      <section id="services" style={{ background: "#060B1A", padding: "110px 48px" }}>
-        <div style={{ maxWidth: 1180, margin: "0 auto" }}>
+      <section id="services" style={{ background: "#060B1A", padding: "clamp(60px, 10vw, 110px) clamp(20px, 5vw, 48px)" }}>
+        <div style={{ maxWidth: "min(1180px, 100%)", margin: "0 auto" }}>
           <div ref={ref} style={{
-            textAlign: "center", marginBottom: 64,
+            textAlign: "center", marginBottom: "clamp(40px, 8vw, 64px)",
             opacity: inView ? 1 : 0, transform: inView ? "none" : "translateY(30px)",
             transition: "all 0.7s ease",
           }}>
-            <div style={{ fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", color: "#38BDF8", marginBottom: 12, fontFamily: "'DM Sans',sans-serif" }}>What We Do</div>
-            <h2 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 42, color: "#fff", margin: "0 0 14px" }}>Our Services</h2>
-            <p style={{ fontSize: 16, color: "rgba(255,255,255,0.38)", fontFamily: "'DM Sans',sans-serif", maxWidth: 500, margin: "0 auto" }}>
+            <div style={{ fontSize: "clamp(10px, 2.5vw, 11px)", letterSpacing: "0.15em", textTransform: "uppercase", color: "#38BDF8", marginBottom: 12, fontFamily: "'DM Sans',sans-serif" }}>What We Do</div>
+            <h2 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: "clamp(32px, 6vw, 42px)", color: "#fff", margin: "0 0 14px" }}>Our Services</h2>
+            <p style={{ fontSize: "clamp(14px, 4vw, 16px)", color: "rgba(255,255,255,0.38)", fontFamily: "'DM Sans',sans-serif", maxWidth: "min(500px, 90%)", margin: "0 auto" }}>
               Six pillars of technology excellence — each delivered with precision and backed by a decade of expertise.
             </p>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 22 }}>
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(280px, 100%), 1fr))",
+            gap: "clamp(16px, 3vw, 22px)"
+          }}>
             {SERVICES.map((s, i) => <ServiceCard key={s.id} svc={s} index={i} />)}
           </div>
         </div>
@@ -1315,25 +1380,35 @@ export default function App() {
       <Router>
         <>
           <style>{`
-          @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap');
-          *{margin:0;padding:0;box-sizing:border-box;}
-          body{background:#060B1A;overflow-x:hidden;}
-          @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
-          @keyframes pulse{0%,100%{box-shadow:0 0 8px #38BDF8;opacity:1}50%{box-shadow:0 0 18px #38BDF8;opacity:0.55}}
-          @keyframes scrollDrop{
-            0%{transform:scaleY(0);transform-origin:top}
-            50%{transform:scaleY(1);transform-origin:top}
-            51%{transform:scaleY(1);transform-origin:bottom}
-            100%{transform:scaleY(0);transform-origin:bottom}
-          }
-          @keyframes kenBurnsA{from{transform:scale(1) translate(0,0)}to{transform:scale(1.08) translate(-1%,-1%)}}
-          @keyframes kenBurnsB{from{transform:scale(1) translate(0,0)}to{transform:scale(1.08) translate(1%,1%)}}
-          @keyframes modalIn{from{opacity:0;transform:scale(0.94) translateY(12px)}to{opacity:1;transform:none}}
-          input:focus{border-color:rgba(56,189,248,0.5)!important;outline:none!important;}
-          ::-webkit-scrollbar{width:5px}
-          ::-webkit-scrollbar-track{background:#04080F}
-          ::-webkit-scrollbar-thumb{background:#1e3a5f;border-radius:4px}
-        `}</style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#060B1A;overflow-x:hidden;}
+  
+  /* Responsive Styles */
+  @media (max-width: 1024px) {
+    .container { padding-left: 24px; padding-right: 24px; }
+  }
+  
+  @media (max-width: 768px) {
+    body { font-size: 14px; }
+  }
+  
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+  @keyframes pulse{0%,100%{box-shadow:0 0 8px #38BDF8;opacity:1}50%{box-shadow:0 0 18px #38BDF8;opacity:0.55}}
+  @keyframes scrollDrop{
+    0%{transform:scaleY(0);transform-origin:top}
+    50%{transform:scaleY(1);transform-origin:top}
+    51%{transform:scaleY(1);transform-origin:bottom}
+    100%{transform:scaleY(0);transform-origin:bottom}
+  }
+  @keyframes kenBurnsA{from{transform:scale(1) translate(0,0)}to{transform:scale(1.08) translate(-1%,-1%)}}
+  @keyframes kenBurnsB{from{transform:scale(1) translate(0,0)}to{transform:scale(1.08) translate(1%,1%)}}
+  @keyframes modalIn{from{opacity:0;transform:scale(0.94) translateY(12px)}to{opacity:1;transform:none}}
+  input:focus{border-color:rgba(56,189,248,0.5)!important;outline:none!important;}
+  ::-webkit-scrollbar{width:5px}
+  ::-webkit-scrollbar-track{background:#04080F}
+  ::-webkit-scrollbar-thumb{background:#1e3a5f;border-radius:4px}
+`}</style>
 
           {auth && <AuthModal mode={auth} onClose={() => setAuth(null)} />}
           <NavBar scrolled={scrolled} onAuth={setAuth} />
@@ -1354,6 +1429,10 @@ export default function App() {
             <Route path="/products" element={<ProductsPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/verify-email" element={<EmailVerificationPage />} />
+            <Route path="/mfa-setup" element={<MFASetupPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
           </Routes>
 
           <Footer />
