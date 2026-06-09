@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from './images/CYFORCE 2-1.jpg';
-import { API_BASE, getPostAuthPath, storeAuthSession } from './utils/authFlow';
+import { API_BASE, getPostAuthPath, loadRememberedLogin, saveRememberedLogin, storeAuthSession } from './utils/authFlow';
 
 // Animated Particle Background
 function ParticleBackground() {
@@ -117,6 +117,20 @@ function LoginPage() {
     const [roleOpen, setRoleOpen] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
 
+    useEffect(() => {
+        const remembered = loadRememberedLogin();
+        if (remembered?.email) {
+            setEmail(remembered.email);
+            setRememberMe(true);
+            if (remembered.password) {
+                setPassword(remembered.password);
+            }
+            if (remembered.role) {
+                setSelectedRole(remembered.role);
+            }
+        }
+    }, []);
+
     const selectedRoleData = ROLES.find(r => r.value === selectedRole);
 
     const handleSubmit = async (e) => {
@@ -134,22 +148,30 @@ function LoginPage() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    email,
+                    email: email.trim().toLowerCase(),
                     password,
                     role: selectedRole,
                 }),
             });
 
-            const data = await response.json();
+            let data = {};
+            try {
+                data = await response.json();
+            } catch {
+                data = {};
+            }
 
             if (!response.ok) {
-                throw new Error(data.error || 'Login failed');
+                throw new Error(data.error || `Login failed (${response.status})`);
             }
 
-            storeAuthSession(data);
-            if (rememberMe) {
-                localStorage.setItem('rememberedEmail', email);
-            }
+            storeAuthSession(data, rememberMe);
+            saveRememberedLogin({
+                email: email.trim().toLowerCase(),
+                password,
+                role: selectedRole,
+                remember: rememberMe,
+            });
 
             navigate(getPostAuthPath(data));
         } catch (loginError) {
@@ -354,6 +376,9 @@ function LoginPage() {
                                         </div>
                                     )}
                                 </div>
+                                <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", marginTop: "6px", marginLeft: "4px" }}>
+                                    Admin accounts must select <strong style={{ color: "#38BDF8" }}>Administrator</strong>. The role must match what is stored for your account.
+                                </p>
                             </div>
 
                             {/* Email Field */}
@@ -445,7 +470,13 @@ function LoginPage() {
                                     id="remember-me"
                                     type="checkbox"
                                     checked={rememberMe}
-                                    onChange={(e) => setRememberMe(e.target.checked)}
+                                    onChange={(e) => {
+                                        const checked = e.target.checked;
+                                        setRememberMe(checked);
+                                        if (!checked) {
+                                            saveRememberedLogin({ remember: false });
+                                        }
+                                    }}
                                     style={{
                                         width: "16px",
                                         height: "16px",

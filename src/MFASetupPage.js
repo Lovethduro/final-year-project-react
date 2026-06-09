@@ -3,7 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from './images/CYFORCE 2-1.jpg';
 
-import { API_BASE } from './utils/authFlow';
+import { QRCodeSVG } from 'qrcode.react';
+import { API_BASE, getDashboardPath } from './utils/authFlow';
+import { getSession } from './utils/apiClient';
 
 // Animated Particle Background
 function ParticleBackground() {
@@ -152,6 +154,27 @@ function OTPInput({ value, onChange, length = 6 }) {
     );
 }
 
+const MFA_SETUP_STORAGE_KEY = 'cyforce_mfa_setup';
+
+function saveMfaSetupState(userId, secret, otpAuthUrl) {
+    sessionStorage.setItem(MFA_SETUP_STORAGE_KEY, JSON.stringify({ userId, secret, otpAuthUrl }));
+}
+
+function loadMfaSetupState(userId) {
+    try {
+        const raw = sessionStorage.getItem(MFA_SETUP_STORAGE_KEY);
+        if (!raw) return null;
+        const data = JSON.parse(raw);
+        return data.userId === userId ? data : null;
+    } catch {
+        return null;
+    }
+}
+
+function clearMfaSetupState() {
+    sessionStorage.removeItem(MFA_SETUP_STORAGE_KEY);
+}
+
 const MFA_METHODS = [
     { value: "authenticator", label: "Authenticator App", description: "Use Google Authenticator, Authy, or similar", icon: "📱", recommended: true },
     { value: "email", label: "Email Verification", description: "Receive codes via email", icon: "✉️", recommended: false },
@@ -160,9 +183,10 @@ const MFA_METHODS = [
 
 function MFASetupPage() {
     const navigate = useNavigate();
-    const userId = localStorage.getItem('userId');
-    const userEmail = localStorage.getItem('userEmail') || '';
-    const userPhone = localStorage.getItem('userPhone') || '';
+    const session = getSession();
+    const userId = session.userId;
+    const userEmail = session.email || '';
+    const userPhone = session.phone || '';
 
     const [selectedMethod, setSelectedMethod] = useState("authenticator");
     const [step, setStep] = useState("select");
@@ -175,13 +199,17 @@ function MFASetupPage() {
     const [secretKey, setSecretKey] = useState("");
     const [otpAuthUrl, setOtpAuthUrl] = useState("");
 
-    const qrCodeUrl = otpAuthUrl
-        ? `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(otpAuthUrl)}`
-        : "";
-
     useEffect(() => {
         if (!userId) {
             navigate('/register');
+            return;
+        }
+        const saved = loadMfaSetupState(userId);
+        if (saved?.secret && saved?.otpAuthUrl) {
+            setSecretKey(saved.secret);
+            setOtpAuthUrl(saved.otpAuthUrl);
+            setSelectedMethod('authenticator');
+            setStep('setup');
         }
     }, [userId, navigate]);
 
@@ -191,27 +219,53 @@ function MFASetupPage() {
         setTimeout(() => setCopied(false), 2000);
     };
 
-    const handleContinue = async () => {
+    const startAuthenticatorSetup = async (forceNew = false) => {
         setError("");
         setInfoMessage("");
         setIsLoading(true);
 
         try {
-            const response = await fetch(`${API_BASE}/mfa/setup/init`, {
+            if (forceNew) {
+                clearMfaSetupState();
+                await fetch(`${API_BASE}/mfa/setup/reset`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, method: 'authenticator' }),
+                });
+            }
+
+            let response = await fetch(`${API_BASE}/mfa/setup/init`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId, method: selectedMethod }),
             });
 
-            const data = await response.json();
+            let data = await response.json();
+
+            if (!response.ok && data.error?.toLowerCase().includes('already enabled')) {
+                await fetch(`${API_BASE}/mfa/setup/reset`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, method: selectedMethod }),
+                });
+                response = await fetch(`${API_BASE}/mfa/setup/init`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, method: selectedMethod }),
+                });
+                data = await response.json();
+            }
 
             if (!response.ok) {
                 throw new Error(data.error || 'Failed to start MFA setup');
             }
 
             if (selectedMethod === 'authenticator') {
-                setSecretKey(data.secret || '');
-                setOtpAuthUrl(data.otpAuthUrl || '');
+                const secret = data.secret || '';
+                const authUrl = data.otpAuthUrl || '';
+                setSecretKey(secret);
+                setOtpAuthUrl(authUrl);
+                saveMfaSetupState(userId, secret, authUrl);
                 setInfoMessage(data.message || '');
                 setStep('setup');
             } else if (selectedMethod === 'email' || selectedMethod === 'sms') {
@@ -229,17 +283,35 @@ function MFASetupPage() {
         }
     };
 
+    const handleContinue = () => startAuthenticatorSetup(false);
+
+    const handleStartOver = async () => {
+        setOtp('');
+        await startAuthenticatorSetup(true);
+    };
+
     const handleVerify = async () => {
-        if (otp.length !== 6) return;
+        const code = otp.replace(/\D/g, '');
+        if (code.length !== 6) return;
+
+        if (selectedMethod === 'authenticator' && !secretKey) {
+            setError('Setup session expired. Please start over and scan the QR code again.');
+            return;
+        }
 
         setIsVerifying(true);
         setError("");
 
         try {
+            const payload = { userId, code };
+            if (selectedMethod === 'authenticator' && secretKey) {
+                payload.secret = secretKey;
+            }
+
             const response = await fetch(`${API_BASE}/mfa/setup/verify`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId, code: otp }),
+                body: JSON.stringify(payload),
             });
 
             const data = await response.json();
@@ -248,7 +320,9 @@ function MFASetupPage() {
                 throw new Error(data.error || 'Verification failed');
             }
 
-            localStorage.setItem('mfaEnabled', 'true');
+            clearMfaSetupState();
+            const storage = session.rememberMe ? localStorage : sessionStorage;
+            storage.setItem('mfaEnabled', 'true');
             setStep('complete');
         } catch (verifyError) {
             setError(verifyError.message);
@@ -332,7 +406,7 @@ function MFASetupPage() {
                             </p>
                             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                                 <button
-                                    onClick={() => navigate("/login")}
+                                    onClick={() => navigate(getDashboardPath(localStorage.getItem('userRole')))}
                                     style={{
                                         width: "100%",
                                         padding: "12px",
@@ -579,7 +653,13 @@ function MFASetupPage() {
                             <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
                                 <div style={{ display: "flex", justifyContent: "center" }}>
                                     <div style={{ padding: "16px", background: "#fff", borderRadius: "12px" }}>
-                                        <img src={qrCodeUrl} alt="QR Code" style={{ width: "180px", height: "180px" }} />
+                                        {otpAuthUrl ? (
+                                            <QRCodeSVG value={otpAuthUrl} size={180} level="M" includeMargin />
+                                        ) : (
+                                            <div style={{ width: 180, height: 180, display: "flex", alignItems: "center", justifyContent: "center", color: "#64748B" }}>
+                                                Loading QR…
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 
@@ -607,7 +687,7 @@ function MFASetupPage() {
                                     </button>
                                 </div>
 
-                                <button onClick={() => setStep("verify")} style={{
+                                <button type="button" onClick={() => setStep("verify")} style={{
                                     width: "100%",
                                     padding: "12px",
                                     background: "linear-gradient(135deg, #2563EB, #2DD4BF)",
@@ -622,6 +702,18 @@ function MFASetupPage() {
                                         onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.02)"}
                                         onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}>
                                     Continue to Verification
+                                </button>
+                                <button type="button" onClick={handleStartOver} disabled={isLoading} style={{
+                                    width: "100%",
+                                    padding: "10px",
+                                    background: "transparent",
+                                    border: "1px solid rgba(51,65,85,1)",
+                                    borderRadius: "10px",
+                                    fontSize: "13px",
+                                    color: "rgba(255,255,255,0.55)",
+                                    cursor: isLoading ? "not-allowed" : "pointer",
+                                }}>
+                                    {isLoading ? "Resetting…" : "Start over (new QR code)"}
                                 </button>
                             </div>
                         )}
@@ -645,6 +737,24 @@ function MFASetupPage() {
                         )}
 
                         {/* Step 3: Verify Code */}
+                        {step === "verify" && selectedMethod === "authenticator" && (
+                            <div style={{
+                                padding: "12px",
+                                marginBottom: "8px",
+                                background: "rgba(15,23,42,0.3)",
+                                borderRadius: "10px",
+                                border: "1px solid rgba(51,65,85,0.5)",
+                                textAlign: "center",
+                            }}>
+                                <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.55)", marginBottom: 4 }}>
+                                    Use the 6-digit code for <strong style={{ color: "#fff" }}>CyForce</strong> ({userEmail})
+                                </p>
+                                <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)" }}>
+                                    If codes keep failing, tap “Start over”, delete old CyForce entries in your app, then scan the new QR code.
+                                </p>
+                            </div>
+                        )}
+
                         {step === "verify" && (
                             <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
                                 <div style={{ display: "flex", justifyContent: "center" }}>
@@ -689,7 +799,7 @@ function MFASetupPage() {
                                     {isVerifying ? "Verifying..." : "Verify & Enable MFA"}
                                 </button>
 
-                                <button onClick={() => setStep(selectedMethod === "authenticator" ? "setup" : "select")} style={{
+                                <button type="button" onClick={() => setStep(selectedMethod === "authenticator" ? "setup" : "select")} style={{
                                     background: "none",
                                     border: "none",
                                     fontSize: "13px",
@@ -701,6 +811,17 @@ function MFASetupPage() {
                                         onMouseLeave={(e) => e.currentTarget.style.color = "rgba(255,255,255,0.4)"}>
                                     Back to Setup
                                 </button>
+                                {selectedMethod === "authenticator" && (
+                                    <button type="button" onClick={handleStartOver} disabled={isLoading} style={{
+                                        background: "none",
+                                        border: "none",
+                                        fontSize: "13px",
+                                        color: "#2DD4BF",
+                                        cursor: isLoading ? "not-allowed" : "pointer",
+                                    }}>
+                                        Start over with a new QR code
+                                    </button>
+                                )}
                             </div>
                         )}
                     </div>

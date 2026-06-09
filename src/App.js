@@ -19,7 +19,7 @@ import part6 from './images/partner6.jpg'
 import logo from './images/CYFORCE 2-1.jpg'
 import GoogleStarsBadge from './GoogleStarsBadge';
 import AIChatbot from './AIChatbot';
-import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import ServicesPage from './ServicesPage';
 import AboutPage from './AboutPage';
 import ProductsPage from './ProductsPage';
@@ -29,6 +29,42 @@ import EmailVerificationPage from './EmailVerificationPage';
 import MFASetupPage from './MFASetupPage';
 import TermsPage from './TermsPage';
 import PrivacyPage from './PrivacyPage';
+import ProtectedRoute from './components/ProtectedRoute';
+import AdminDashboard from './AdminDashboard';
+import CustomersPage from './CustomersPage';
+import TicketsPage from './TicketsPage';
+import SalesPage from './SalesPage';
+import LeadsPage from './LeadsPage';
+import AnalyticsPage from './AnalyticsPage';
+import PerformancePage from './PerformancePage';
+import KnowledgeBasePage from './KnowledgeBasePage';
+import UserManagementPage from './UserManagementPage';
+import RolePermissionsPage from './RolePermissionsPage';
+import BillingPage from './BillingPage';
+import PaymentCallbackPage from './PaymentCallbackPage';
+import ComplianceReportsPage from './ComplianceReportsPage';
+import DataManagementPage from './DataManagementPage';
+import ModuleConfigPage from './ModuleConfigPage';
+import SecurityAuditPage from './SecurityAuditPage';
+import SystemConfigPage from './SystemConfigPage';
+import SystemHealthPage from './SystemHealthPage';
+import ProfilePage from './ProfilePage';
+import ProductsManagementPage from './ProductsManagementPage';
+import CustomerDashboard from './dashboards/CustomerDashboard';
+import CustomerProductsPage from './dashboards/CustomerProductsPage';
+import CustomerTicketsPage from './dashboards/CustomerTicketsPage';
+import CustomerMessagesPage from './dashboards/CustomerMessagesPage';
+import SalesMessagesPage from './dashboards/SalesMessagesPage';
+import SalesAgentDashboard from './dashboards/SalesAgentDashboard';
+import SupportAgentDashboard from './dashboards/SupportAgentDashboard';
+import SupervisorDashboard from './dashboards/SupervisorDashboard';
+import { getSession } from './utils/apiClient';
+import { getDashboardPath } from './utils/authFlow';
+
+function DashboardRedirect() {
+  const session = getSession();
+  return <Navigate to={getDashboardPath(session.role)} replace />;
+}
 
 
 
@@ -380,35 +416,31 @@ function NavBar({ scrolled, onAuth }) {
 
         {/* Mobile Menu Button */}
         <button
+            type="button"
+            className="cyforce-mobile-menu-btn"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             style={{
-              display: "none",
               background: "transparent",
               border: "none",
               color: "#fff",
               fontSize: "24px",
               cursor: "pointer",
-              "@media (max-width: 768px)": { display: "block" }
             }}
         >
           ☰
         </button>
 
         {/* Navigation Links */}
-        <div style={{
-          display: "flex",
-          gap: 30,
-          alignItems: "center",
-          flexWrap: "wrap",
-          transition: "all 0.3s ease",
-          "@media (max-width: 768px)": {
-            display: isMobileMenuOpen ? "flex" : "none",
-            flexDirection: "column",
-            width: "100%",
-            marginTop: "20px",
-            gap: "15px"
-          }
-        }}>
+        <div
+            className={`cyforce-nav-links${isMobileMenuOpen ? " open" : ""}`}
+            style={{
+              display: "flex",
+              gap: 30,
+              alignItems: "center",
+              flexWrap: "wrap",
+              transition: "all 0.3s ease",
+            }}
+        >
           <Link to="/services" style={{
             color: isActive("/services") ? "#38BDF8" : "rgba(255,255,255,0.55)",
             fontSize: "clamp(12px, 3vw, 13px)",
@@ -603,10 +635,9 @@ function HeroSection({ onAuth }) {
             gap: "clamp(16px, 4vw, 0)"
           }}>
             {STATS.map((s, i) => (
-                <div key={s.label} style={{
+                <div key={s.label} className="cyforce-stat-item" style={{
                   textAlign: "center", padding: "0 clamp(16px, 4vw, 32px)",
                   borderRight: i < STATS.length - 1 ? "0.5px solid rgba(99,179,237,0.1)" : "none",
-                  "@media (max-width: 600px)": { borderRight: "none" }
                 }}>
                   <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: "clamp(22px, 5vw, 26px)", color: "#fff" }}>{s.value}</div>
                   <div style={{ fontSize: "clamp(10px, 2.5vw, 11px)", color: "rgba(255,255,255,0.35)", marginTop: 3, fontFamily: "'DM Sans',sans-serif" }}>{s.label}</div>
@@ -1366,7 +1397,15 @@ function Footer() {
 }
 
 // ─── EXPORT ──────────────────────────────────────────────────────────────────
-export default function App() {
+function AppShell() {
+  const location = useLocation();
+  const isDashboard = location.pathname.startsWith('/dashboard')
+    || location.pathname.startsWith('/customer/')
+    || location.pathname.startsWith('/admin/')
+    || location.pathname.startsWith('/sales/')
+    || location.pathname.startsWith('/support/')
+    || location.pathname.startsWith('/supervisor/')
+    || location.pathname === '/profile';
   const [scrolled, setScrolled] = useState(false);
   const [auth, setAuth] = useState(null);
 
@@ -1377,7 +1416,6 @@ export default function App() {
   }, []);
 
   return (
-      <Router>
         <>
           <style>{`
   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap');
@@ -1391,6 +1429,19 @@ export default function App() {
   
   @media (max-width: 768px) {
     body { font-size: 14px; }
+    .cyforce-mobile-menu-btn { display: block !important; }
+    .cyforce-nav-links {
+      display: none !important;
+      flex-direction: column;
+      width: 100%;
+      margin-top: 20px;
+      gap: 15px;
+    }
+    .cyforce-nav-links.open { display: flex !important; }
+  }
+  .cyforce-mobile-menu-btn { display: none; }
+  @media (max-width: 600px) {
+    .cyforce-stat-item { border-right: none !important; }
   }
   
   @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
@@ -1411,7 +1462,7 @@ export default function App() {
 `}</style>
 
           {auth && <AuthModal mode={auth} onClose={() => setAuth(null)} />}
-          <NavBar scrolled={scrolled} onAuth={setAuth} />
+          {!isDashboard && <NavBar scrolled={scrolled} onAuth={setAuth} />}
 
           <Routes>
             <Route path="/" element={
@@ -1427,19 +1478,54 @@ export default function App() {
             <Route path="/services" element={<ServicesPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/products" element={<ProductsPage />} />
+            <Route path="/payment/callback" element={<PaymentCallbackPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/verify-email" element={<EmailVerificationPage />} />
             <Route path="/mfa-setup" element={<MFASetupPage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
+
+            <Route path="/admin/dashboard" element={<ProtectedRoute roles={['ADMIN']}><AdminDashboard /></ProtectedRoute>} />
+            <Route path="/supervisor/dashboard" element={<ProtectedRoute roles={['SUPERVISOR']}><SupervisorDashboard /></ProtectedRoute>} />
+            <Route path="/customer/dashboard" element={<ProtectedRoute roles={['CUSTOMER']}><CustomerDashboard /></ProtectedRoute>} />
+            <Route path="/customer/products" element={<ProtectedRoute roles={['CUSTOMER']}><CustomerProductsPage /></ProtectedRoute>} />
+            <Route path="/customer/tickets" element={<ProtectedRoute roles={['CUSTOMER']}><CustomerTicketsPage /></ProtectedRoute>} />
+            <Route path="/customer/messages" element={<ProtectedRoute roles={['CUSTOMER']}><CustomerMessagesPage /></ProtectedRoute>} />
+            <Route path="/sales/messages" element={<ProtectedRoute roles={['SALES_AGENT']}><SalesMessagesPage /></ProtectedRoute>} />
+            <Route path="/sales/dashboard" element={<ProtectedRoute roles={['SALES_AGENT']}><SalesAgentDashboard /></ProtectedRoute>} />
+            <Route path="/support/dashboard" element={<ProtectedRoute roles={['SUPPORT_AGENT']}><SupportAgentDashboard /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><DashboardRedirect /></ProtectedRoute>} />
+            <Route path="/dashboard/customers" element={<ProtectedRoute roles={['ADMIN', 'SUPERVISOR', 'SALES_AGENT', 'SUPPORT_AGENT']}><CustomersPage /></ProtectedRoute>} />
+            <Route path="/dashboard/tickets" element={<ProtectedRoute><TicketsPage /></ProtectedRoute>} />
+            <Route path="/dashboard/sales" element={<ProtectedRoute roles={['ADMIN', 'SUPERVISOR', 'SALES_AGENT']}><SalesPage /></ProtectedRoute>} />
+            <Route path="/dashboard/leads" element={<ProtectedRoute roles={['ADMIN', 'SUPERVISOR', 'SALES_AGENT']}><LeadsPage /></ProtectedRoute>} />
+            <Route path="/dashboard/analytics" element={<ProtectedRoute roles={['ADMIN', 'SUPERVISOR']}><AnalyticsPage /></ProtectedRoute>} />
+            <Route path="/dashboard/performance" element={<ProtectedRoute roles={['ADMIN', 'SUPERVISOR']}><PerformancePage /></ProtectedRoute>} />
+            <Route path="/dashboard/knowledge-base" element={<ProtectedRoute roles={['ADMIN', 'SUPERVISOR', 'SUPPORT_AGENT', 'CUSTOMER']}><KnowledgeBasePage /></ProtectedRoute>} />
+            <Route path="/dashboard/users" element={<ProtectedRoute roles={['ADMIN', 'SUPERVISOR']}><UserManagementPage /></ProtectedRoute>} />
+            <Route path="/dashboard/roles" element={<ProtectedRoute roles={['ADMIN']}><RolePermissionsPage /></ProtectedRoute>} />
+            <Route path="/dashboard/billing" element={<ProtectedRoute roles={['ADMIN', 'SUPERVISOR', 'CUSTOMER']}><BillingPage /></ProtectedRoute>} />
+            <Route path="/dashboard/compliance" element={<ProtectedRoute roles={['ADMIN']}><ComplianceReportsPage /></ProtectedRoute>} />
+            <Route path="/dashboard/data" element={<ProtectedRoute roles={['ADMIN']}><DataManagementPage /></ProtectedRoute>} />
+            <Route path="/dashboard/modules" element={<ProtectedRoute roles={['ADMIN']}><ModuleConfigPage /></ProtectedRoute>} />
+            <Route path="/dashboard/security" element={<ProtectedRoute roles={['ADMIN']}><SecurityAuditPage /></ProtectedRoute>} />
+            <Route path="/dashboard/system-config" element={<ProtectedRoute roles={['ADMIN']}><SystemConfigPage /></ProtectedRoute>} />
+            <Route path="/dashboard/system-health" element={<ProtectedRoute roles={['ADMIN', 'SUPERVISOR']}><SystemHealthPage /></ProtectedRoute>} />
+            <Route path="/dashboard/products" element={<ProtectedRoute roles={['ADMIN']}><ProductsManagementPage /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
           </Routes>
 
-          <Footer />
-          <AIChatbot />
+          {!isDashboard && <Footer />}
+          {!isDashboard && <AIChatbot />}
         </>
+  );
+}
+
+export default function App() {
+  return (
+      <Router>
+        <AppShell />
       </Router>
   );
-
-
 }

@@ -518,7 +518,7 @@ function RegisterPage() {
 
         const registrationData = {
             fullName: formData.fullName,
-            email: formData.email,
+            email: formData.email.trim().toLowerCase(),
             phone: fullPhoneNumber,
             companyName: needsCompanyName ? formData.companyName : null,
             customerType: selectedCustomerType,

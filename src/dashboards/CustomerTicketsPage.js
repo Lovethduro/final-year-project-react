@@ -1,0 +1,156 @@
+import { useEffect, useState } from 'react';
+import { DashboardLayout } from '../components/DashboardLayout';
+import { PageHeader, Card, DataTable, StatusBadge, PrimaryButton, Alert } from '../components/ui';
+import { customerApi, assetUrl } from '../utils/apiClient';
+import { theme } from '../styles/theme';
+import { refreshNotifications } from '../utils/notifications';
+
+export default function CustomerTicketsPage() {
+    const [tickets, setTickets] = useState([]);
+    const [selected, setSelected] = useState(null);
+    const [messages, setMessages] = useState([]);
+    const [reply, setReply] = useState('');
+    const [showForm, setShowForm] = useState(false);
+    const [form, setForm] = useState({ subject: '', description: '', category: 'general', priority: 'medium' });
+    const [attachment, setAttachment] = useState(null);
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    const loadTickets = () => {
+        customerApi.tickets().then(setTickets).catch((err) => setError(err.message));
+    };
+
+    useEffect(() => { loadTickets(); }, []);
+
+    const openTicket = async (id) => {
+        setError('');
+        try {
+            const data = await customerApi.getTicket(id);
+            setSelected(data.ticket);
+            setMessages(data.messages || []);
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
+    const submitTicket = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+        try {
+            if (attachment) {
+                await customerApi.createTicketWithAttachment(form, attachment);
+            } else {
+                await customerApi.createTicket(form);
+            }
+            setShowForm(false);
+            setForm({ subject: '', description: '', category: 'general', priority: 'medium' });
+            setAttachment(null);
+            loadTickets();
+            refreshNotifications();
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const sendReply = async (e) => {
+        e.preventDefault();
+        if (!selected || !reply.trim()) return;
+        try {
+            await customerApi.replyToTicket(selected.id, reply.trim());
+            setReply('');
+            openTicket(selected.id);
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
+    const inputStyle = { width: '100%', background: 'rgba(255,255,255,0.05)', border: `0.5px solid ${theme.border}`, borderRadius: 8, padding: 10, color: theme.text, fontFamily: theme.fontBody, marginBottom: 12 };
+
+    return (
+        <DashboardLayout>
+            <PageHeader
+                title="My Support Tickets"
+                subtitle="Only your tickets are shown here"
+                action={<PrimaryButton onClick={() => setShowForm(true)}>+ New Ticket</PrimaryButton>}
+            />
+            {error && <Alert type="error">{error}</Alert>}
+
+            {showForm && (
+                <Card title="Create Ticket" style={{ marginBottom: 24 }}>
+                    <form onSubmit={submitTicket}>
+                        <input style={inputStyle} placeholder="Subject" value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} required />
+                        <textarea style={{ ...inputStyle, minHeight: 100 }} placeholder="Describe your issue..." value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required />
+                        <select style={inputStyle} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
+                            <option value="general">General</option>
+                            <option value="billing">Billing / Payment</option>
+                            <option value="technical">Technical</option>
+                        </select>
+                        <select style={inputStyle} value={form.priority} onChange={(e) => setForm({ ...form, priority: e.target.value })}>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                        <div style={{ marginBottom: 12 }}>
+                            <label style={{ fontSize: 12, color: theme.textDim, display: 'block', marginBottom: 6 }}>Attach screenshot or image (optional)</label>
+                            <input type="file" accept="image/*" onChange={(e) => setAttachment(e.target.files?.[0] || null)} style={{ color: theme.textMuted, fontSize: 13 }} />
+                        </div>
+                        <div style={{ display: 'flex', gap: 10 }}>
+                            <PrimaryButton type="submit" disabled={loading}>{loading ? 'Submitting…' : 'Submit Ticket'}</PrimaryButton>
+                            <button type="button" onClick={() => setShowForm(false)} style={{ background: 'transparent', border: `0.5px solid ${theme.border}`, color: theme.textMuted, borderRadius: 8, padding: '8px 16px', cursor: 'pointer' }}>Cancel</button>
+                        </div>
+                    </form>
+                </Card>
+            )}
+
+            <div style={{ display: 'grid', gridTemplateColumns: selected ? '1fr 1fr' : '1fr', gap: 20 }}>
+                <Card title="Your Tickets">
+                    <DataTable
+                        columns={[
+                            { key: 'id', label: '#', render: (r) => r.id?.slice(-6).toUpperCase() },
+                            { key: 'subject', label: 'Subject' },
+                            { key: 'status', label: 'Status', render: (r) => <StatusBadge status={r.status === 'resolved' ? 'success' : 'warning'} label={r.status} /> },
+                            { key: 'priority', label: 'Priority' },
+                            { key: 'actions', label: '', render: (r) => (
+                                <button type="button" onClick={() => openTicket(r.id)} style={{ fontSize: 12, padding: '4px 10px', borderRadius: 6, border: 'none', background: theme.primary, color: '#fff', cursor: 'pointer' }}>View</button>
+                            )},
+                        ]}
+                        rows={tickets}
+                        emptyMessage="No tickets yet. Create one to get help."
+                    />
+                </Card>
+
+                {selected && (
+                    <Card title={selected.subject}>
+                        <div style={{ fontSize: 13, color: theme.textMuted, marginBottom: 12 }}>
+                            Status: <StatusBadge status={selected.status === 'resolved' ? 'success' : 'warning'} label={selected.status} />
+                            {' · '}Priority: {selected.priority}
+                        </div>
+                        <p style={{ fontSize: 14, color: theme.text, marginBottom: 12 }}>{selected.description}</p>
+                        {selected.attachmentUrl && (
+                            <img src={assetUrl(selected.attachmentUrl)} alt="Attachment" style={{ maxWidth: '100%', borderRadius: 8, marginBottom: 16 }} />
+                        )}
+                        <div style={{ maxHeight: 240, overflowY: 'auto', marginBottom: 16, borderTop: `0.5px solid ${theme.border}`, paddingTop: 12 }}>
+                            {messages.length ? messages.map((m) => (
+                                <div key={m.id} style={{ marginBottom: 12, padding: 10, background: 'rgba(255,255,255,0.03)', borderRadius: 8 }}>
+                                    <div style={{ fontSize: 11, color: theme.accent, marginBottom: 4 }}>{m.authorName}</div>
+                                    <div style={{ fontSize: 13, color: theme.text }}>{m.message}</div>
+                                    <div style={{ fontSize: 10, color: theme.textDim, marginTop: 4 }}>{m.createdAt ? new Date(m.createdAt).toLocaleString() : ''}</div>
+                                </div>
+                            )) : <p style={{ color: theme.textDim, fontSize: 13 }}>No messages yet.</p>}
+                        </div>
+                        {selected.status !== 'closed' && selected.status !== 'resolved' && (
+                            <form onSubmit={sendReply}>
+                                <textarea value={reply} onChange={(e) => setReply(e.target.value)} placeholder="Write a reply..." rows={3} style={inputStyle} required />
+                                <PrimaryButton type="submit">Send Reply</PrimaryButton>
+                            </form>
+                        )}
+                        <button type="button" onClick={() => setSelected(null)} style={{ marginTop: 12, background: 'transparent', border: 'none', color: theme.textDim, cursor: 'pointer', fontSize: 12 }}>← Back to list</button>
+                    </Card>
+                )}
+            </div>
+        </DashboardLayout>
+    );
+}
