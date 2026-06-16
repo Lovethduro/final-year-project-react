@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { DashboardLayout } from './components/DashboardLayout';
-import { Alert, DataTable } from './components/ui';
-import { QuickActions, DonutChart } from './components/dashboard/DashboardWidgets';
+import { Alert, DataTable, StatCard, Select } from './components/ui';
+import { WelcomeBanner, QuickActions, DonutChart, StarRating } from './components/dashboard/DashboardWidgets';
 import { adminApi } from './utils/apiClient';
 import { theme, cardStyle } from './styles/theme';
 
@@ -34,24 +34,6 @@ function formatRelativeTime(iso) {
     return `${Math.floor(hours / 24)} day${Math.floor(hours / 24) === 1 ? '' : 's'} ago`;
 }
 
-function StatCard({ title, value, icon, trend, status = 'info' }) {
-    const colors = { success: theme.success, warning: theme.warning, error: theme.error, info: theme.accent };
-    return (
-        <div style={{ ...cardStyle, padding: 20 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-                <span style={{ fontSize: 24 }}>{icon}</span>
-                {trend != null && (
-                    <span style={{ fontSize: 12, color: trend >= 0 ? theme.success : theme.error }}>
-                        {trend >= 0 ? '↑' : '↓'} {Math.abs(trend)}%
-                    </span>
-                )}
-            </div>
-            <div style={{ fontSize: 28, fontWeight: 'bold', color: theme.text }}>{value}</div>
-            <div style={{ fontSize: 13, color: colors[status] }}>{title}</div>
-        </div>
-    );
-}
-
 function BarChart({ data }) {
     if (!data?.length) return <p style={{ color: theme.textDim, fontSize: 13 }}>No registration activity yet.</p>;
     const max = Math.max(...data.map((d) => Math.max(d.registrations, d.logins)), 1);
@@ -80,6 +62,7 @@ function actionBadgeStyle(action) {
 
 export default function AdminDashboard() {
     const [overview, setOverview] = useState(null);
+    const [feedback, setFeedback] = useState([]);
     const [announcement, setAnnouncement] = useState('');
     const [audience, setAudience] = useState('all');
     const [time, setTime] = useState('');
@@ -91,7 +74,16 @@ export default function AdminDashboard() {
 
     const load = useCallback(() => {
         setLoading(true);
-        adminApi.overview().then(setOverview).catch((err) => setError(err.message)).finally(() => setLoading(false));
+        Promise.all([
+            adminApi.overview(),
+            adminApi.feedback().catch(() => []),
+        ])
+            .then(([overviewData, feedbackData]) => {
+                setOverview(overviewData);
+                setFeedback(feedbackData || []);
+            })
+            .catch((err) => setError(err.message))
+            .finally(() => setLoading(false));
     }, []);
 
     useEffect(() => {
@@ -140,32 +132,34 @@ export default function AdminDashboard() {
 
     return (
         <DashboardLayout>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28, flexWrap: 'wrap', gap: 12 }}>
-                <div>
-                    <h1 style={{ fontFamily: theme.fontHeading, fontSize: 32, fontWeight: 800, color: theme.text, marginBottom: 8 }}>Admin Dashboard</h1>
-                    <p style={{ color: theme.textMuted, fontSize: 14 }}>
-                        System overview for {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
-                    </p>
-                </div>
-                <span style={{ color: theme.accent, fontSize: 18, fontFamily: 'monospace', fontWeight: 600 }}>🕐 {time}</span>
-            </div>
+            <WelcomeBanner
+                title="Admin Dashboard"
+                subtitle={`System overview for ${new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}`}
+            >
+                <span style={{ color: theme.textMuted, fontSize: 14, fontFamily: 'monospace' }}>{time}</span>
+            </WelcomeBanner>
 
             {error && <Alert type="error">{error}</Alert>}
             {announcementSuccess && <Alert type="success">{announcementSuccess}</Alert>}
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(170px,1fr))', gap: 16, marginBottom: 24 }}>
-                <StatCard title="Total Active Users" value={loading ? '…' : (stats?.activeUsers ?? 0)} icon="👥" trend={overview?.userGrowthPercent} status="success" />
-                <StatCard title="Storage Usage" value={loading ? '…' : `${overview?.storageUsagePercent ?? 0}%`} icon="💾" status="warning" />
-                <StatCard title="Pending Approvals" value={loading ? '…' : (stats?.pendingApprovals ?? pendingUsers.length)} icon="⏳" status="warning" />
-                <StatCard title="Active Sessions" value={loading ? '…' : (overview?.activeSessions ?? 0)} icon="📊" status="info" />
-                <StatCard title="Anomaly Alerts" value={loading ? '…' : (overview?.anomalyAlertCount ?? 0)} icon="⚠️" status="error" />
+                <StatCard
+                    title="Total Active Users"
+                    value={loading ? '…' : (stats?.activeUsers ?? 0)}
+                    trend={overview?.userGrowthPercent != null ? { value: Math.abs(overview.userGrowthPercent), isPositive: overview.userGrowthPercent >= 0 } : undefined}
+                    status="success"
+                />
+                <StatCard title="Storage Usage" value={loading ? '…' : `${overview?.storageUsagePercent ?? 0}%`} status="warning" />
+                <StatCard title="Pending Approvals" value={loading ? '…' : (stats?.pendingApprovals ?? pendingUsers.length)} status="warning" />
+                <StatCard title="Active Sessions" value={loading ? '…' : (overview?.activeSessions ?? 0)} status="info" />
+                <StatCard title="Anomaly Alerts" value={loading ? '…' : (overview?.anomalyAlertCount ?? 0)} status="error" />
             </div>
 
             <QuickActions actions={[
-                { to: '/dashboard/users', icon: '👤', label: 'Add New User' },
-                { to: '/dashboard/system-config', icon: '⚙️', label: 'Configure System' },
-                { to: '/dashboard/security', icon: '📄', label: 'View Audit Log' },
-                { to: '/dashboard/roles', icon: '🛡️', label: 'Manage Permissions' },
+                { to: '/dashboard/users', label: 'Add New User' },
+                { to: '/dashboard/system-config', label: 'Configure System' },
+                { to: '/dashboard/security', label: 'View Audit Log' },
+                { to: '/dashboard/roles', label: 'Manage Permissions' },
             ]} />
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 20 }}>
@@ -177,7 +171,7 @@ export default function AdminDashboard() {
                             <span><span style={{ color: theme.success }}>■</span> Total Logins</span>
                         </div>
                         <BarChart data={overview?.registrationActivity || []} />
-                    </div>
+                </div>
 
                     <div style={{ ...cardStyle, marginBottom: 24 }}>
                         <h3 style={{ color: theme.text, marginBottom: 16 }}>System Health Status</h3>
@@ -190,7 +184,7 @@ export default function AdminDashboard() {
                                 <span style={{ color: s.status === 'online' ? theme.success : theme.error, fontSize: 12, fontWeight: 600, textTransform: 'capitalize' }}>{s.status}</span>
                             </div>
                         ))}
-                    </div>
+            </div>
 
                     <div style={cardStyle}>
                         <h3 style={{ color: theme.text, marginBottom: 12 }}>Recent Anomaly Alerts</h3>
@@ -204,7 +198,7 @@ export default function AdminDashboard() {
                     </div>
                 </div>
 
-                <div>
+                                    <div>
                     <div style={{ ...cardStyle, marginBottom: 20 }}>
                         <h3 style={{ color: theme.text, marginBottom: 12 }}>Pending Approvals</h3>
                         {pendingUsers.length ? pendingUsers.map((p) => (
@@ -218,7 +212,7 @@ export default function AdminDashboard() {
                                 </div>
                             </div>
                         )) : <p style={{ color: theme.textDim, fontSize: 13 }}>No pending approvals.</p>}
-                    </div>
+            </div>
 
                     <div style={{ ...cardStyle, marginBottom: 20 }}>
                         <h3 style={{ color: theme.text, marginBottom: 12 }}>Recent User Activity</h3>
@@ -229,7 +223,7 @@ export default function AdminDashboard() {
                                 <div style={{ color: theme.textDim, fontSize: 11 }}>{formatRelativeTime(a.createdAt)}</div>
                             </div>
                         ))}
-                    </div>
+                </div>
 
                     <div style={cardStyle}>
                         <h3 style={{ color: theme.text, marginBottom: 12 }}>Storage Breakdown</h3>
@@ -242,13 +236,32 @@ export default function AdminDashboard() {
                 <div style={cardStyle}>
                     <h3 style={{ color: theme.text, marginBottom: 12 }}>Broadcast System Announcement</h3>
                     <textarea value={announcement} onChange={(e) => setAnnouncement(e.target.value)} placeholder="Type your announcement message..." rows={4} style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: `0.5px solid ${theme.border}`, borderRadius: 10, padding: 12, color: theme.text, fontFamily: theme.fontBody, marginBottom: 12 }} />
-                    <select value={audience} onChange={(e) => setAudience(e.target.value)} style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: `0.5px solid ${theme.border}`, borderRadius: 8, padding: '8px 12px', color: theme.text, marginBottom: 12, fontFamily: theme.fontBody }}>
+                    <Select value={audience} onChange={(e) => setAudience(e.target.value)} style={{ width: '100%', marginBottom: 12 }}>
                         {AUDIENCE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-                    </select>
+                    </Select>
                     <button type="button" onClick={handleAnnouncement} disabled={announcementSending || !announcement.trim()} style={{ background: theme.primary, color: '#fff', border: 'none', borderRadius: 9, padding: '10px 20px', cursor: 'pointer', opacity: announcementSending || !announcement.trim() ? 0.6 : 1 }}>
                         {announcementSending ? 'Sending…' : 'Send Announcement'}
-                    </button>
+                            </button>
                 </div>
+                    </div>
+
+            <div style={{ ...cardStyle, marginTop: 24 }}>
+                <h3 style={{ color: theme.text, marginBottom: 16 }}>Customer Reviews & Surveys</h3>
+                {feedback.length ? feedback.slice(0, 12).map((f) => (
+                    <div key={f.id} style={{ padding: '12px 0', borderBottom: `0.5px solid ${theme.border}` }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+                                <div>
+                                <div style={{ fontSize: 13, fontWeight: 600, color: theme.text }}>{f.customerName}</div>
+                                <div style={{ fontSize: 11, color: theme.textDim }}>
+                                    {f.type} · {f.agentName || 'No agent'} {f.agentRole ? `(${f.agentRole})` : ''}
+                                </div>
+                            </div>
+                            <StarRating rating={f.rating} />
+                        </div>
+                        {f.comment && <p style={{ fontSize: 13, color: theme.textMuted, margin: '6px 0 0' }}>{f.comment}</p>}
+                        {f.createdAt && <div style={{ fontSize: 11, color: theme.textDim, marginTop: 4 }}>{formatRelativeTime(f.createdAt)}</div>}
+                    </div>
+                )) : <p style={{ color: theme.textDim, fontSize: 13 }}>No customer feedback yet.</p>}
             </div>
 
             <div style={{ ...cardStyle, marginTop: 24 }}>

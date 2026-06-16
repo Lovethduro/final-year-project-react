@@ -12,16 +12,26 @@ export const theme = {
     success: '#34D399',
     warning: '#FBBF24',
     error: '#EF4444',
-    fontHeading: "'Syne', sans-serif",
-    fontBody: "'DM Sans', sans-serif",
+    fontHeading: "'Plus Jakarta Sans', system-ui, sans-serif",
+    fontBody: "'Inter', system-ui, sans-serif",
 };
 
 export const cardStyle = {
     background: theme.bgCard,
-    borderRadius: 16,
-    padding: 24,
-    border: `0.5px solid ${theme.border}`,
+    borderRadius: 8,
+    padding: 20,
+    border: `1px solid ${theme.border}`,
 };
+
+export const dashboardCardStyle = {
+    ...cardStyle,
+    boxShadow: '0 1px 2px rgba(0,0,0,0.2)',
+};
+
+export function formatRoleLabel(role) {
+    if (!role) return '';
+    return role.split('_').map((w) => w.charAt(0) + w.slice(1).toLowerCase()).join(' ');
+}
 
 export const inputStyle = {
     width: '100%',
@@ -33,6 +43,15 @@ export const inputStyle = {
     color: '#fff',
     fontFamily: theme.fontBody,
     outline: 'none',
+};
+
+/** Use on native select elements — pairs with styles/forms.css */
+export const selectStyle = {
+    ...inputStyle,
+    background: '#0D1830',
+    color: '#f1f5f9',
+    colorScheme: 'light',
+    cursor: 'pointer',
 };
 
 export const buttonPrimary = {

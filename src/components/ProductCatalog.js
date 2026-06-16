@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ProductCard } from './ProductCard';
 import { productApi, getSession, customerApi, paymentApi, userApi } from '../utils/apiClient';
-import { mapProductForDisplay } from '../utils/productUtils';
-import { theme } from '../styles/theme';
+import { mapProductForDisplay, maxCartQuantity } from '../utils/productUtils';
+import { addProductToCart, readCart, writeCart, CART_UPDATED_EVENT } from '../utils/cartUtils';
 import { refreshNotifications } from '../utils/notifications';
+import { theme } from '../styles/theme';
 
 export function ProductCatalog({ variant = 'public' }) {
     const isDashboard = variant === 'dashboard';
     const navigate = useNavigate();
+    const location = useLocation();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [cart, setCart] = useState([]);
@@ -16,6 +18,7 @@ export function ProductCatalog({ variant = 'public' }) {
     const [showAuth, setShowAuth] = useState(false);
     const [cartTotal, setCartTotal] = useState(0);
     const [checkoutError, setCheckoutError] = useState('');
+    const [cartNotice, setCartNotice] = useState('');
     const [checkingOut, setCheckingOut] = useState(false);
     const [paymentProvider, setPaymentProvider] = useState('paystack');
     const session = getSession();
@@ -46,50 +49,59 @@ export function ProductCatalog({ variant = 'public' }) {
     }, [isLoggedIn, isCustomer, session.preferredPaymentMethod]);
 
     useEffect(() => {
-        const savedCart = localStorage.getItem('cart');
-        if (savedCart) {
-            try {
-                setCart(JSON.parse(savedCart));
-            } catch {
-                setCart([]);
-            }
-        }
+        setCart(readCart());
+        const syncCart = () => setCart(readCart());
+        window.addEventListener(CART_UPDATED_EVENT, syncCart);
+        return () => window.removeEventListener(CART_UPDATED_EVENT, syncCart);
     }, []);
+
+    useEffect(() => {
+        if (location.state?.openCart) {
+            setShowCart(true);
+            navigate(location.pathname, { replace: true, state: {} });
+        }
+    }, [location, navigate]);
 
     useEffect(() => {
         const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
         setCartTotal(total);
-        localStorage.setItem('cart', JSON.stringify(cart));
     }, [cart]);
 
+    const persistCart = (nextCart) => {
+        setCart(nextCart);
+        writeCart(nextCart);
+    };
+
     const addToCart = (product) => {
-        const cartItem = mapProductForDisplay(product);
-        const existingItem = cart.find((item) => item.id === cartItem.id);
-        if (existingItem) {
-            setCart(cart.map((item) => (
-                item.id === cartItem.id ? { ...item, quantity: item.quantity + 1 } : item
-            )));
-        } else {
-            setCart([...cart, { ...cartItem, quantity: 1 }]);
-        }
+        const result = addProductToCart(product);
+        setCart(result.cart);
+        setCartNotice(result.notice || '');
     };
 
     const removeFromCart = (productId) => {
-        setCart(cart.filter((item) => item.id !== productId));
+        persistCart(cart.filter((item) => item.id !== productId));
     };
 
     const updateQuantity = (productId, newQuantity) => {
         if (newQuantity < 1) {
             removeFromCart(productId);
-        } else {
-            setCart(cart.map((item) => (
-                item.id === productId ? { ...item, quantity: newQuantity } : item
-            )));
+            return;
         }
+        const item = cart.find((i) => i.id === productId);
+        const maxQty = item ? maxCartQuantity(item) : Infinity;
+        const capped = Math.min(newQuantity, maxQty);
+        if (capped < newQuantity && maxQty !== Infinity) {
+            setCartNotice(`Only ${maxQty} available for ${item.name}.`);
+        } else {
+            setCartNotice('');
+        }
+        persistCart(cart.map((cartItem) => (
+            cartItem.id === productId ? { ...cartItem, quantity: capped } : cartItem
+        )));
     };
 
     const clearCart = () => {
-        setCart([]);
+        persistCart([]);
         localStorage.removeItem('cart');
     };
 
@@ -120,6 +132,7 @@ export function ProductCatalog({ variant = 'public' }) {
             const items = cart.map((item) => ({
                 productId: item.id,
                 quantity: item.quantity,
+                unitPrice: item.price,
             }));
 
             const result = await customerApi.checkout(items, paymentProvider);
@@ -166,18 +179,24 @@ export function ProductCatalog({ variant = 'public' }) {
                 <button
                     type="button"
                     onClick={() => setShowCart(!showCart)}
+                    aria-label="Open cart"
                     style={{
                         background: 'linear-gradient(135deg, #2B5CE6, #38BDF8)',
                         border: 'none',
                         borderRadius: '50%',
                         width: 60,
                         height: 60,
+                        padding: 0,
                         cursor: 'pointer',
                         position: 'relative',
                         boxShadow: '0 4px 20px rgba(43,92,230,0.4)',
+                        color: '#fff',
+                        fontSize: isDashboard ? 13 : 26,
+                        fontWeight: 600,
+                        fontFamily: "'Inter', system-ui, sans-serif",
                     }}
                 >
-                    🛒
+                    {isDashboard ? 'Cart' : '🛒'}
                     {cartCount > 0 && (
                         <span style={{
                             position: 'absolute',
@@ -247,6 +266,9 @@ export function ProductCatalog({ variant = 'public' }) {
                                     <span style={{ color: '#fff' }}>Total:</span>
                                     <span style={{ color: '#38BDF8', fontSize: 20, fontWeight: 'bold' }}>₦{cartTotal.toLocaleString()}</span>
                                 </div>
+                                {cartNotice && (
+                                    <p style={{ color: '#FBBF24', fontSize: 13, marginBottom: 12 }}>{cartNotice}</p>
+                                )}
                                 {checkoutError && (
                                     <p style={{ color: '#EF4444', fontSize: 13, marginBottom: 12 }}>{checkoutError}</p>
                                 )}
@@ -286,8 +308,18 @@ export function ProductCatalog({ variant = 'public' }) {
                 />
             )}
 
-            <div style={{ padding: isDashboard ? 0 : '60px 48px' }}>
+            <div style={{ padding: isDashboard ? 0 : 0 }}>
                 <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+                    {!isDashboard && (
+                        <div className="catalog-toolbar">
+                            <div>
+                                <h2 className="catalog-toolbar-title">Browse catalog</h2>
+                                <p className="catalog-toolbar-count">
+                                    {loading ? 'Loading…' : `${products.length} product${products.length === 1 ? '' : 's'} available`}
+                                </p>
+                            </div>
+                        </div>
+                    )}
                     {loading ? (
                         <p style={{ color: theme.textDim, textAlign: 'center' }}>Loading products…</p>
                     ) : products.length === 0 ? (
@@ -295,8 +327,8 @@ export function ProductCatalog({ variant = 'public' }) {
                     ) : (
                         <div style={{
                             display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                            gap: 30,
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                            gap: 24,
                         }}>
                             {products.map((product) => (
                                 <ProductCard key={product.id} product={product} onAddToCart={addToCart} />

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { getSession, clearSession } from '../utils/apiClient';
-import { loadRememberedLogin } from '../utils/authFlow';
+import { hasRememberedEmail } from '../utils/authFlow';
 
 export function useAuth() {
     return useMemo(() => {
@@ -15,7 +15,7 @@ export function useAuth() {
             isSupervisor: role === 'SUPERVISOR',
             isStaff: ['ADMIN', 'SUPERVISOR', 'SALES_AGENT', 'SUPPORT_AGENT'].includes(role),
             logout: () => {
-                clearSession({ keepRememberedLogin: Boolean(loadRememberedLogin()) });
+                clearSession({ keepRememberedLogin: hasRememberedEmail() });
                 window.location.href = '/login';
             },
         };

@@ -49,13 +49,29 @@ export function ProductCard({ product, onAddToCart, compact = false }) {
                         position: 'absolute',
                         bottom: 10,
                         left: 10,
-                        background: 'rgba(0,0,0,0.7)',
+                        background: 'rgba(220,38,38,0.9)',
                         padding: '4px 12px',
                         borderRadius: 4,
                         fontSize: 12,
                         color: '#fff',
+                        fontWeight: 600,
                     }}>
-                        Out of Stock
+                        Sold Out
+                    </span>
+                )}
+                {item.inStock && item.stockQuantity > 0 && item.stockQuantity <= 5 && (
+                    <span style={{
+                        position: 'absolute',
+                        bottom: 10,
+                        left: 10,
+                        background: 'rgba(251,191,36,0.9)',
+                        padding: '4px 12px',
+                        borderRadius: 4,
+                        fontSize: 11,
+                        color: '#111',
+                        fontWeight: 600,
+                    }}>
+                        Only {item.stockQuantity} left
                     </span>
                 )}
             </div>
@@ -74,6 +90,9 @@ export function ProductCard({ product, onAddToCart, compact = false }) {
                 </div>
                 <h3 style={{ fontSize: compact ? 14 : 16, color: '#fff', marginBottom: 8 }}>{item.name}</h3>
                 <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 12 }}>{item.description}</p>
+                {item.inStock && item.stockQuantity > 5 && (
+                    <p style={{ fontSize: 12, color: '#34D399', marginBottom: 10 }}>{item.stockQuantity} in stock</p>
+                )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
                     <div>
                         <span style={{ fontSize: compact ? 16 : 20, fontWeight: 'bold', color: '#38BDF8' }}>
@@ -101,7 +120,7 @@ export function ProductCard({ product, onAddToCart, compact = false }) {
                                 whiteSpace: 'nowrap',
                             }}
                         >
-                            {item.inStock ? 'Add to Cart' : 'Out of Stock'}
+                            {item.inStock ? 'Add to Cart' : 'Sold Out'}
                         </button>
                     )}
                 </div>

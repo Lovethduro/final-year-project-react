@@ -1,7 +1,16 @@
 export const API_BASE = `${process.env.REACT_APP_API_URL || 'http://localhost:8080'}/api/auth`;
 
-const SESSION_KEYS = ['userId', 'userEmail', 'userName', 'userPhone', 'authToken', 'userRole', 'mfaEnabled', 'emailVerified', 'userAvatarUrl', 'userPaymentMethod', 'userMemberSince'];
-const REMEMBER_KEY = 'cyforce_remember_login';
+/** Set to true to require MFA setup and verification after login. */
+export const LOGIN_MFA_ENABLED = false;
+
+export const SESSION_KEYS = [
+    'userId', 'userEmail', 'userName', 'userPhone', 'authToken', 'userRole',
+    'mfaEnabled', 'emailVerified', 'userAvatarUrl', 'userPaymentMethod', 'userMemberSince',
+    'mustChangePassword', 'showMotivationalMessages',
+];
+
+const REMEMBER_EMAIL_KEY = 'cyforce_remember_email';
+const LEGACY_REMEMBER_KEY = 'cyforce_remember_login';
 const PERSISTENCE_KEY = 'authPersistence';
 
 export function getDashboardPath(role) {
@@ -13,7 +22,17 @@ export function getDashboardPath(role) {
     return '/customer/dashboard';
 }
 
-export function storeAuthSession(data, rememberMe = true) {
+/** @returns {boolean} Whether the active session was stored with "Remember me". */
+export function isSessionPersistent() {
+    return localStorage.getItem(PERSISTENCE_KEY) !== 'session';
+}
+
+/**
+ * Store authenticated session.
+ * Remember me checked → localStorage (survives browser restart).
+ * Remember me unchecked → sessionStorage (cleared when the tab/browser session ends).
+ */
+export function storeAuthSession(data, rememberMe = false) {
     SESSION_KEYS.forEach((key) => {
         localStorage.removeItem(key);
         sessionStorage.removeItem(key);
@@ -30,34 +49,71 @@ export function storeAuthSession(data, rememberMe = true) {
     if (data.role) storage.setItem('userRole', data.role);
     storage.setItem('mfaEnabled', String(Boolean(data.mfaEnabled)));
     storage.setItem('emailVerified', String(Boolean(data.emailVerified)));
+    storage.setItem('mustChangePassword', String(Boolean(data.mustChangePassword)));
+    storage.setItem('showMotivationalMessages', String(data.showMotivationalMessages !== false));
     if (data.avatarUrl) storage.setItem('userAvatarUrl', data.avatarUrl);
     if (data.preferredPaymentMethod) storage.setItem('userPaymentMethod', data.preferredPaymentMethod);
     if (data.createdAt) storage.setItem('userMemberSince', data.createdAt);
 }
 
+/** Saved email/role for login form convenience only — never stores a password. */
 export function loadRememberedLogin() {
+    migrateLegacyRememberedLogin();
     try {
-        const raw = localStorage.getItem(REMEMBER_KEY);
-        return raw ? JSON.parse(raw) : null;
+        const raw = localStorage.getItem(REMEMBER_EMAIL_KEY);
+        if (!raw) return null;
+        const data = JSON.parse(raw);
+        if (!data?.email) return null;
+        return {
+            email: data.email,
+            role: data.role || '',
+        };
     } catch {
         return null;
     }
 }
 
-export function saveRememberedLogin({ email, password, role, remember }) {
+export function hasRememberedEmail() {
+    return Boolean(loadRememberedLogin()?.email);
+}
+
+/** Save or clear remembered email/role after a successful login. */
+export function saveRememberedLogin({ email, role, remember }) {
     if (remember && email) {
-        localStorage.setItem(REMEMBER_KEY, JSON.stringify({
-            email,
-            password: password || '',
+        localStorage.setItem(REMEMBER_EMAIL_KEY, JSON.stringify({
+            email: email.trim().toLowerCase(),
             role: role || '',
         }));
     } else {
-        localStorage.removeItem(REMEMBER_KEY);
+        clearRememberedEmail();
+    }
+}
+
+export function clearRememberedEmail() {
+    localStorage.removeItem(REMEMBER_EMAIL_KEY);
+    localStorage.removeItem(LEGACY_REMEMBER_KEY);
+}
+
+function migrateLegacyRememberedLogin() {
+    try {
+        const raw = localStorage.getItem(LEGACY_REMEMBER_KEY);
+        if (!raw) return;
+        const legacy = JSON.parse(raw);
+        if (legacy?.email && !localStorage.getItem(REMEMBER_EMAIL_KEY)) {
+            localStorage.setItem(REMEMBER_EMAIL_KEY, JSON.stringify({
+                email: legacy.email,
+                role: legacy.role || '',
+            }));
+        }
+        localStorage.removeItem(LEGACY_REMEMBER_KEY);
+    } catch {
+        localStorage.removeItem(LEGACY_REMEMBER_KEY);
     }
 }
 
 export function getPostAuthPath(data) {
     if (!data.emailVerified) return '/verify-email';
-    if (!data.mfaEnabled) return '/mfa-setup';
+    if (data.mustChangePassword) return '/change-password';
+    if (LOGIN_MFA_ENABLED && !data.mfaEnabled) return '/mfa-setup';
     return getDashboardPath(data.role);
 }

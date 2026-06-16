@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import logo from './images/CYFORCE 2-1.jpg';
 
 import { QRCodeSVG } from 'qrcode.react';
-import { API_BASE, getDashboardPath } from './utils/authFlow';
+import { API_BASE, getPostAuthPath } from './utils/authFlow';
 import { getSession } from './utils/apiClient';
 
 // Animated Particle Background
@@ -175,8 +175,13 @@ function clearMfaSetupState() {
     sessionStorage.removeItem(MFA_SETUP_STORAGE_KEY);
 }
 
+function formatSecretKey(secret) {
+    if (!secret) return '';
+    return secret.replace(/\s/g, '').toUpperCase().match(/.{1,4}/g)?.join(' ') || secret;
+}
+
 const MFA_METHODS = [
-    { value: "authenticator", label: "Authenticator App", description: "Use Google Authenticator, Authy, or similar", icon: "📱", recommended: true },
+    { value: "authenticator", label: "Authenticator App", description: "Google Authenticator, Authy, etc. — use setup key if QR scan fails", icon: "📱", recommended: true },
     { value: "email", label: "Email Verification", description: "Receive codes via email", icon: "✉️", recommended: false },
     { value: "sms", label: "SMS Verification", description: "Receive codes via text message", icon: "💬", recommended: false }
 ];
@@ -201,7 +206,11 @@ function MFASetupPage() {
 
     useEffect(() => {
         if (!userId) {
-            navigate('/register');
+            navigate('/login', { replace: true });
+            return;
+        }
+        if (session.mustChangePassword) {
+            navigate('/change-password', { replace: true });
             return;
         }
         const saved = loadMfaSetupState(userId);
@@ -211,7 +220,11 @@ function MFASetupPage() {
             setSelectedMethod('authenticator');
             setStep('setup');
         }
-    }, [userId, navigate]);
+
+        return () => {
+            setOtp('');
+        };
+    }, [userId, navigate, session.mustChangePassword]);
 
     const handleCopySecret = () => {
         navigator.clipboard.writeText(secretKey);
@@ -295,7 +308,7 @@ function MFASetupPage() {
         if (code.length !== 6) return;
 
         if (selectedMethod === 'authenticator' && !secretKey) {
-            setError('Setup session expired. Please start over and scan the QR code again.');
+            setError('Setup session expired. Please start over and enter the setup key again.');
             return;
         }
 
@@ -326,6 +339,7 @@ function MFASetupPage() {
             setStep('complete');
         } catch (verifyError) {
             setError(verifyError.message);
+            setOtp('');
         } finally {
             setIsVerifying(false);
         }
@@ -406,7 +420,12 @@ function MFASetupPage() {
                             </p>
                             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                                 <button
-                                    onClick={() => navigate(getDashboardPath(localStorage.getItem('userRole')))}
+                                    onClick={() => navigate(getPostAuthPath({
+                                        emailVerified: true,
+                                        mustChangePassword: false,
+                                        mfaEnabled: true,
+                                        role: session.role,
+                                    }))}
                                     style={{
                                         width: "100%",
                                         padding: "12px",
@@ -422,7 +441,7 @@ function MFASetupPage() {
                                     onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.02)"}
                                     onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
                                 >
-                                    Continue to Login
+                                    Continue to Dashboard
                                 </button>
                                 <Link to="/login" style={{
                                     width: "100%",
@@ -514,7 +533,7 @@ function MFASetupPage() {
                         </div>
                         <h1 style={{ fontSize: "24px", fontWeight: "bold", color: "#fff", marginTop: "24px", marginBottom: "8px" }}>
                             {step === "select" && "Setup Two-Factor Authentication"}
-                            {step === "setup" && "Configure Authenticator App"}
+                            {step === "setup" && "Add CyForce to your authenticator app"}
                             {step === "verify" && (
                                 selectedMethod === "email" ? "Verify Email Code"
                                     : selectedMethod === "sms" ? "Verify SMS Code"
@@ -523,7 +542,7 @@ function MFASetupPage() {
                         </h1>
                         <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.5)" }}>
                             {step === "select" && "Add an extra layer of security to your account"}
-                            {step === "setup" && "Scan the QR code with your authenticator app"}
+                            {step === "setup" && "On a laptop? Enter the setup key manually — Google Authenticator often cannot scan desktop screens."}
                             {step === "verify" && (
                                 selectedMethod === "email" ? "Enter the code we sent to your email"
                                     : selectedMethod === "sms" ? "Enter the code we sent to your phone"
@@ -537,17 +556,13 @@ function MFASetupPage() {
                         {/* Step 1: Method Selection */}
                         {error && (
                             <div style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "8px",
                                 padding: "10px 12px",
                                 marginBottom: "16px",
                                 background: "rgba(239,68,68,0.1)",
                                 border: "1px solid rgba(239,68,68,0.3)",
                                 borderRadius: "10px"
                             }}>
-                                <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#EF4444", flexShrink: 0 }} />
-                                <p style={{ fontSize: "12px", color: "#F87171" }}>{error}</p>
+                                <p style={{ fontSize: "12px", color: "#F87171", margin: 0 }}>{error}</p>
                             </div>
                         )}
 
@@ -650,44 +665,62 @@ function MFASetupPage() {
 
                         {/* Step 2: Setup Authenticator */}
                         {step === "setup" && selectedMethod === "authenticator" && (
-                            <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-                                <div style={{ display: "flex", justifyContent: "center" }}>
-                                    <div style={{ padding: "16px", background: "#fff", borderRadius: "12px" }}>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                                <div style={{
+                                    padding: "14px 16px",
+                                    borderRadius: "10px",
+                                    background: "rgba(251,191,36,0.12)",
+                                    border: "1px solid rgba(251,191,36,0.35)",
+                                }}>
+                                    <p style={{ fontSize: "13px", color: "#FDE68A", margin: 0, lineHeight: 1.55 }}>
+                                        <strong>Can&apos;t scan the code?</strong> Google Authenticator on phones often shows
+                                        &quot;Try using camera on your iPhone or iPad&quot; when the QR code is on a laptop screen.
+                                        Use <strong>Enter a setup key</strong> below instead — or choose SMS / Email on the previous step.
+                                    </p>
+                                </div>
+
+                                <div style={{
+                                    padding: "16px",
+                                    background: "rgba(15,23,42,0.45)",
+                                    borderRadius: "12px",
+                                    border: "1px solid rgba(45,212,191,0.35)",
+                                }}>
+                                    <p style={{ fontSize: "13px", fontWeight: 600, color: "#2DD4BF", margin: "0 0 12px" }}>
+                                        Recommended: Enter setup key manually
+                                    </p>
+                                    <ol style={{ margin: "0 0 14px", paddingLeft: "18px", fontSize: "12px", color: "rgba(255,255,255,0.65)", lineHeight: 1.7 }}>
+                                        <li>Open Google Authenticator (or Authy / Microsoft Authenticator)</li>
+                                        <li>Tap <strong>+</strong> → <strong>Enter a setup key</strong> (not &quot;Scan QR code&quot;)</li>
+                                        <li>Account name: <strong>CyForce</strong> {userEmail ? `(${userEmail})` : ''}</li>
+                                        <li>Paste the key below · Type: <strong>Time based</strong></li>
+                                    </ol>
+                                    <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.45)", margin: "0 0 8px" }}>Your setup key</p>
+                                    <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "12px", background: "rgba(15,23,42,0.7)", border: "1px solid rgba(51,65,85,1)", borderRadius: "10px" }}>
+                                        <code style={{ flex: 1, fontSize: "15px", color: "#fff", fontFamily: "monospace", letterSpacing: "0.08em", wordBreak: "break-all" }}>
+                                            {formatSecretKey(secretKey)}
+                                        </code>
+                                        <button type="button" onClick={handleCopySecret} style={{ padding: "8px 12px", background: "rgba(43,92,230,0.35)", border: "none", cursor: "pointer", borderRadius: "6px", color: "#fff", fontSize: "12px", whiteSpace: "nowrap" }}>
+                                            {copied ? "Copied!" : "Copy key"}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div style={{ textAlign: "center" }}>
+                                    <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.45)", margin: "0 0 12px" }}>
+                                        Optional — scan with iPhone/iPad camera (point at this screen)
+                                    </p>
+                                    <div style={{ display: "inline-block", padding: "20px", background: "#fff", borderRadius: "12px", boxShadow: "0 4px 24px rgba(0,0,0,0.25)" }}>
                                         {otpAuthUrl ? (
-                                            <QRCodeSVG value={otpAuthUrl} size={180} level="M" includeMargin />
+                                            <QRCodeSVG value={otpAuthUrl} size={220} level="H" includeMargin bgColor="#FFFFFF" fgColor="#000000" />
                                         ) : (
-                                            <div style={{ width: 180, height: 180, display: "flex", alignItems: "center", justifyContent: "center", color: "#64748B" }}>
+                                            <div style={{ width: 220, height: 220, display: "flex", alignItems: "center", justifyContent: "center", color: "#64748B" }}>
                                                 Loading QR…
                                             </div>
                                         )}
                                     </div>
                                 </div>
 
-                                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                                    <div style={{ display: "flex", alignItems: "flex-start", gap: "12px", padding: "12px", background: "rgba(15,23,42,0.3)", borderRadius: "10px", border: "1px solid rgba(51,65,85,0.5)" }}>
-                                        <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "rgba(45,212,191,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>1</div>
-                                        <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>Download an authenticator app like Google Authenticator or Authy</p>
-                                    </div>
-                                    <div style={{ display: "flex", alignItems: "flex-start", gap: "12px", padding: "12px", background: "rgba(15,23,42,0.3)", borderRadius: "10px", border: "1px solid rgba(51,65,85,0.5)" }}>
-                                        <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "rgba(45,212,191,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>2</div>
-                                        <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>Scan the QR code above with your authenticator app</p>
-                                    </div>
-                                    <div style={{ display: "flex", alignItems: "flex-start", gap: "12px", padding: "12px", background: "rgba(15,23,42,0.3)", borderRadius: "10px", border: "1px solid rgba(51,65,85,0.5)" }}>
-                                        <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "rgba(45,212,191,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>3</div>
-                                        <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>Or manually enter this secret key:</p>
-                                    </div>
-                                </div>
-
-                                <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "12px", background: "rgba(15,23,42,0.5)", border: "1px solid rgba(51,65,85,1)", borderRadius: "10px" }}>
-                                    <code style={{ flex: 1, fontSize: "14px", color: "#fff", fontFamily: "monospace" }}>{secretKey}</code>
-                                    <button onClick={handleCopySecret} style={{ padding: "8px", background: "none", border: "none", cursor: "pointer", borderRadius: "6px", transition: "background 0.2s" }}
-                                            onMouseEnter={(e) => e.currentTarget.style.background = "rgba(51,65,85,0.5)"}
-                                            onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}>
-                                        {copied ? "✓" : "📋"}
-                                    </button>
-                                </div>
-
-                                <button type="button" onClick={() => setStep("verify")} style={{
+                                <button type="button" onClick={() => { setOtp(''); setStep('verify'); }} style={{
                                     width: "100%",
                                     padding: "12px",
                                     background: "linear-gradient(135deg, #2563EB, #2DD4BF)",
@@ -703,6 +736,18 @@ function MFASetupPage() {
                                         onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}>
                                     Continue to Verification
                                 </button>
+                                <button type="button" onClick={() => { setOtp(''); setStep('select'); }} style={{
+                                    width: "100%",
+                                    padding: "10px",
+                                    background: "transparent",
+                                    border: "1px solid rgba(51,65,85,1)",
+                                    borderRadius: "10px",
+                                    fontSize: "13px",
+                                    color: "rgba(255,255,255,0.55)",
+                                    cursor: "pointer",
+                                }}>
+                                    Use SMS or Email instead
+                                </button>
                                 <button type="button" onClick={handleStartOver} disabled={isLoading} style={{
                                     width: "100%",
                                     padding: "10px",
@@ -713,7 +758,7 @@ function MFASetupPage() {
                                     color: "rgba(255,255,255,0.55)",
                                     cursor: isLoading ? "not-allowed" : "pointer",
                                 }}>
-                                    {isLoading ? "Resetting…" : "Start over (new QR code)"}
+                                    {isLoading ? "Resetting…" : "Start over (new setup key)"}
                                 </button>
                             </div>
                         )}
@@ -750,7 +795,7 @@ function MFASetupPage() {
                                     Use the 6-digit code for <strong style={{ color: "#fff" }}>CyForce</strong> ({userEmail})
                                 </p>
                                 <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)" }}>
-                                    If codes keep failing, tap “Start over”, delete old CyForce entries in your app, then scan the new QR code.
+                                    If codes keep failing, tap “Start over”, delete old CyForce entries in your app, then add the account again with a new setup key.
                                 </p>
                             </div>
                         )}
@@ -799,7 +844,7 @@ function MFASetupPage() {
                                     {isVerifying ? "Verifying..." : "Verify & Enable MFA"}
                                 </button>
 
-                                <button type="button" onClick={() => setStep(selectedMethod === "authenticator" ? "setup" : "select")} style={{
+                                <button type="button" onClick={() => { setOtp(''); setStep(selectedMethod === "authenticator" ? "setup" : "select"); }} style={{
                                     background: "none",
                                     border: "none",
                                     fontSize: "13px",
@@ -819,7 +864,7 @@ function MFASetupPage() {
                                         color: "#2DD4BF",
                                         cursor: isLoading ? "not-allowed" : "pointer",
                                     }}>
-                                        Start over with a new QR code
+                                        Start over with a new setup key
                                     </button>
                                 )}
                             </div>

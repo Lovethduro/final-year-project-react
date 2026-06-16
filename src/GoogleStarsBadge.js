@@ -1,4 +1,3 @@
-// src/GoogleStarsBadge.jsx
 import { useEffect, useRef, useState } from 'react';
 
 function GoogleStarsBadge() {
@@ -16,10 +15,6 @@ function GoogleStarsBadge() {
 
         script.onerror = () => {
             setLoadFailed(true);
-        };
-
-        script.onload = () => {
-            // Elfsight loads async widgets; script load success is enough
         };
 
         try {
@@ -40,11 +35,13 @@ function GoogleStarsBadge() {
     }
 
     return (
-        <div
-            ref={containerRef}
-            className="elfsight-app-8c79923b-21dd-4956-ab69-4e1aa11aae3a"
-            data-elfsight-app-lazy
-        />
+        <div data-cyforce-landing-reviews>
+            <div
+                ref={containerRef}
+                className="elfsight-app-8c79923b-21dd-4956-ab69-4e1aa11aae3a"
+                data-elfsight-app-lazy
+            />
+        </div>
     );
 }
 

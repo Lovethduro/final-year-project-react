@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { DashboardLayout } from './components/DashboardLayout';
-import { PageHeader, Card, Alert, PrimaryButton, DataTable, StatusBadge } from './components/ui';
+import { PageHeader, Card, Alert, PrimaryButton, DataTable, StatusBadge, Select } from './components/ui';
 import { productApi } from './utils/apiClient';
 import { resolveProductImage } from './utils/productUtils';
 import { theme } from './styles/theme';
@@ -11,6 +11,7 @@ const EMPTY_FORM = {
     price: '',
     originalPrice: '',
     description: '',
+    stockQuantity: '10',
     inStock: true,
     featured: false,
     active: true,
@@ -47,6 +48,7 @@ export default function ProductsManagementPage() {
             price: String(product.price ?? ''),
             originalPrice: product.originalPrice != null ? String(product.originalPrice) : '',
             description: product.description || '',
+            stockQuantity: String(product.stockQuantity ?? 0),
             inStock: Boolean(product.inStock),
             featured: Boolean(product.featured),
             active: Boolean(product.active),
@@ -126,13 +128,14 @@ export default function ProductsManagementPage() {
                 <Card title={editingId ? 'Edit Product' : 'Add Product'}>
                     <form onSubmit={handleSubmit}>
                         <input style={inputStyle} placeholder="Product name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-                        <select style={inputStyle} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
+                        <Select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
                             {['CCTV', 'Solar', 'Security', 'Enterprise', 'ICT', 'Automation'].map((c) => (
                                 <option key={c} value={c}>{c}</option>
                             ))}
-                        </select>
+                        </Select>
                         <input style={inputStyle} type="number" min="0" placeholder="Price (NGN)" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required />
-                        <input style={inputStyle} type="number" min="0" placeholder="Original price (optional)" value={form.originalPrice} onChange={(e) => setForm({ ...form, originalPrice: e.target.value })} />
+                        <input style={inputStyle} type="number" min="0" placeholder="Original price for discount (optional)" value={form.originalPrice} onChange={(e) => setForm({ ...form, originalPrice: e.target.value })} />
+                        <input style={inputStyle} type="number" min="0" placeholder="Stock quantity (0 = unlimited)" value={form.stockQuantity} onChange={(e) => setForm({ ...form, stockQuantity: e.target.value })} />
                         <textarea style={{ ...inputStyle, minHeight: 90 }} placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required />
                         <input style={{ ...inputStyle, padding: 8 }} type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] || null)} />
                         <p style={{ fontSize: 12, color: theme.textDim, marginBottom: 12 }}>
@@ -179,8 +182,18 @@ export default function ProductsManagementPage() {
                     columns={[
                         { key: 'name', label: 'Name' },
                         { key: 'category', label: 'Category' },
-                        { key: 'price', label: 'Price', render: (r) => `₦${Number(r.price).toLocaleString()}` },
-                        { key: 'inStock', label: 'Stock', render: (r) => <StatusBadge status={r.inStock ? 'success' : 'warning'} label={r.inStock ? 'In stock' : 'Out of stock'} /> },
+                        { key: 'price', label: 'Price', render: (r) => (
+                            <div>
+                                <div>₦{Number(r.price).toLocaleString()}</div>
+                                {r.originalPrice != null && r.originalPrice > r.price && (
+                                    <div style={{ fontSize: 11, color: theme.success }}>
+                                        Was ₦{Number(r.originalPrice).toLocaleString()}
+                                    </div>
+                                )}
+                            </div>
+                        )},
+                        { key: 'stockQuantity', label: 'Qty', render: (r) => (r.stockQuantity > 0 ? r.stockQuantity : '—') },
+                        { key: 'inStock', label: 'Stock', render: (r) => <StatusBadge status={r.inStock ? 'success' : 'warning'} label={r.inStock ? 'Available' : 'Sold out'} /> },
                         { key: 'active', label: 'Status', render: (r) => <StatusBadge status={r.active ? 'success' : 'warning'} label={r.active ? 'Live' : 'Hidden'} /> },
                         { key: 'actions', label: '', render: (r) => (
                             <div style={{ display: 'flex', gap: 8 }}>

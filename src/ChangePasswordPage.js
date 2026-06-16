@@ -1,0 +1,163 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import logo from './images/CYFORCE 2-1.jpg';
+import { authApi, getSession } from './utils/apiClient';
+import { getPostAuthPath, storeAuthSession } from './utils/authFlow';
+
+const inputStyle = {
+    width: '100%',
+    padding: '10px 12px',
+    background: 'rgba(15,23,42,0.5)',
+    border: '1px solid rgba(51,65,85,1)',
+    borderRadius: '10px',
+    fontSize: '14px',
+    color: '#fff',
+    outline: 'none',
+};
+
+export default function ChangePasswordPage() {
+    const navigate = useNavigate();
+    const session = getSession();
+    const forced = session.mustChangePassword;
+
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+
+        if (newPassword.length < 8) {
+            setError('New password must be at least 8 characters.');
+            return;
+        }
+        if (newPassword !== confirmPassword) {
+            setError('New passwords do not match.');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            await authApi.changePassword(currentPassword, newPassword);
+            storeAuthSession({
+                ...session,
+                userId: session.userId,
+                email: session.email,
+                fullName: session.fullName,
+                phone: session.phone,
+                token: session.token,
+                role: session.role,
+                mfaEnabled: session.mfaEnabled,
+                emailVerified: session.emailVerified,
+                mustChangePassword: false,
+            }, session.rememberMe);
+            navigate(getPostAuthPath({
+                emailVerified: session.emailVerified,
+                mustChangePassword: false,
+                mfaEnabled: session.mfaEnabled,
+                role: session.role,
+            }), { replace: true });
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div style={{
+            minHeight: '100vh', background: '#0F172A', display: 'flex', alignItems: 'center',
+            justifyContent: 'center', fontFamily: "'DM Sans', sans-serif", padding: 16,
+        }}>
+            <div style={{ width: '100%', maxWidth: 420 }}>
+                <div style={{
+                    backdropFilter: 'blur(12px)', background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20, padding: 32,
+                }}>
+                    <div style={{ textAlign: 'center', marginBottom: 24 }}>
+                        <img src={logo} alt="CyForce" style={{ height: 48, marginBottom: 12 }} />
+                        <h1 style={{ fontSize: 22, color: '#fff', marginBottom: 8 }}>
+                            {forced ? 'Update your password' : 'Change password'}
+                        </h1>
+                        <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)' }}>
+                            {forced
+                                ? 'Your account uses a temporary password. Set a new one before continuing.'
+                                : 'Enter your current password and choose a new one.'}
+                        </p>
+                    </div>
+
+                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                        <div>
+                            <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 6 }}>
+                                {forced ? 'Temporary password' : 'Current password'}
+                            </label>
+                            <input
+                                type="password"
+                                value={currentPassword}
+                                onChange={(e) => setCurrentPassword(e.target.value)}
+                                required
+                                style={inputStyle}
+                                autoComplete="current-password"
+                            />
+                        </div>
+                        <div>
+                            <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 6 }}>
+                                New password
+                            </label>
+                            <input
+                                type="password"
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                required
+                                minLength={8}
+                                style={inputStyle}
+                                autoComplete="new-password"
+                            />
+                        </div>
+                        <div>
+                            <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 6 }}>
+                                Confirm new password
+                            </label>
+                            <input
+                                type="password"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                required
+                                minLength={8}
+                                style={inputStyle}
+                                autoComplete="new-password"
+                            />
+                        </div>
+
+                        {error && (
+                            <div style={{
+                                padding: '10px 12px',
+                                background: 'rgba(239,68,68,0.1)',
+                                border: '1px solid rgba(239,68,68,0.3)',
+                                borderRadius: '10px',
+                            }}>
+                                <p style={{ fontSize: 12, color: '#F87171', margin: 0 }}>{error}</p>
+                            </div>
+                        )}
+
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            style={{
+                                width: '100%', padding: 12, border: 'none', borderRadius: 10,
+                                background: 'linear-gradient(135deg, #2563EB, #2DD4BF)',
+                                color: '#fff', fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer',
+                                opacity: loading ? 0.7 : 1,
+                            }}
+                        >
+                            {loading ? 'Saving...' : 'Save new password'}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    );
+}

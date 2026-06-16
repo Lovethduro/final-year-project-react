@@ -1,0 +1,54 @@
+/**
+ * Native form controls — readable on CyForce dark UI.
+ * Loaded after Bootstrap so these rules take precedence.
+ *
+ * Closed select: dark field, light text.
+ * Open dropdown (OS popup): light background, dark text — works on Windows Chrome/Edge.
+ */
+
+:root {
+  --cyforce-select-bg: #0d1830;
+  --cyforce-select-text: #f1f5f9;
+  --cyforce-select-border: rgba(99, 179, 237, 0.25);
+  --cyforce-option-bg: #ffffff;
+  --cyforce-option-text: #0f172a;
+  --cyforce-option-hover: #e0e7ff;
+  --cyforce-option-selected: #c7d2fe;
+  --cyforce-option-muted: #64748b;
+}
+
+select,
+.cyforce-select {
+  background-color: var(--cyforce-select-bg) !important;
+  color: var(--cyforce-select-text) !important;
+  border-color: var(--cyforce-select-border);
+  font-family: 'Inter', system-ui, sans-serif;
+  color-scheme: light;
+}
+
+select:disabled,
+.cyforce-select:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Native OS dropdown list — must be light bg + dark text on Windows */
+select option,
+select optgroup,
+.cyforce-select option,
+.cyforce-select optgroup {
+  background-color: var(--cyforce-option-bg) !important;
+  color: var(--cyforce-option-text) !important;
+}
+
+select option:checked,
+.cyforce-select option:checked {
+  background-color: var(--cyforce-option-selected) !important;
+  color: var(--cyforce-option-text) !important;
+}
+
+select option[value=""],
+.cyforce-select option[value=""] {
+  background-color: var(--cyforce-option-bg) !important;
+  color: var(--cyforce-option-muted) !important;
+}

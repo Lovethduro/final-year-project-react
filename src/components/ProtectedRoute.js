@@ -1,8 +1,8 @@
 import { Navigate } from 'react-router-dom';
 import { getSession } from '../utils/apiClient';
-import { getDashboardPath } from '../utils/authFlow';
+import { getDashboardPath, LOGIN_MFA_ENABLED } from '../utils/authFlow';
 
-export default function ProtectedRoute({ children, roles }) {
+export default function ProtectedRoute({ children, roles, allowPasswordChange = false, allowMfaSetup = false }) {
     const session = getSession();
 
     if (!session.userId || !session.token) {
@@ -13,7 +13,11 @@ export default function ProtectedRoute({ children, roles }) {
         return <Navigate to="/verify-email" replace />;
     }
 
-    if (!session.mfaEnabled) {
+    if (session.mustChangePassword && !allowPasswordChange) {
+        return <Navigate to="/change-password" replace />;
+    }
+
+    if (LOGIN_MFA_ENABLED && !session.mfaEnabled && !allowMfaSetup && !session.mustChangePassword) {
         return <Navigate to="/mfa-setup" replace />;
     }
 

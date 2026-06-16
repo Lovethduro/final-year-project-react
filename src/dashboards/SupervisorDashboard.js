@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { DashboardLayout } from '../components/DashboardLayout';
-import { Card, DataTable, StatusBadge, Alert } from '../components/ui';
-import { WelcomeBanner, QuickActions, DonutChart, LineChart, GaugeChart, HorizontalBarChart, StarRating } from '../components/dashboard/DashboardWidgets';
+import { Card, DataTable, StatusBadge, Alert, Select } from '../components/ui';
+import { WelcomeBanner, QuickActions, DonutChart, LineChart, GaugeChart, HorizontalBarChart, StarRating, MetricCard } from '../components/dashboard/DashboardWidgets';
 import { useAuth } from '../hooks/useAuth';
 import { supervisorApi } from '../utils/apiClient';
-import { theme, cardStyle } from '../styles/theme';
+import { theme } from '../styles/theme';
 
 const TEAM_OPTIONS = [
     { value: 'all', label: 'All Teams' },
@@ -20,34 +20,32 @@ function formatDate() {
     return new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
 }
 
-function KpiCard({ title, value, icon, status = 'info' }) {
-    const colors = { success: theme.success, warning: theme.warning, error: theme.error, info: theme.accent };
-    return (
-        <div style={{ ...cardStyle, padding: 20 }}>
-            <span style={{ fontSize: 24 }}>{icon}</span>
-            <div style={{ fontSize: 24, fontWeight: 'bold', color: theme.text, margin: '12px 0 4px' }}>{value}</div>
-            <div style={{ fontSize: 13, color: colors[status] }}>{title}</div>
-        </div>
-    );
-}
-
-function medalIcon(medal) {
-    if (medal === 'gold') return '🥇';
-    if (medal === 'silver') return '🥈';
-    if (medal === 'bronze') return '🥉';
-    return `#${''}`;
+function medalLabel(medal, rank) {
+    if (medal === 'gold') return '1st';
+    if (medal === 'silver') return '2nd';
+    if (medal === 'bronze') return '3rd';
+    return `#${rank}`;
 }
 
 export default function SupervisorDashboard() {
     const auth = useAuth();
     const [team, setTeam] = useState('all');
     const [overview, setOverview] = useState(null);
+    const [feedback, setFeedback] = useState([]);
     const [trendTab, setTrendTab] = useState('total');
     const [error, setError] = useState('');
     const [actionId, setActionId] = useState(null);
 
     const load = () => {
-        supervisorApi.overview(team).then(setOverview).catch((err) => setError(err.message));
+        Promise.all([
+            supervisorApi.overview(team),
+            supervisorApi.feedback().catch(() => []),
+        ])
+            .then(([overviewData, feedbackData]) => {
+                setOverview(overviewData);
+                setFeedback(feedbackData || []);
+            })
+            .catch((err) => setError(err.message));
     };
 
     useEffect(() => { load(); }, [team]);
@@ -103,28 +101,28 @@ export default function SupervisorDashboard() {
                 title={`Supervisor Dashboard`}
                 subtitle={`Team overview for ${formatDate()}`}
             >
-                <select value={team} onChange={(e) => setTeam(e.target.value)} style={{ background: 'rgba(255,255,255,0.05)', border: `0.5px solid ${theme.border}`, borderRadius: 8, padding: '8px 12px', color: theme.text, fontFamily: theme.fontBody }}>
+                <Select value={team} onChange={(e) => setTeam(e.target.value)} style={{ width: 'auto' }}>
                     {TEAM_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-                </select>
+                </Select>
             </WelcomeBanner>
 
             {error && <Alert type="error">{error}</Alert>}
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 16, marginBottom: 24 }}>
-                <KpiCard title="Open Tickets" value={stats.openTickets ?? 0} icon="🎫" status="warning" />
-                <KpiCard title="Avg Response Time" value={stats.avgResponseTime || '—'} icon="⏱️" status="info" />
-                <KpiCard title="Avg Resolution Time" value={stats.avgResolutionTime || '—'} icon="📋" status="info" />
-                <KpiCard title="Customer Satisfaction" value={stats.customerSatisfaction ? `${stats.customerSatisfaction}/5` : '—'} icon="⭐" status="success" />
-                <KpiCard title="Sales Target" value={`${stats.salesAchieved ?? 0}/${stats.salesTarget ?? 20}`} icon="🎯" status="success" />
-                <KpiCard title="Open Escalations" value={stats.openEscalations ?? 0} icon="🚨" status="error" />
+                <MetricCard label="Open Tickets" value={stats.openTickets ?? 0} detail="Awaiting response" accent={theme.warning} />
+                <MetricCard label="Avg Response Time" value={stats.avgResponseTime || '—'} accent={theme.accent} />
+                <MetricCard label="Avg Resolution Time" value={stats.avgResolutionTime || '—'} accent={theme.accent} />
+                <MetricCard label="Customer Satisfaction" value={stats.customerSatisfaction ? `${stats.customerSatisfaction}/5` : '—'} accent={theme.success} />
+                <MetricCard label="Sales Target" value={`${stats.salesAchieved ?? 0}/${stats.salesTarget ?? 20}`} accent={theme.success} />
+                <MetricCard label="Open Escalations" value={stats.openEscalations ?? 0} accent={theme.error} />
             </div>
 
             <QuickActions actions={[
-                { to: '/dashboard/tickets', icon: '🎫', label: 'View All Tickets' },
-                { to: '/dashboard/performance', icon: '📊', label: 'Team Performance' },
-                { to: '/dashboard/analytics', icon: '📢', label: 'Broadcast Message' },
-                { to: '/dashboard/tickets', icon: '⚠️', label: 'View Escalations' },
-                { to: '/dashboard/analytics', icon: '📄', label: 'Generate Report' },
+                { to: '/dashboard/tickets', label: 'View All Tickets' },
+                { to: '/dashboard/performance', label: 'Team Performance' },
+                { to: '/dashboard/analytics', label: 'Broadcast Message' },
+                { to: '/dashboard/tickets', label: 'View Escalations' },
+                { to: '/dashboard/analytics', label: 'Generate Report' },
             ]} />
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 20 }}>
@@ -169,16 +167,21 @@ export default function SupervisorDashboard() {
                     </Card>
 
                     <Card title="Recent Customer Feedback">
-                        {(overview?.recentFeedback || []).length ? overview.recentFeedback.map((f, i) => (
-                            <div key={i} style={{ padding: '12px 0', borderBottom: `0.5px solid ${theme.border}` }}>
+                        {(feedback.length ? feedback : overview?.recentFeedback || []).slice(0, 8).map((f, i) => (
+                            <div key={f.id || i} style={{ padding: '12px 0', borderBottom: `0.5px solid ${theme.border}` }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <strong style={{ color: theme.text }}>{f.companyName}</strong>
+                                    <strong style={{ color: theme.text }}>{f.customerName || f.companyName}</strong>
                                     <StarRating rating={f.rating} />
                                 </div>
-                                <div style={{ fontSize: 12, color: theme.textDim }}>{f.customerName}</div>
+                                <div style={{ fontSize: 12, color: theme.textDim }}>
+                                    {f.type || 'feedback'} · {f.agentName || '—'}
+                                </div>
                                 <p style={{ fontSize: 13, color: theme.textMuted, margin: '6px 0 0' }}>{f.comment}</p>
                             </div>
-                        )) : <p style={{ color: theme.textDim, fontSize: 13 }}>No feedback yet.</p>}
+                        ))}
+                        {!feedback.length && !(overview?.recentFeedback || []).length && (
+                            <p style={{ color: theme.textDim, fontSize: 13 }}>No feedback yet.</p>
+                        )}
                     </Card>
                 </div>
 
@@ -186,7 +189,7 @@ export default function SupervisorDashboard() {
                     <Card title="Team Performance Leaderboard" style={{ marginBottom: 20 }}>
                         {(overview?.teamLeaderboard || []).map((agent) => (
                             <div key={agent.rank} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', borderBottom: `0.5px solid ${theme.border}` }}>
-                                <span style={{ fontSize: 18 }}>{agent.medal ? medalIcon(agent.medal) : `#${agent.rank}`}</span>
+                                <span style={{ fontSize: 12, fontWeight: 600, color: theme.accent }}>{agent.medal ? medalLabel(agent.medal, agent.rank) : `#${agent.rank}`}</span>
                                 <div style={{ flex: 1 }}>
                                     <div style={{ fontSize: 13, color: theme.text, fontWeight: 600 }}>{agent.name}</div>
                                     <div style={{ fontSize: 11, color: theme.textDim }}>{agent.ticketsResolved} resolved · {agent.avgResponse}</div>

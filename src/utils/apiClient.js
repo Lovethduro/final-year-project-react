@@ -1,3 +1,5 @@
+import { SESSION_KEYS, clearRememberedEmail, isSessionPersistent } from './authFlow';
+
 const API_ROOT = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
 export function assetUrl(path) {
@@ -5,8 +7,6 @@ export function assetUrl(path) {
     if (path.startsWith('http')) return path;
     return `${API_ROOT}${path}`;
 }
-
-const SESSION_KEYS = ['userId', 'userEmail', 'userName', 'userPhone', 'authToken', 'userRole', 'mfaEnabled', 'emailVerified', 'userAvatarUrl', 'userPaymentMethod', 'userMemberSince'];
 
 function getStorageForSession() {
     const mode = localStorage.getItem('authPersistence');
@@ -30,7 +30,9 @@ export function getSession() {
         avatarUrl: storage.getItem('userAvatarUrl'),
         preferredPaymentMethod: storage.getItem('userPaymentMethod'),
         memberSince: storage.getItem('userMemberSince'),
-        rememberMe: localStorage.getItem('authPersistence') !== 'session',
+        rememberMe: isSessionPersistent(),
+        mustChangePassword: storage.getItem('mustChangePassword') === 'true',
+        showMotivationalMessages: storage.getItem('showMotivationalMessages') !== 'false',
     };
 }
 
@@ -52,7 +54,7 @@ export function clearSession({ keepRememberedLogin = false } = {}) {
     });
     localStorage.removeItem('authPersistence');
     if (!keepRememberedLogin) {
-        localStorage.removeItem('cyforce_remember_login');
+        clearRememberedEmail();
     }
 }
 
@@ -106,8 +108,15 @@ export const notificationApi = {
     delete: (id) => api.delete(`/api/notifications/${id}`),
 };
 
+export const quoteApi = {
+    request: (body) => api.post('/api/quotes/request', body),
+    getPortal: (token) => api.get(`/api/quotes/portal/${token}`),
+    sendPortalMessage: (token, message) => api.post(`/api/quotes/portal/${token}/messages`, { message }),
+};
+
 export const adminApi = {
     overview: () => api.get('/api/admin/dashboard/stats'),
+    feedback: () => api.get('/api/admin/feedback'),
     users: () => api.get('/api/admin/users'),
     createUser: (body) => api.post('/api/admin/users', body),
     updateUser: (id, body) => api.put(`/api/admin/users/${id}`, body),
@@ -134,6 +143,8 @@ export const customerApi = {
     startConversation: (subject, message) => api.post('/api/customer/conversations', { subject, message }),
     getConversation: (id) => api.get(`/api/customer/conversations/${id}`),
     sendMessage: (id, message) => api.post(`/api/customer/conversations/${id}/messages`, { message }),
+    rateConversation: (id, rating, comment) => api.post(`/api/customer/conversations/${id}/rating`, { rating, comment }),
+    rateTicket: (id, rating, comment) => api.post(`/api/customer/tickets/${id}/rating`, { rating, comment }),
     invoices: () => api.get('/api/customer/invoices'),
     billingOverview: () => api.get('/api/customer/billing/overview'),
     checkout: (items, provider = 'paystack') => api.post('/api/customer/checkout', { items, provider }),
@@ -148,21 +159,52 @@ export const supportApi = {
     assign: (id) => api.put(`/api/support/tickets/${id}/assign`, {}),
     updateTicketStatus: (id, status) => api.put(`/api/support/tickets/${id}/status`, { status }),
     respond: (id, message, internalNote) => api.post(`/api/support/tickets/${id}/response`, { message, internalNote }),
+    transferToSales: (id, note) => api.post(`/api/support/tickets/${id}/transfer-to-sales`, { note }),
 };
 
 export const salesApi = {
+    overview: () => api.get('/api/sales/dashboard/overview'),
+    bonuses: () => api.get('/api/sales/dashboard/bonuses'),
     stats: () => api.get('/api/sales/dashboard/stats'),
+    customers: () => api.get('/api/sales/customers'),
     leads: () => api.get('/api/sales/leads'),
     createLead: (body) => api.post('/api/sales/leads', body),
     updateLead: (id, body) => api.put(`/api/sales/leads/${id}`, body),
+    sendLeadEmail: (id, body) => api.post(`/api/sales/leads/${id}/email`, body),
     quotes: () => api.get('/api/sales/quotes'),
     conversations: () => api.get('/api/sales/conversations'),
+    conversationQueue: () => api.get('/api/sales/conversations/queue'),
+    acceptConversation: (id) => api.post(`/api/sales/conversations/${id}/accept`, {}),
     getConversation: (id) => api.get(`/api/sales/conversations/${id}`),
     sendMessage: (id, message) => api.post(`/api/sales/conversations/${id}/messages`, { message }),
+    sendInvoice: (id, body) => api.post(`/api/sales/conversations/${id}/invoice`, body),
+    forwardConversation: (id, reason) => api.post(`/api/sales/conversations/${id}/forward`, { reason }),
+    dealsComparison: () => api.get('/api/sales/dashboard/deals-comparison'),
+    playbookCategories: () => api.get('/api/sales/playbook/categories'),
+    playbookList: (category, q) => {
+        const params = new URLSearchParams();
+        if (category) params.set('category', category);
+        if (q) params.set('q', q);
+        const qs = params.toString();
+        return api.get(`/api/sales/playbook${qs ? `?${qs}` : ''}`);
+    },
+    playbookGet: (id) => api.get(`/api/sales/playbook/${id}`),
+    playbookManageList: () => api.get('/api/sales/playbook/manage'),
+    playbookCreate: (body) => api.post('/api/sales/playbook', body),
+    playbookUpdate: (id, body) => api.put(`/api/sales/playbook/${id}`, body),
+    playbookDelete: (id) => api.delete(`/api/sales/playbook/${id}`),
+};
+
+export const feedbackApi = {
+    listAdmin: () => api.get('/api/admin/feedback'),
+    listSupervisor: () => api.get('/api/supervisor/feedback'),
+    getPurchaseSurvey: (token) => api.get(`/api/feedback/purchase-survey/${token}`),
+    submitPurchaseSurvey: (token, body) => api.post(`/api/feedback/purchase-survey/${token}`, body),
 };
 
 export const supervisorApi = {
     overview: (team = 'all') => api.get(`/api/supervisor/dashboard/overview?team=${team}`),
+    feedback: () => api.get('/api/supervisor/feedback'),
     tickets: () => api.get('/api/supervisor/tickets'),
     leads: () => api.get('/api/supervisor/leads'),
     performance: () => api.get('/api/supervisor/agents/performance'),
@@ -177,6 +219,14 @@ export const paymentApi = {
     verifyFlutterwave: (reference) => api.get(`/api/payments/flutterwave/verify/${reference}`),
     sandboxComplete: (reference) => api.post(`/api/payments/sandbox/complete/${reference}`, {}),
     transactions: () => api.get('/api/payments/transactions'),
+};
+
+export const authApi = {
+    forgotPassword: (email) => api.post('/api/auth/forgot-password', { email }),
+    resetPassword: (token, password) => api.post('/api/auth/reset-password', { token, password }),
+    changePassword: (currentPassword, newPassword) => api.post('/api/auth/change-password', { currentPassword, newPassword }),
+    verifyMfaLogin: (challengeToken, code) => api.post('/api/auth/mfa/login/verify', { challengeToken, code }),
+    resendMfaLogin: (challengeToken) => api.post('/api/auth/mfa/login/resend', { challengeToken }),
 };
 
 export const userApi = {
@@ -198,6 +248,17 @@ export const userApi = {
 
 export const dashboardApi = {
     getStats: () => api.get('/api/dashboard/stats'),
+};
+
+export const contentApi = {
+    hotDeals: () => api.get('/api/content/hot-deals'),
+    allHotDeals: () => api.get('/api/content/hot-deals/all'),
+    createHotDeal: (fields, imageFile) => uploadRequest('/api/content/hot-deals', buildProductFormData(fields, imageFile)),
+    updateHotDeal: (id, fields, imageFile) => uploadRequest(`/api/content/hot-deals/${id}`, buildProductFormData(fields, imageFile), 'PUT'),
+    deleteHotDeal: (id) => api.delete(`/api/content/hot-deals/${id}`),
+    motivational: (role) => api.get(`/api/content/motivational${role ? `?role=${encodeURIComponent(role)}` : ''}`),
+    allMotivational: () => api.get('/api/content/motivational/all'),
+    createMotivational: (body) => api.post('/api/content/motivational', body),
 };
 
 async function uploadRequest(path, formData, method = 'POST') {

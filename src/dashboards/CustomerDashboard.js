@@ -1,12 +1,13 @@
 import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { DashboardLayout } from '../components/DashboardLayout';
-import { Card, DataTable, StatusBadge, PrimaryButton, Alert } from '../components/ui';
+import { Card, DataTable, StatusBadge, PrimaryButton, Alert, Select } from '../components/ui';
+import { HotDealsStrip } from '../components/HotDealsStrip';
 import { ProductCard } from '../components/ProductCard';
-import { WelcomeBanner, QuickActions, ActivityTimeline } from '../components/dashboard/DashboardWidgets';
+import { WelcomeBanner, QuickActions, ActivityTimeline, MetricCard } from '../components/dashboard/DashboardWidgets';
 import { useAuth } from '../hooks/useAuth';
 import { customerApi, productApi, userApi, formatPaymentMethod, getProfileImageUrl, assetUrl } from '../utils/apiClient';
-import { theme, cardStyle } from '../styles/theme';
+import { theme } from '../styles/theme';
 
 const KB_SUGGESTIONS = [
     { title: 'How to reset your password', category: 'Account' },
@@ -26,17 +27,6 @@ function formatRelative(iso) {
     const hrs = Math.floor(mins / 60);
     if (hrs < 24) return `${hrs}h ago`;
     return `${Math.floor(hrs / 24)}d ago`;
-}
-
-function KpiCard({ title, value, icon, status }) {
-    const colors = { success: theme.success, warning: theme.warning, info: theme.accent };
-    return (
-        <div style={{ ...cardStyle, padding: 20 }}>
-            <span style={{ fontSize: 24 }}>{icon}</span>
-            <div style={{ fontSize: 28, fontWeight: 'bold', color: theme.text, margin: '12px 0 4px' }}>{value}</div>
-            <div style={{ fontSize: 13, color: colors[status] || theme.accent }}>{title}</div>
-        </div>
-    );
 }
 
 export default function CustomerDashboard() {
@@ -93,9 +83,9 @@ export default function CustomerDashboard() {
     return (
         <DashboardLayout>
             <WelcomeBanner
-                title={`Welcome back, ${auth.fullName || 'Customer'}!`}
+                title={`Welcome back, ${auth.fullName || 'Customer'}`}
                 subtitle={[formatDate(), profile?.createdAt ? `Member since ${profile.createdAt}` : null].filter(Boolean).join(' · ')}
-                badge={profile?.active !== false ? '● Account Active' : '● Account Inactive'}
+                badge={profile?.active !== false ? 'Account Active' : 'Account Inactive'}
             >
                 {getProfileImageUrl(profile) && (
                     <div style={{
@@ -110,19 +100,27 @@ export default function CustomerDashboard() {
             {error && <Alert type="error">{error}</Alert>}
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16, marginBottom: 24 }}>
-                <KpiCard title="Active Subscriptions" value={subscriptions} icon="📦" status="info" />
-                <KpiCard title="Open Support Tickets" value={openTickets} icon="🎫" status="warning" />
-                <KpiCard title="Pending Invoices" value={pendingInvoices} icon="💳" status="warning" />
-                <KpiCard title="Account Status" value={profile?.active !== false ? 'Active' : 'Inactive'} icon="✅" status="success" />
+                <MetricCard label="Active Subscriptions" value={subscriptions} accent={theme.accent} />
+                <MetricCard label="Open Support Tickets" value={openTickets} accent={theme.warning} />
+                <MetricCard label="Pending Invoices" value={pendingInvoices} accent={theme.warning} />
+                <MetricCard label="Account Status" value={profile?.active !== false ? 'Active' : 'Inactive'} accent={theme.success} />
             </div>
 
             <QuickActions actions={[
-                { icon: '🎫', label: 'Create Ticket', to: '/customer/tickets' },
-                { icon: '💬', label: 'Message Sales', to: '/customer/messages' },
-                { icon: '📚', label: 'Help Center', to: '/dashboard/knowledge-base' },
-                { icon: '🧾', label: 'View Invoices', to: '/dashboard/billing' },
-                { icon: '🛍️', label: 'My Products', to: '/customer/products' },
+                { label: 'Create Ticket', to: '/customer/tickets' },
+                { label: 'Message Sales', to: '/customer/messages' },
+                { label: 'Hot Deals', to: '/customer/hot-deals' },
+                { label: 'Help Center', to: '/dashboard/knowledge-base' },
+                { label: 'View Invoices', to: '/dashboard/billing' },
+                { label: 'My Products', to: '/customer/products' },
             ]} />
+
+            <Card title="Hot Deals" style={{ marginBottom: 24 }}>
+                <HotDealsStrip compact maxItems={3} showTitle={false} emptyMessage="No hot deals right now. Watch your notifications for new offers." />
+                <Link to="/customer/hot-deals" style={{ display: 'inline-block', marginTop: 12, color: theme.accent, fontSize: 14 }}>
+                    View all hot deals →
+                </Link>
+            </Card>
 
             {showForm && (
                 <div ref={formRef}>
@@ -130,16 +128,16 @@ export default function CustomerDashboard() {
                         <form onSubmit={createTicket}>
                             <input style={inputStyle} placeholder="Subject" value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} required />
                             <textarea style={{ ...inputStyle, minHeight: 100 }} placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required />
-                            <select style={inputStyle} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
+                            <Select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
                                 <option value="general">General</option>
                                 <option value="billing">Billing</option>
                                 <option value="technical">Technical</option>
-                            </select>
-                            <select style={inputStyle} value={form.priority} onChange={(e) => setForm({ ...form, priority: e.target.value })}>
+                            </Select>
+                            <Select value={form.priority} onChange={(e) => setForm({ ...form, priority: e.target.value })}>
                                 <option value="low">Low</option>
                                 <option value="medium">Medium</option>
                                 <option value="high">High</option>
-                            </select>
+                            </Select>
                             <PrimaryButton type="submit">Submit Ticket</PrimaryButton>
                         </form>
                     </Card>

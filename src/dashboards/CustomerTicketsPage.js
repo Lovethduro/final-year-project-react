@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react';
 import { DashboardLayout } from '../components/DashboardLayout';
-import { PageHeader, Card, DataTable, StatusBadge, PrimaryButton, Alert } from '../components/ui';
+import { PageHeader, Card, DataTable, StatusBadge, PrimaryButton, Alert, Select } from '../components/ui';
+import { useAuth } from '../hooks/useAuth';
 import { customerApi, assetUrl } from '../utils/apiClient';
 import { theme } from '../styles/theme';
 import { refreshNotifications } from '../utils/notifications';
+import { AgentChatHeader, ChatMessageRow } from '../components/ChatMessage';
+import { StarRatingInput } from '../components/StarRatingInput';
 
 export default function CustomerTicketsPage() {
+    const auth = useAuth();
     const [tickets, setTickets] = useState([]);
     const [selected, setSelected] = useState(null);
     const [messages, setMessages] = useState([]);
@@ -15,6 +19,9 @@ export default function CustomerTicketsPage() {
     const [attachment, setAttachment] = useState(null);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [ticketRating, setTicketRating] = useState(0);
+    const [ticketRatingComment, setTicketRatingComment] = useState('');
+    const [ticketRated, setTicketRated] = useState(false);
 
     const loadTickets = () => {
         customerApi.tickets().then(setTickets).catch((err) => setError(err.message));
@@ -24,10 +31,24 @@ export default function CustomerTicketsPage() {
 
     const openTicket = async (id) => {
         setError('');
+        setTicketRating(0);
+        setTicketRatingComment('');
+        setTicketRated(false);
         try {
             const data = await customerApi.getTicket(id);
             setSelected(data.ticket);
             setMessages(data.messages || []);
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
+    const submitTicketRating = async (e) => {
+        e.preventDefault();
+        if (!selected || ticketRating < 1) return;
+        try {
+            await customerApi.rateTicket(selected.id, ticketRating, ticketRatingComment.trim());
+            setTicketRated(true);
         } catch (err) {
             setError(err.message);
         }
@@ -83,16 +104,16 @@ export default function CustomerTicketsPage() {
                     <form onSubmit={submitTicket}>
                         <input style={inputStyle} placeholder="Subject" value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} required />
                         <textarea style={{ ...inputStyle, minHeight: 100 }} placeholder="Describe your issue..." value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required />
-                        <select style={inputStyle} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
+                        <Select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
                             <option value="general">General</option>
                             <option value="billing">Billing / Payment</option>
                             <option value="technical">Technical</option>
-                        </select>
-                        <select style={inputStyle} value={form.priority} onChange={(e) => setForm({ ...form, priority: e.target.value })}>
+                        </Select>
+                        <Select value={form.priority} onChange={(e) => setForm({ ...form, priority: e.target.value })}>
                             <option value="low">Low</option>
                             <option value="medium">Medium</option>
                             <option value="high">High</option>
-                        </select>
+                        </Select>
                         <div style={{ marginBottom: 12 }}>
                             <label style={{ fontSize: 12, color: theme.textDim, display: 'block', marginBottom: 6 }}>Attach screenshot or image (optional)</label>
                             <input type="file" accept="image/*" onChange={(e) => setAttachment(e.target.files?.[0] || null)} style={{ color: theme.textMuted, fontSize: 13 }} />
@@ -129,23 +150,48 @@ export default function CustomerTicketsPage() {
                             {' · '}Priority: {selected.priority}
                         </div>
                         <p style={{ fontSize: 14, color: theme.text, marginBottom: 12 }}>{selected.description}</p>
+                        {selected.assigneeName && (
+                            <AgentChatHeader
+                                name={selected.assigneeName}
+                                imageUrl={selected.assigneeAvatarUrl}
+                                roleLabel="Support Agent"
+                            />
+                        )}
                         {selected.attachmentUrl && (
                             <img src={assetUrl(selected.attachmentUrl)} alt="Attachment" style={{ maxWidth: '100%', borderRadius: 8, marginBottom: 16 }} />
                         )}
                         <div style={{ maxHeight: 240, overflowY: 'auto', marginBottom: 16, borderTop: `0.5px solid ${theme.border}`, paddingTop: 12 }}>
-                            {messages.length ? messages.map((m) => (
-                                <div key={m.id} style={{ marginBottom: 12, padding: 10, background: 'rgba(255,255,255,0.03)', borderRadius: 8 }}>
-                                    <div style={{ fontSize: 11, color: theme.accent, marginBottom: 4 }}>{m.authorName}</div>
-                                    <div style={{ fontSize: 13, color: theme.text }}>{m.message}</div>
-                                    <div style={{ fontSize: 10, color: theme.textDim, marginTop: 4 }}>{m.createdAt ? new Date(m.createdAt).toLocaleString() : ''}</div>
+                            {messages.length ? messages.map((m) => {
+                                const mine = m.authorId === auth.userId;
+                                return (
+                                <div key={m.id} style={{ marginBottom: 4 }}>
+                                    <ChatMessageRow
+                                        message={{ ...m, messageType: 'text' }}
+                                        isMine={mine}
+                                        showAvatar={!mine}
+                                    />
+                                    <div style={{ fontSize: 10, color: theme.textDim, margin: mine ? '-8px 0 8px 0' : '-8px 0 8px 42px', textAlign: mine ? 'right' : 'left' }}>
+                                        {m.createdAt ? new Date(m.createdAt).toLocaleString() : ''}
+                                    </div>
                                 </div>
-                            )) : <p style={{ color: theme.textDim, fontSize: 13 }}>No messages yet.</p>}
+                            ); }) : <p style={{ color: theme.textDim, fontSize: 13 }}>No messages yet.</p>}
                         </div>
                         {selected.status !== 'closed' && selected.status !== 'resolved' && (
                             <form onSubmit={sendReply}>
                                 <textarea value={reply} onChange={(e) => setReply(e.target.value)} placeholder="Write a reply..." rows={3} style={inputStyle} required />
                                 <PrimaryButton type="submit">Send Reply</PrimaryButton>
                             </form>
+                        )}
+                        {['resolved', 'closed'].includes(selected.status) && !ticketRated && (
+                            <form onSubmit={submitTicketRating} style={{ marginTop: 12, padding: 14, borderRadius: 10, background: 'rgba(52,211,153,0.08)', border: `0.5px solid ${theme.success}44` }}>
+                                <div style={{ fontSize: 13, fontWeight: 600, color: theme.success, marginBottom: 8 }}>Rate your support experience</div>
+                                <StarRatingInput value={ticketRating} onChange={setTicketRating} />
+                                <textarea value={ticketRatingComment} onChange={(e) => setTicketRatingComment(e.target.value)} placeholder="Optional comment…" rows={2} style={inputStyle} />
+                                <PrimaryButton type="submit" disabled={ticketRating < 1}>Submit Rating</PrimaryButton>
+                            </form>
+                        )}
+                        {ticketRated && (
+                            <p style={{ fontSize: 13, color: theme.success, marginTop: 12 }}>Thank you for your feedback!</p>
                         )}
                         <button type="button" onClick={() => setSelected(null)} style={{ marginTop: 12, background: 'transparent', border: 'none', color: theme.textDim, cursor: 'pointer', fontSize: 12 }}>← Back to list</button>
                     </Card>

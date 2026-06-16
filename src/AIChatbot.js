@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import Groq from 'groq-sdk';
+import { FONT_BODY, FONT_DISPLAY } from './styles/landingFonts';
 
 function AIChatbot() {
     const [isOpen, setIsOpen] = useState(false);
@@ -10,7 +11,6 @@ function AIChatbot() {
     const [isTyping, setIsTyping] = useState(false);
     const messagesEndRef = useRef(null);
 
-    // Initialize Groq (will only work after .env is set up)
     const groq = new Groq({
         apiKey: process.env.REACT_APP_GROQ_API_KEY,
         dangerouslyAllowBrowser: true,
@@ -30,10 +30,9 @@ function AIChatbot() {
         setInput("");
         setIsTyping(true);
 
-        // Check if API key is available
         if (!process.env.REACT_APP_GROQ_API_KEY) {
             setMessages(prev => [...prev, {
-                text: "⚠️ API key not configured. Please add REACT_APP_GROQ_API_KEY to your .env file and restart the server.",
+                text: "⚠️ The assistant is not configured yet. Please contact us at +234 (0) 901 066 9297 or info@cyforcetech.com.",
                 sender: "bot"
             }]);
             setIsTyping(false);
@@ -79,11 +78,11 @@ function AIChatbot() {
         }
     };
 
-    // Rest of your component JSX remains the same...
     return (
         <>
-            {/* Chat Button */}
             <button
+                type="button"
+                aria-label="Open chat assistant"
                 onClick={() => setIsOpen(!isOpen)}
                 style={{
                     position: "fixed",
@@ -109,13 +108,12 @@ function AIChatbot() {
                 💬
             </button>
 
-            {/* Chat Window */}
             {isOpen && (
                 <div style={{
                     position: "fixed",
                     bottom: "90px",
                     right: "20px",
-                    width: "380px",
+                    width: "min(380px, calc(100vw - 40px))",
                     height: "550px",
                     background: "#0D1830",
                     borderRadius: "16px",
@@ -125,8 +123,8 @@ function AIChatbot() {
                     display: "flex",
                     flexDirection: "column",
                     overflow: "hidden",
+                    fontFamily: FONT_BODY,
                 }}>
-                    {/* Header */}
                     <div style={{
                         padding: "18px",
                         background: "linear-gradient(135deg, #2B5CE6, #38BDF8)",
@@ -138,14 +136,20 @@ function AIChatbot() {
                         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                             <span style={{ fontSize: "24px" }}>🤖</span>
                             <div>
-                                <div style={{ fontWeight: "bold", fontSize: "16px" }}>CyForce AI Assistant</div>
-                                <div style={{ fontSize: "11px", opacity: 0.8 }}>Powered by Groq</div>
+                                <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: "16px" }}>CyForce AI Assistant</div>
+                                <div style={{ fontSize: "11px", opacity: 0.85 }}>Powered by Groq</div>
                             </div>
                         </div>
-                        <button onClick={() => setIsOpen(false)} style={{ background: "none", border: "none", color: "#fff", cursor: "pointer", fontSize: "20px" }}>✕</button>
+                        <button
+                            type="button"
+                            aria-label="Close chat"
+                            onClick={() => setIsOpen(false)}
+                            style={{ background: "none", border: "none", color: "#fff", cursor: "pointer", fontSize: "20px" }}
+                        >
+                            ✕
+                        </button>
                     </div>
 
-                    {/* Messages */}
                     <div style={{ flex: 1, padding: "15px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "12px" }}>
                         {messages.map((msg, idx) => (
                             <div key={idx} style={{ display: "flex", justifyContent: msg.sender === "user" ? "flex-end" : "flex-start" }}>
@@ -165,7 +169,13 @@ function AIChatbot() {
                         ))}
                         {isTyping && (
                             <div style={{ display: "flex", justifyContent: "flex-start" }}>
-                                <div style={{ padding: "10px 14px", borderRadius: "18px 18px 18px 4px", background: "rgba(255,255,255,0.08)", display: "flex", gap: "4px" }}>
+                                <div style={{
+                                    padding: "10px 14px",
+                                    borderRadius: "18px 18px 18px 4px",
+                                    background: "rgba(255,255,255,0.08)",
+                                    display: "flex",
+                                    gap: "4px",
+                                }}>
                                     <span style={{ animation: "bounce 1.4s infinite" }}>●</span>
                                     <span style={{ animation: "bounce 1.4s infinite 0.2s" }}>●</span>
                                     <span style={{ animation: "bounce 1.4s infinite 0.4s" }}>●</span>
@@ -175,7 +185,6 @@ function AIChatbot() {
                         <div ref={messagesEndRef} />
                     </div>
 
-                    {/* Input */}
                     <div style={{ padding: "15px", borderTop: "0.5px solid rgba(99,179,237,0.1)", display: "flex", gap: "10px" }}>
                         <input
                             value={input}
@@ -190,29 +199,37 @@ function AIChatbot() {
                                 background: "rgba(255,255,255,0.05)",
                                 color: "#fff",
                                 fontSize: "13px",
-                                outline: "none"
+                                outline: "none",
+                                fontFamily: FONT_BODY,
                             }}
                         />
-                        <button onClick={handleSend} style={{
-                            width: "40px",
-                            height: "40px",
-                            borderRadius: "50%",
-                            background: "#2B5CE6",
-                            border: "none",
-                            cursor: "pointer",
-                            color: "#fff",
-                            fontSize: "18px"
-                        }}>➤</button>
+                        <button
+                            type="button"
+                            onClick={handleSend}
+                            aria-label="Send message"
+                            style={{
+                                width: "40px",
+                                height: "40px",
+                                borderRadius: "50%",
+                                background: "#2B5CE6",
+                                border: "none",
+                                cursor: "pointer",
+                                color: "#fff",
+                                fontSize: "18px",
+                            }}
+                        >
+                            ➤
+                        </button>
                     </div>
                 </div>
             )}
 
             <style>{`
-        @keyframes bounce {
-          0%, 60%, 100% { transform: translateY(0); }
-          30% { transform: translateY(-4px); }
-        }
-      `}</style>
+                @keyframes bounce {
+                    0%, 60%, 100% { transform: translateY(0); }
+                    30% { transform: translateY(-4px); }
+                }
+            `}</style>
         </>
     );
 }

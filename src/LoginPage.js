@@ -1,8 +1,9 @@
 // src/LoginPage.jsx
 import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import logo from './images/CYFORCE 2-1.jpg';
 import { API_BASE, getPostAuthPath, loadRememberedLogin, saveRememberedLogin, storeAuthSession } from './utils/authFlow';
+import { authApi } from './utils/apiClient';
 
 // Animated Particle Background
 function ParticleBackground() {
@@ -108,6 +109,8 @@ const ROLES = [
 
 function LoginPage() {
     const navigate = useNavigate();
+    const location = useLocation();
+    const loginMessage = location.state?.message || '';
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
@@ -116,15 +119,15 @@ function LoginPage() {
     const [selectedRole, setSelectedRole] = useState("");
     const [roleOpen, setRoleOpen] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
+    const [loginStep, setLoginStep] = useState('credentials');
+    const [mfaChallenge, setMfaChallenge] = useState(null);
+    const [mfaCode, setMfaCode] = useState('');
 
     useEffect(() => {
         const remembered = loadRememberedLogin();
         if (remembered?.email) {
             setEmail(remembered.email);
             setRememberMe(true);
-            if (remembered.password) {
-                setPassword(remembered.password);
-            }
             if (remembered.role) {
                 setSelectedRole(remembered.role);
             }
@@ -165,10 +168,16 @@ function LoginPage() {
                 throw new Error(data.error || `Login failed (${response.status})`);
             }
 
+            if (data.mfaRequired) {
+                setMfaChallenge(data);
+                setLoginStep('mfa');
+                setMfaCode('');
+                return;
+            }
+
             storeAuthSession(data, rememberMe);
             saveRememberedLogin({
                 email: email.trim().toLowerCase(),
-                password,
                 role: selectedRole,
                 remember: rememberMe,
             });
@@ -181,20 +190,71 @@ function LoginPage() {
         }
     };
 
-    const handleSSOLogin = async (provider) => {
-        if (!selectedRole) {
-            setError("Please select your role before using SSO.");
-            return;
+    const handleMfaVerify = async (e) => {
+        e.preventDefault();
+        setError('');
+        setIsLoading(true);
+        try {
+            const data = await authApi.verifyMfaLogin(mfaChallenge.mfaChallengeToken, mfaCode.replace(/\D/g, ''));
+            storeAuthSession(data, rememberMe);
+            saveRememberedLogin({
+                email: email.trim().toLowerCase() || data.email,
+                role: data.role || selectedRole,
+                remember: rememberMe,
+            });
+            navigate(getPostAuthPath(data));
+        } catch (err) {
+            setError(err.message);
+            setMfaCode('');
+        } finally {
+            setIsLoading(false);
         }
+    };
 
+    const handleMfaResend = async () => {
+        setError('');
+        try {
+            await authApi.resendMfaLogin(mfaChallenge.mfaChallengeToken);
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
+    const mfaMethodLabel = () => {
+        const method = mfaChallenge?.mfaMethod || 'authenticator';
+        if (method === 'sms') return `Enter the code sent to ${mfaChallenge?.phone || 'your phone'}`;
+        if (method === 'email') return `Enter the code sent to ${mfaChallenge?.email || 'your email'}`;
+        return 'Enter the 6-digit code from your authenticator app';
+    };
+
+    const handleSSOLogin = async (provider) => {
         setError("");
         setIsLoading(true);
 
         try {
             const { signInWithGoogle, signInWithMicrosoft } = await import('./utils/sso');
             const result = provider === 'google'
-                ? await signInWithGoogle(selectedRole)
-                : await signInWithMicrosoft(selectedRole);
+                ? await signInWithGoogle(null, rememberMe)
+                : await signInWithMicrosoft(null, rememberMe);
+
+            if (result.mfaRequired) {
+                setMfaChallenge(result.data);
+                setLoginStep('mfa');
+                setMfaCode('');
+                return;
+            }
+
+            const accountRole = result.data?.role || selectedRole;
+
+            if (rememberMe && result.data?.email) {
+                saveRememberedLogin({
+                    email: result.data.email,
+                    role: accountRole,
+                    remember: true,
+                });
+            } else {
+                saveRememberedLogin({ remember: false });
+            }
 
             navigate(result.nextPath);
         } catch (loginError) {
@@ -295,6 +355,61 @@ function LoginPage() {
 
                     {/* Form */}
                     <div style={{ padding: "0 32px 32px 32px" }}>
+                        {loginStep === 'mfa' ? (
+                            <form onSubmit={handleMfaVerify} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                                <div style={{ textAlign: 'center', marginBottom: 8 }}>
+                                    <div style={{ fontSize: 40, marginBottom: 12 }}>🔐</div>
+                                    <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.6)", margin: 0 }}>{mfaMethodLabel()}</p>
+                                </div>
+                                <input
+                                    type="text"
+                                    inputMode="numeric"
+                                    autoComplete="one-time-code"
+                                    value={mfaCode}
+                                    onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                    placeholder="000000"
+                                    maxLength={6}
+                                    autoFocus
+                                    style={{
+                                        width: "100%",
+                                        textAlign: "center",
+                                        letterSpacing: "0.5em",
+                                        fontSize: "24px",
+                                        padding: "14px",
+                                        background: "rgba(15,23,42,0.5)",
+                                        border: "1px solid rgba(45,212,191,0.4)",
+                                        borderRadius: "10px",
+                                        color: "#fff",
+                                    }}
+                                />
+                                {error && (
+                                    <div style={{ padding: "10px 12px", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: "10px" }}>
+                                        <p style={{ fontSize: "12px", color: "#F87171", margin: 0 }}>{error}</p>
+                                    </div>
+                                )}
+                                <button type="submit" disabled={isLoading || mfaCode.length < 6} style={{
+                                    width: "100%", padding: "10px 16px",
+                                    background: "linear-gradient(135deg, #2563EB, #2DD4BF)",
+                                    border: "none", borderRadius: "10px", fontSize: "14px", fontWeight: "600", color: "#fff",
+                                    cursor: isLoading || mfaCode.length < 6 ? "not-allowed" : "pointer",
+                                    opacity: isLoading || mfaCode.length < 6 ? 0.7 : 1,
+                                }}>
+                                    {isLoading ? 'Verifying…' : 'Verify & Sign In'}
+                                </button>
+                                {(mfaChallenge?.mfaMethod === 'sms' || mfaChallenge?.mfaMethod === 'email') && (
+                                    <button type="button" onClick={handleMfaResend} style={{
+                                        background: 'transparent', border: 'none', color: '#2DD4BF', fontSize: 13, cursor: 'pointer',
+                                    }}>
+                                        Resend code
+                                    </button>
+                                )}
+                                <button type="button" onClick={() => { setLoginStep('credentials'); setMfaChallenge(null); setMfaCode(''); setError(''); }} style={{
+                                    background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: 13, cursor: 'pointer',
+                                }}>
+                                    ← Back to login
+                                </button>
+                            </form>
+                        ) : (
                         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
                             {/* Role Selector */}
                             <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
@@ -376,9 +491,6 @@ function LoginPage() {
                                         </div>
                                     )}
                                 </div>
-                                <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", marginTop: "6px", marginLeft: "4px" }}>
-                                    Admin accounts must select <strong style={{ color: "#38BDF8" }}>Administrator</strong>. The role must match what is stored for your account.
-                                </p>
                             </div>
 
                             {/* Email Field */}
@@ -464,19 +576,13 @@ function LoginPage() {
                                 </div>
                             </div>
 
-                            {/* Remember Me */}
+                            {/* Remember Me — keeps you signed in and saves email for next visit */}
                             <div style={{ display: "flex", alignItems: "center" }}>
                                 <input
                                     id="remember-me"
                                     type="checkbox"
                                     checked={rememberMe}
-                                    onChange={(e) => {
-                                        const checked = e.target.checked;
-                                        setRememberMe(checked);
-                                        if (!checked) {
-                                            saveRememberedLogin({ remember: false });
-                                        }
-                                    }}
+                                    onChange={(e) => setRememberMe(e.target.checked)}
                                     style={{
                                         width: "16px",
                                         height: "16px",
@@ -486,23 +592,30 @@ function LoginPage() {
                                     }}
                                 />
                                 <label htmlFor="remember-me" style={{ fontSize: "13px", color: "rgba(255,255,255,0.5)", cursor: "pointer" }}>
-                                    Remember me
+                                    Remember me on this device
                                 </label>
                             </div>
+
+                            {loginMessage && (
+                                <div style={{
+                                    padding: "10px 12px",
+                                    background: "rgba(45,212,191,0.1)",
+                                    border: "1px solid rgba(45,212,191,0.3)",
+                                    borderRadius: "10px"
+                                }}>
+                                    <p style={{ fontSize: "12px", color: "#5EEAD4", margin: 0 }}>{loginMessage}</p>
+                                </div>
+                            )}
 
                             {/* Error Message */}
                             {error && (
                                 <div style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "8px",
                                     padding: "10px 12px",
                                     background: "rgba(239,68,68,0.1)",
                                     border: "1px solid rgba(239,68,68,0.3)",
                                     borderRadius: "10px"
                                 }}>
-                                    <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#EF4444", flexShrink: 0 }} />
-                                    <p style={{ fontSize: "12px", color: "#F87171" }}>{error}</p>
+                                    <p style={{ fontSize: "12px", color: "#F87171", margin: 0 }}>{error}</p>
                                 </div>
                             )}
 
@@ -556,7 +669,10 @@ function LoginPage() {
                                 )}
                             </button>
                         </form>
+                        )}
 
+                        {loginStep !== 'mfa' && (
+                        <>
                         {/* Divider */}
                         <div style={{ position: "relative", marginTop: "32px", marginBottom: "24px" }}>
                             <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center" }}>
@@ -626,6 +742,11 @@ function LoginPage() {
                                 <span style={{ fontSize: "14px", fontWeight: "500", color: "rgba(255,255,255,0.7)" }}>Microsoft</span>
                             </button>
                         </div>
+                        <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.35)", textAlign: "center", marginTop: "10px", marginBottom: 0 }}>
+                            Google and Microsoft sign-in use your account role automatically — no role selection needed.
+                        </p>
+                        </>
+                        )}
                     </div>
 
                     {/* Footer */}

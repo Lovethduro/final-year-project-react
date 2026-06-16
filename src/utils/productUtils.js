@@ -11,9 +11,21 @@ export function resolveProductImage(imageUrl) {
 }
 
 export function mapProductForDisplay(product) {
+    const stockQuantity = Number(product.stockQuantity || 0);
+    const tracked = stockQuantity > 0;
+    const inStock = tracked ? stockQuantity > 0 : Boolean(product.inStock);
     return {
         ...product,
         image: resolveProductImage(product.imageUrl),
         originalPrice: product.originalPrice ?? product.price,
+        stockQuantity,
+        inStock,
+        isSoldOut: !inStock,
+        hasDiscount: product.originalPrice != null && product.originalPrice > product.price,
     };
+}
+
+export function maxCartQuantity(product) {
+    const qty = Number(product.stockQuantity || 0);
+    return qty > 0 ? qty : Infinity;
 }

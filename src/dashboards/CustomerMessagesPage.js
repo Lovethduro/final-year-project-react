@@ -1,12 +1,30 @@
 import { useEffect, useState, useRef } from 'react';
 import { DashboardLayout } from '../components/DashboardLayout';
 import { PageHeader, Card, PrimaryButton, Alert } from '../components/ui';
-import { customerApi } from '../utils/apiClient';
+import { customerApi, paymentApi, getSession } from '../utils/apiClient';
 import { useAuth } from '../hooks/useAuth';
-import { theme } from '../styles/theme';
+import { theme, inputStyle as themeInputStyle } from '../styles/theme';
+import { refreshNotifications } from '../utils/notifications';
+import {
+    AgentChatHeader,
+    ChatMessageRow,
+    ChatPanel,
+    ChatPanelHeader,
+    ChatPanelBody,
+    ChatPanelFooter,
+    ChatInboxList,
+    ChatInboxItem,
+} from '../components/ChatMessage';
+import { StarRatingInput } from '../components/StarRatingInput';
+
+function formatNaira(kobo) {
+    if (!kobo) return '₦0';
+    return `₦${(kobo / 100).toLocaleString()}`;
+}
 
 export default function CustomerMessagesPage() {
     const auth = useAuth();
+    const session = getSession();
     const [conversations, setConversations] = useState([]);
     const [active, setActive] = useState(null);
     const [messages, setMessages] = useState([]);
@@ -15,7 +33,12 @@ export default function CustomerMessagesPage() {
     const [firstMessage, setFirstMessage] = useState('');
     const [showNew, setShowNew] = useState(false);
     const [error, setError] = useState('');
+    const [paying, setPaying] = useState(null);
+    const [rating, setRating] = useState(0);
+    const [ratingComment, setRatingComment] = useState('');
+    const [ratingSubmitting, setRatingSubmitting] = useState(false);
     const bottomRef = useRef(null);
+    const provider = session.preferredPaymentMethod || 'paystack';
 
     const loadConversations = () => {
         customerApi.conversations().then(setConversations).catch((err) => setError(err.message));
@@ -29,6 +52,8 @@ export default function CustomerMessagesPage() {
 
     const openConversation = async (id) => {
         setError('');
+        setRating(0);
+        setRatingComment('');
         try {
             const data = await customerApi.getConversation(id);
             setActive(data.conversation);
@@ -38,11 +63,29 @@ export default function CustomerMessagesPage() {
         }
     };
 
+    const submitRating = async (e) => {
+        e.preventDefault();
+        if (!active || rating < 1) return;
+        setRatingSubmitting(true);
+        setError('');
+        try {
+            await customerApi.rateConversation(active.id, rating, ratingComment.trim());
+            setRating(0);
+            setRatingComment('');
+            openConversation(active.id);
+            loadConversations();
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setRatingSubmitting(false);
+        }
+    };
+
     const startChat = async (e) => {
         e.preventDefault();
         if (!firstMessage.trim()) return;
         try {
-            const conv = await customerApi.startConversation(subject || 'Sales inquiry', firstMessage.trim());
+            const conv = await customerApi.startConversation(subject || 'Product inquiry', firstMessage.trim());
             setShowNew(false);
             setSubject('');
             setFirstMessage('');
@@ -65,79 +108,158 @@ export default function CustomerMessagesPage() {
         }
     };
 
-    const inputStyle = { width: '100%', background: 'rgba(255,255,255,0.05)', border: `0.5px solid ${theme.border}`, borderRadius: 8, padding: 10, color: theme.text, fontFamily: theme.fontBody, marginBottom: 12 };
+    const payInvoice = async (invoice) => {
+        if (!invoice || invoice.status === 'paid') return;
+        setPaying(invoice.id);
+        setError('');
+        try {
+            const init = provider === 'paystack'
+                ? await paymentApi.initPaystack({ amount: invoice.amount, description: invoice.description, invoiceId: invoice.id })
+                : await paymentApi.initFlutterwave({ amount: invoice.amount, description: invoice.description, invoiceId: invoice.id });
+
+            if (init.sandbox || init.authorizationUrl?.includes('sandbox=1')) {
+                await paymentApi.sandboxComplete(init.reference);
+                openConversation(active.id);
+                loadConversations();
+                refreshNotifications();
+                return;
+            }
+            if (init.authorizationUrl) {
+                window.location.href = init.authorizationUrl;
+            }
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setPaying(null);
+        }
+    };
+
+    const fieldStyle = { ...themeInputStyle, marginBottom: 0 };
+    const canSend = active && active.status !== 'closed' && active.status !== 'pending_rating';
 
     return (
         <DashboardLayout>
             <PageHeader
                 title="Message Sales Team"
-                subtitle="Chat with a sales agent about products, pricing, or payment issues"
-                action={<PrimaryButton onClick={() => setShowNew(true)}>+ New Message</PrimaryButton>}
+                subtitle="Discuss pricing with a sales agent. When you agree on a price, they will send an invoice you can pay here."
+                action={<PrimaryButton onClick={() => setShowNew(true)}>New Message</PrimaryButton>}
             />
             {error && <Alert type="error">{error}</Alert>}
 
             {showNew && (
-                <Card title="Start a conversation" style={{ marginBottom: 20 }}>
+                <Card title="Start a conversation" style={{ marginBottom: 16 }}>
                     <form onSubmit={startChat}>
-                        <input style={inputStyle} placeholder="Subject (e.g. Payment not working)" value={subject} onChange={(e) => setSubject(e.target.value)} />
-                        <textarea style={{ ...inputStyle, minHeight: 80 }} placeholder="Describe your issue or question..." value={firstMessage} onChange={(e) => setFirstMessage(e.target.value)} required />
+                        <input style={{ ...themeInputStyle, marginBottom: 12 }} placeholder="Subject (e.g. Solar package pricing)" value={subject} onChange={(e) => setSubject(e.target.value)} />
+                        <textarea style={{ ...themeInputStyle, minHeight: 80, marginBottom: 12 }} placeholder="Tell us what you need and your budget if you have one..." value={firstMessage} onChange={(e) => setFirstMessage(e.target.value)} required />
                         <div style={{ display: 'flex', gap: 10 }}>
                             <PrimaryButton type="submit">Send Message</PrimaryButton>
-                            <button type="button" onClick={() => setShowNew(false)} style={{ background: 'transparent', border: `0.5px solid ${theme.border}`, color: theme.textMuted, borderRadius: 8, padding: '8px 16px', cursor: 'pointer' }}>Cancel</button>
+                            <button type="button" onClick={() => setShowNew(false)} style={{ background: 'transparent', border: `1px solid ${theme.border}`, color: theme.textMuted, borderRadius: 6, padding: '8px 16px', cursor: 'pointer', fontFamily: theme.fontBody, fontSize: 13 }}>Cancel</button>
                         </div>
                     </form>
                 </Card>
             )}
 
-            <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: 20, minHeight: 480 }}>
-                <Card title="Conversations">
-                    {conversations.length ? conversations.map((c) => (
-                        <button key={c.id} type="button" onClick={() => openConversation(c.id)} style={{
-                            display: 'block', width: '100%', textAlign: 'left', padding: '12px 0',
-                            borderBottom: `0.5px solid ${theme.border}`, background: 'transparent', border: 'none',
-                            borderBottomWidth: 1, borderBottomStyle: 'solid', borderBottomColor: theme.border,
-                            cursor: 'pointer', color: active?.id === c.id ? theme.accent : theme.text,
-                        }}>
-                            <div style={{ fontSize: 13, fontWeight: 600 }}>{c.subject}</div>
-                            <div style={{ fontSize: 11, color: theme.textDim }}>{c.salesAgentName || 'Awaiting agent'} · {c.status}</div>
-                        </button>
-                    )) : <p style={{ color: theme.textDim, fontSize: 13 }}>No conversations yet.</p>}
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(240px, 280px) 1fr', gap: 16, alignItems: 'stretch' }}>
+                <Card title="Conversations" style={{ marginBottom: 0 }}>
+                    <ChatInboxList>
+                        {conversations.length ? conversations.map((c) => (
+                            <ChatInboxItem
+                                key={c.id}
+                                active={active?.id === c.id}
+                                onClick={() => openConversation(c.id)}
+                                title={c.subject}
+                                subtitle={`${c.salesAgentName || 'Awaiting agent'} · ${c.status === 'pending_rating' ? 'rate experience' : c.status}`}
+                            />
+                        )) : <p style={{ color: theme.textDim, fontSize: 13, padding: '8px 14px' }}>No conversations yet.</p>}
+                    </ChatInboxList>
                 </Card>
 
-                <Card title={active ? active.subject : 'Select a conversation'}>
+                <ChatPanel>
                     {active ? (
                         <>
-                            <div style={{ fontSize: 12, color: theme.textDim, marginBottom: 12 }}>
-                                Sales agent: {active.salesAgentName || 'Will be assigned shortly'}
-                            </div>
-                            <div style={{ height: 320, overflowY: 'auto', marginBottom: 16, padding: '8px 0' }}>
-                                {messages.map((m) => {
+                            <ChatPanelHeader>
+                                <AgentChatHeader
+                                    name={active.salesAgentName}
+                                    imageUrl={active.salesAgentAvatarUrl}
+                                    roleLabel="Sales Agent"
+                                    averageRating={active.salesAgentAverageRating}
+                                    ratingCount={active.salesAgentRatingCount}
+                                    meta={active.subject}
+                                />
+                            </ChatPanelHeader>
+
+                            <ChatPanelBody bottomRef={bottomRef}>
+                                {messages.length === 0 ? (
+                                    <p style={{ color: theme.textDim, fontSize: 13, textAlign: 'center', marginTop: 40 }}>No messages yet.</p>
+                                ) : messages.map((m) => {
                                     const mine = m.authorId === auth.userId;
+                                    const isInvoice = m.messageType === 'invoice';
+                                    if (m.messageType === 'system') {
+                                        return <ChatMessageRow key={m.id} message={m} isMine={mine} />;
+                                    }
                                     return (
-                                        <div key={m.id} style={{
-                                            marginBottom: 10, maxWidth: '80%',
-                                            marginLeft: mine ? 'auto' : 0,
-                                            padding: 10, borderRadius: 10,
-                                            background: mine ? 'rgba(43,92,230,0.25)' : 'rgba(255,255,255,0.05)',
-                                        }}>
-                                            <div style={{ fontSize: 11, color: theme.textDim, marginBottom: 4 }}>{m.authorName}</div>
-                                            <div style={{ fontSize: 14, color: theme.text }}>{m.message}</div>
+                                        <div key={m.id}>
+                                            <ChatMessageRow message={m} isMine={mine} showAvatar={!mine} />
+                                            {isInvoice && m.invoice && (
+                                                <div style={{ margin: '-8px 0 14px 42px', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                                                    <span style={{ fontSize: 13, color: theme.accent, fontWeight: 600 }}>
+                                                        {formatNaira(m.invoice.amount)}
+                                                    </span>
+                                                    {m.invoice.status === 'paid' ? (
+                                                        <span style={{ fontSize: 12, color: theme.success }}>Paid</span>
+                                                    ) : (
+                                                        <PrimaryButton onClick={() => payInvoice(m.invoice)} disabled={paying === m.invoice.id} style={{ fontSize: 12, padding: '6px 12px' }}>
+                                                            {paying === m.invoice.id ? 'Processing…' : 'Pay Invoice'}
+                                                        </PrimaryButton>
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
                                     );
                                 })}
-                                <div ref={bottomRef} />
-                            </div>
-                            {active.status !== 'closed' && (
-                                <form onSubmit={send} style={{ display: 'flex', gap: 10 }}>
-                                    <input value={text} onChange={(e) => setText(e.target.value)} placeholder="Type your message..." style={{ ...inputStyle, marginBottom: 0, flex: 1 }} />
-                                    <PrimaryButton type="submit">Send</PrimaryButton>
-                                </form>
+                            </ChatPanelBody>
+
+                            {active.status === 'pending_rating' && (
+                                <ChatPanelFooter>
+                                    <form onSubmit={submitRating}>
+                                        <div style={{ fontSize: 14, fontWeight: 600, color: theme.text, marginBottom: 6 }}>Rate your experience</div>
+                                        <p style={{ fontSize: 13, color: theme.textMuted, marginBottom: 12 }}>
+                                            This conversation was closed. Please rate {active.salesAgentName || 'our sales team'}.
+                                        </p>
+                                        <StarRatingInput value={rating} onChange={setRating} />
+                                        <textarea value={ratingComment} onChange={(e) => setRatingComment(e.target.value)} placeholder="Optional comment…" style={{ ...themeInputStyle, minHeight: 60, marginTop: 8, marginBottom: 12 }} />
+                                        <PrimaryButton type="submit" disabled={ratingSubmitting || rating < 1}>
+                                            {ratingSubmitting ? 'Submitting…' : 'Submit Rating'}
+                                        </PrimaryButton>
+                                    </form>
+                                </ChatPanelFooter>
+                            )}
+
+                            {canSend && (
+                                <ChatPanelFooter>
+                                    <form onSubmit={send} style={{ display: 'flex', gap: 10 }}>
+                                        <input value={text} onChange={(e) => setText(e.target.value)} placeholder="Type your message..." style={{ ...fieldStyle, flex: 1 }} />
+                                        <PrimaryButton type="submit">Send</PrimaryButton>
+                                    </form>
+                                </ChatPanelFooter>
+                            )}
+
+                            {active.status === 'closed' && active.customerRating && (
+                                <ChatPanelFooter>
+                                    <p style={{ fontSize: 13, color: theme.textDim, margin: 0 }}>
+                                        You rated this conversation {active.customerRating}/5. Thank you!
+                                    </p>
+                                </ChatPanelFooter>
                             )}
                         </>
                     ) : (
-                        <p style={{ color: theme.textDim, fontSize: 14 }}>Select a conversation or start a new message to contact our sales team.</p>
+                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 40 }}>
+                            <p style={{ color: theme.textDim, fontSize: 14, textAlign: 'center', maxWidth: 320 }}>
+                                Select a conversation or start a new message to negotiate with our sales team.
+                            </p>
+                        </div>
                     )}
-                </Card>
+                </ChatPanel>
             </div>
         </DashboardLayout>
     );

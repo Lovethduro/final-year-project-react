@@ -1,68 +1,73 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import logo from '../images/CYFORCE 2-1.jpg';
-import { theme } from '../styles/theme';
+import { theme, formatRoleLabel } from '../styles/theme';
 import { useAuth } from '../hooks/useAuth';
 import { NotificationBell } from './NotificationBell';
 import { UserMenu } from './UserMenu';
-import { assetUrl, getProfileImageUrl, userApi } from '../utils/apiClient';
+import { MotivationalBanner } from './MotivationalBanner';
+import { NavIcon } from './dashboard/NavIcons';
+import { getProfileImageUrl, userApi } from '../utils/apiClient';
 
 const NAV_SECTIONS = [
     {
         title: 'Overview',
         roles: ['ADMIN', 'SUPERVISOR', 'SALES_AGENT', 'SUPPORT_AGENT', 'CUSTOMER'],
         items: [
-            { path: '/admin/dashboard', label: 'Dashboard', icon: '📊', roles: ['ADMIN'] },
-            { path: '/supervisor/dashboard', label: 'Dashboard', icon: '📊', roles: ['SUPERVISOR'] },
-            { path: '/customer/dashboard', label: 'Dashboard', icon: '📊', roles: ['CUSTOMER'] },
-            { path: '/sales/dashboard', label: 'Dashboard', icon: '📊', roles: ['SALES_AGENT'] },
-            { path: '/support/dashboard', label: 'Dashboard', icon: '📊', roles: ['SUPPORT_AGENT'] },
-            { path: '/dashboard/sales', label: 'Sales', icon: '💰', roles: ['ADMIN', 'SUPERVISOR', 'SALES_AGENT'] },
-            { path: '/dashboard/customers', label: 'Customers', icon: '👥', roles: ['ADMIN', 'SUPERVISOR', 'SALES_AGENT', 'SUPPORT_AGENT'] },
-            { path: '/dashboard/leads', label: 'Leads', icon: '🎯', roles: ['ADMIN', 'SUPERVISOR', 'SALES_AGENT'] },
-            { path: '/dashboard/tickets', label: 'Tickets', icon: '🎫', roles: ['ADMIN', 'SUPERVISOR', 'SUPPORT_AGENT'] },
-            { path: '/customer/tickets', label: 'My Tickets', icon: '🎫', roles: ['CUSTOMER'] },
-            { path: '/customer/messages', label: 'Message Sales', icon: '💬', roles: ['CUSTOMER'] },
-            { path: '/dashboard/billing', label: 'Billing', icon: '💳', roles: ['CUSTOMER'] },
-            { path: '/customer/products', label: 'Products', icon: '🛍️', roles: ['CUSTOMER'] },
-            { path: '/sales/messages', label: 'Customer Messages', icon: '💬', roles: ['SALES_AGENT'] },
-            { path: '/dashboard/products', label: 'Products', icon: '🛍️', roles: ['ADMIN'] },
+            { path: '/admin/dashboard', label: 'Dashboard', icon: 'dashboard', roles: ['ADMIN'] },
+            { path: '/supervisor/dashboard', label: 'Dashboard', icon: 'dashboard', roles: ['SUPERVISOR'] },
+            { path: '/customer/dashboard', label: 'Dashboard', icon: 'dashboard', roles: ['CUSTOMER'] },
+            { path: '/sales/dashboard', label: 'Dashboard', icon: 'dashboard', roles: ['SALES_AGENT'] },
+            { path: '/support/dashboard', label: 'Dashboard', icon: 'dashboard', roles: ['SUPPORT_AGENT'] },
+            { path: '/dashboard/sales', label: 'Sales', icon: 'sales', roles: ['ADMIN', 'SUPERVISOR', 'SALES_AGENT'] },
+            { path: '/dashboard/customers', label: 'Customers', icon: 'customers', roles: ['ADMIN', 'SUPERVISOR', 'SALES_AGENT', 'SUPPORT_AGENT'] },
+            { path: '/dashboard/leads', label: 'Leads', icon: 'leads', roles: ['ADMIN', 'SUPERVISOR', 'SALES_AGENT'] },
+            { path: '/dashboard/tickets', label: 'Tickets', icon: 'tickets', roles: ['ADMIN', 'SUPERVISOR', 'SUPPORT_AGENT'] },
+            { path: '/customer/tickets', label: 'My Tickets', icon: 'tickets', roles: ['CUSTOMER'] },
+            { path: '/customer/messages', label: 'Message Sales', icon: 'messages', roles: ['CUSTOMER'] },
+            { path: '/dashboard/billing', label: 'Billing', icon: 'billing', roles: ['CUSTOMER'] },
+            { path: '/customer/products', label: 'Products', icon: 'products', roles: ['CUSTOMER'] },
+            { path: '/customer/hot-deals', label: 'Hot Deals', icon: 'deals', roles: ['CUSTOMER'] },
+            { path: '/sales/messages', label: 'Customer Messages', icon: 'messages', roles: ['SALES_AGENT'] },
+            { path: '/sales/playbook', label: 'Sales Playbook', icon: 'playbook', roles: ['SALES_AGENT', 'ADMIN', 'SUPERVISOR'] },
+            { path: '/dashboard/products', label: 'Products', icon: 'products', roles: ['ADMIN'] },
+            { path: '/dashboard/hot-deals', label: 'Hot Deals', icon: 'deals', roles: ['ADMIN', 'SUPERVISOR'] },
         ],
     },
     {
         title: 'Insights',
         roles: ['ADMIN', 'SUPERVISOR', 'SALES_AGENT', 'SUPPORT_AGENT'],
         items: [
-            { path: '/dashboard/analytics', label: 'Analytics', icon: '📈', roles: ['ADMIN', 'SUPERVISOR'] },
-            { path: '/dashboard/performance', label: 'Performance', icon: '🏆', roles: ['ADMIN', 'SUPERVISOR'] },
-            { path: '/dashboard/knowledge-base', label: 'Knowledge Base', icon: '📚', roles: ['ADMIN', 'SUPERVISOR', 'SUPPORT_AGENT'] },
+            { path: '/dashboard/analytics', label: 'Analytics', icon: 'analytics', roles: ['ADMIN', 'SUPERVISOR'] },
+            { path: '/dashboard/performance', label: 'Performance', icon: 'performance', roles: ['ADMIN', 'SUPERVISOR'] },
+            { path: '/dashboard/knowledge-base', label: 'Knowledge Base', icon: 'knowledge', roles: ['ADMIN', 'SUPERVISOR', 'SUPPORT_AGENT'] },
         ],
     },
     {
         title: 'Administration',
         roles: ['ADMIN', 'SUPERVISOR'],
         items: [
-            { path: '/dashboard/users', label: 'User Management', icon: '🧑‍💼', roles: ['ADMIN', 'SUPERVISOR'] },
-            { path: '/dashboard/roles', label: 'Roles & Permissions', icon: '🛡️', roles: ['ADMIN'] },
-            { path: '/dashboard/billing', label: 'Billing', icon: '💳', roles: ['ADMIN', 'SUPERVISOR'] },
-            { path: '/dashboard/compliance', label: 'Compliance', icon: '📋', roles: ['ADMIN'] },
-            { path: '/dashboard/data', label: 'Data Management', icon: '🗄️', roles: ['ADMIN'] },
-            { path: '/dashboard/modules', label: 'Modules', icon: '⚙️', roles: ['ADMIN'] },
-            { path: '/dashboard/security', label: 'Security Audit', icon: '🔒', roles: ['ADMIN'] },
-            { path: '/dashboard/system-config', label: 'System Config', icon: '🔧', roles: ['ADMIN'] },
-            { path: '/dashboard/system-health', label: 'System Health', icon: '💚', roles: ['ADMIN', 'SUPERVISOR'] },
+            { path: '/dashboard/users', label: 'User Management', icon: 'users', roles: ['ADMIN', 'SUPERVISOR'] },
+            { path: '/dashboard/roles', label: 'Roles & Permissions', icon: 'roles', roles: ['ADMIN'] },
+            { path: '/dashboard/billing', label: 'Billing', icon: 'billing', roles: ['ADMIN', 'SUPERVISOR'] },
+            { path: '/dashboard/compliance', label: 'Compliance', icon: 'compliance', roles: ['ADMIN'] },
+            { path: '/dashboard/data', label: 'Data Management', icon: 'data', roles: ['ADMIN'] },
+            { path: '/dashboard/modules', label: 'Modules', icon: 'modules', roles: ['ADMIN'] },
+            { path: '/dashboard/security', label: 'Security Audit', icon: 'security', roles: ['ADMIN'] },
+            { path: '/dashboard/system-config', label: 'System Config', icon: 'config', roles: ['ADMIN'] },
+            { path: '/dashboard/system-health', label: 'System Health', icon: 'health', roles: ['ADMIN', 'SUPERVISOR'] },
         ],
     },
     {
         title: 'Account',
         roles: ['ADMIN', 'SUPERVISOR', 'SALES_AGENT', 'SUPPORT_AGENT', 'CUSTOMER'],
         items: [
-            { path: '/profile', label: 'Profile', icon: '👤', roles: ['ADMIN', 'SUPERVISOR', 'SALES_AGENT', 'SUPPORT_AGENT', 'CUSTOMER'] },
+            { path: '/profile', label: 'Profile', icon: 'profile', roles: ['ADMIN', 'SUPERVISOR', 'SALES_AGENT', 'SUPPORT_AGENT', 'CUSTOMER'] },
         ],
     },
 ];
 
-function canSee(role, allowedRoles) {
+function roleCanAccess(role, allowedRoles) {
     return allowedRoles.includes(role);
 }
 
@@ -83,14 +88,18 @@ export function DashboardLayout({ children }) {
             .catch(() => {});
     }, [auth.avatarUrl, auth.isAuthenticated]);
 
+    const currentPage = NAV_SECTIONS
+        .flatMap((s) => s.items)
+        .find((item) => item.path === location.pathname);
+
     return (
         <div style={{ minHeight: '100vh', background: theme.bg, fontFamily: theme.fontBody, display: 'flex' }}>
             <aside style={{
-                width: sidebarOpen ? 260 : 0,
-                minWidth: sidebarOpen ? 260 : 0,
+                width: sidebarOpen ? 240 : 0,
+                minWidth: sidebarOpen ? 240 : 0,
                 background: theme.bgDark,
-                borderRight: `0.5px solid ${theme.border}`,
-                transition: 'all 0.25s ease',
+                borderRight: `1px solid ${theme.border}`,
+                transition: 'all 0.2s ease',
                 overflow: 'hidden',
                 position: 'fixed',
                 top: 0,
@@ -98,44 +107,47 @@ export function DashboardLayout({ children }) {
                 bottom: 0,
                 zIndex: 300,
             }}>
-                <div style={{ padding: '24px 20px', borderBottom: `0.5px solid ${theme.border}` }}>
+                <div style={{ padding: '20px 16px', borderBottom: `1px solid ${theme.border}` }}>
                     <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-                        <img src={logo} alt="CyForce" style={{ height: 32, objectFit: 'contain' }} />
+                        <img src={logo} alt="CyForce" style={{ height: 28, objectFit: 'contain' }} />
                         <div>
-                            <div style={{ fontFamily: theme.fontHeading, fontWeight: 800, fontSize: 14, color: theme.text }}>CyForce CRM</div>
-                            <div style={{ fontSize: 10, color: theme.textDim, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{auth.role}</div>
+                            <div style={{ fontFamily: theme.fontHeading, fontWeight: 700, fontSize: 14, color: theme.text }}>CyForce CRM</div>
+                            <div style={{ fontSize: 11, color: theme.textDim }}>{formatRoleLabel(auth.role)}</div>
                         </div>
                     </Link>
                 </div>
 
-                <nav style={{ padding: '16px 12px', overflowY: 'auto', height: 'calc(100vh - 90px)' }}>
-                    {NAV_SECTIONS.filter((section) => canSee(auth.role, section.roles)).map((section) => (
-                        <div key={section.title} style={{ marginBottom: 20 }}>
-                            <div style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: theme.textDim, padding: '0 10px', marginBottom: 8 }}>
+                <nav style={{ padding: '12px 8px', overflowY: 'auto', height: 'calc(100vh - 76px)' }}>
+                    {NAV_SECTIONS.filter((section) => roleCanAccess(auth.role, section.roles)).map((section) => (
+                        <div key={section.title} style={{ marginBottom: 16 }}>
+                            <div style={{ fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: theme.textDim, padding: '0 12px', marginBottom: 4, fontWeight: 600 }}>
                                 {section.title}
                             </div>
-                            {section.items.filter((item) => canSee(auth.role, item.roles)).map((item) => {
+                            {section.items.filter((item) => roleCanAccess(auth.role, item.roles)).map((item) => {
                                 const active = location.pathname === item.path;
                                 return (
                                     <Link
                                         key={item.path}
                                         to={item.path}
-                                        onClick={() => setSidebarOpen(false)}
+                                        onClick={() => window.innerWidth < 900 && setSidebarOpen(false)}
                                         style={{
                                             display: 'flex',
                                             alignItems: 'center',
                                             gap: 10,
-                                            padding: '10px 12px',
-                                            marginBottom: 4,
-                                            borderRadius: 10,
+                                            padding: '8px 12px',
+                                            marginBottom: 2,
+                                            borderRadius: 6,
                                             textDecoration: 'none',
-                                            color: active ? theme.accent : 'rgba(255,255,255,0.65)',
-                                            background: active ? 'rgba(43,92,230,0.15)' : 'transparent',
-                                            border: active ? `0.5px solid ${theme.borderHover}` : '0.5px solid transparent',
-                                            fontSize: 14,
+                                            color: active ? theme.text : theme.textMuted,
+                                            background: active ? 'rgba(43,92,230,0.12)' : 'transparent',
+                                            borderLeft: active ? `2px solid ${theme.primary}` : '2px solid transparent',
+                                            fontSize: 13,
+                                            fontWeight: active ? 500 : 400,
                                         }}
                                     >
-                                        <span>{item.icon}</span>
+                                        <span style={{ color: active ? theme.accent : theme.textDim, display: 'flex', flexShrink: 0 }}>
+                                            <NavIcon name={item.icon} />
+                                        </span>
                                         <span>{item.label}</span>
                                     </Link>
                                 );
@@ -145,40 +157,56 @@ export function DashboardLayout({ children }) {
                 </nav>
             </aside>
 
-            <div style={{ flex: 1, marginLeft: sidebarOpen ? 260 : 0, transition: 'margin-left 0.25s ease', minWidth: 0 }}>
+            <div style={{ flex: 1, marginLeft: sidebarOpen ? 240 : 0, transition: 'margin-left 0.2s ease', minWidth: 0 }}>
                 <header style={{
                     position: 'sticky',
                     top: 0,
                     zIndex: 200,
-                    background: 'rgba(6,11,26,0.94)',
-                    backdropFilter: 'blur(16px)',
-                    borderBottom: `0.5px solid ${theme.border}`,
-                    padding: '14px 24px',
+                    background: theme.bgDark,
+                    borderBottom: `1px solid ${theme.border}`,
+                    padding: '0 24px',
+                    height: 56,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
                 }}>
-                    <button
-                        onClick={() => setSidebarOpen(!sidebarOpen)}
-                        style={{
-                            background: 'rgba(255,255,255,0.05)',
-                            border: `0.5px solid ${theme.border}`,
-                            color: theme.text,
-                            borderRadius: 8,
-                            padding: '8px 12px',
-                            cursor: 'pointer',
-                            fontFamily: theme.fontBody,
-                        }}
-                    >
-                        ☰ Menu
-                    </button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                        <button
+                            type="button"
+                            onClick={() => setSidebarOpen(!sidebarOpen)}
+                            aria-label="Toggle sidebar"
+                            style={{
+                                background: 'transparent',
+                                border: `1px solid ${theme.border}`,
+                                color: theme.textMuted,
+                                borderRadius: 6,
+                                width: 36,
+                                height: 36,
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontFamily: theme.fontBody,
+                            }}
+                        >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                                <line x1="3" y1="6" x2="21" y2="6" />
+                                <line x1="3" y1="12" x2="21" y2="12" />
+                                <line x1="3" y1="18" x2="21" y2="18" />
+                            </svg>
+                        </button>
+                        {currentPage && (
+                            <span style={{ fontSize: 14, fontWeight: 500, color: theme.text }}>{currentPage.label}</span>
+                        )}
+                    </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                         <NotificationBell />
                         <UserMenu auth={auth} profileImage={profileImage} onLogout={auth.logout} />
                     </div>
                 </header>
 
-                <main style={{ padding: '28px 24px 48px' }}>
+                <main style={{ padding: '24px', maxWidth: 1400, margin: '0 auto' }}>
+                    <MotivationalBanner role={auth.role} />
                     {children}
                 </main>
             </div>

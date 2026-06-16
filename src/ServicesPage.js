@@ -1,6 +1,7 @@
 // src/ServicesPage.jsx
 import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { FONT_BODY, FONT_DISPLAY } from './styles/landingFonts';
 
 // Import your local images
 import cyber from './images/CyberSec.jpg';
@@ -128,7 +129,6 @@ const SERVICES = [
     {
         id: 0,
         title: "Cyber Security",
-        icon: "🛡️",
         accent: "#38BDF8",
         tag: "Security",
         desc: "Our solutions for cybersecurity, anti-fraud, and brand protection leverage intelligence-driven technologies to ensure monitoring and proactive protection of critical data and assets.",
@@ -144,7 +144,6 @@ const SERVICES = [
     {
         id: 1,
         title: "CCTV & Access Control",
-        icon: "📹",
         accent: "#34D399",
         tag: "Surveillance",
         desc: "Access control system integration with employee and visitor management. Tailored security products and services designed to meet your unique needs.",
@@ -160,7 +159,6 @@ const SERVICES = [
     {
         id: 2,
         title: "Alarm Systems",
-        icon: "🚨",
         accent: "#FBBF24",
         tag: "Security",
         desc: "Fire Alarm solutions for old or new buildings, no matter how complicated. We deal in Gents, Chloride-UK, EMS, and others.",
@@ -176,7 +174,6 @@ const SERVICES = [
     {
         id: 3,
         title: "ICT Services",
-        icon: "💻",
         accent: "#F97316",
         tag: "Technology",
         desc: "Leverage technology to revolutionize your business operations. Our IT consulting services are tailored to equip you for the digital age.",
@@ -192,7 +189,6 @@ const SERVICES = [
     {
         id: 4,
         title: "Automation & Solar Energy",
-        icon: "⚙️",
         accent: "#A78BFA",
         tag: "Energy",
         desc: "CyForce focuses on security systems, products, and services. We provide a range of automation solutions and solar energy systems.",
@@ -208,7 +204,6 @@ const SERVICES = [
     {
         id: 5,
         title: "Additional Services",
-        icon: "🔧",
         accent: "#F472B6",
         tag: "Solutions",
         desc: "Complete technology solutions including security doors, POS terminals, training, and hardware maintenance.",
@@ -223,379 +218,152 @@ const SERVICES = [
     }
 ];
 
+const HERO_STATS = [
+    { value: '500+', label: 'Installations' },
+    { value: '12+', label: 'Years' },
+    { value: '30+', label: 'Cities' },
+    { value: '99.8%', label: 'Uptime SLA' },
+];
+
 function ServicesPage() {
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
 
     return (
-        <div style={{ background: "#060B1A", minHeight: "100vh", paddingTop: "100px", overflowX: "hidden" }}>
-            {/* Animated Hero Section with Background Animation */}
-            {/* Animated Hero Section with Background Animation */}
-            <div style={{
-                background: "linear-gradient(135deg, #0D1830, #060B1A)",
-                padding: "80px 48px",
-                textAlign: "center",
-                borderBottom: "0.5px solid rgba(99,179,237,0.1)",
-                position: "relative",
-                overflow: "hidden"
-            }}>
-                {/* Animated Gradient Background */}
-                <div style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    background: "radial-gradient(circle at 20% 50%, rgba(56,189,248,0.15) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(43,92,230,0.1) 0%, transparent 50%)",
-                    animation: "gradientShift 8s ease-in-out infinite"
-                }} />
-
-                {/* Floating Orbs */}
-                <div style={{
-                    position: "absolute",
-                    width: "200px",
-                    height: "200px",
-                    borderRadius: "50%",
-                    background: "radial-gradient(circle, rgba(56,189,248,0.2) 0%, transparent 70%)",
-                    top: "10%",
-                    left: "-5%",
-                    animation: "floatOrb1 12s ease-in-out infinite"
-                }} />
-                <div style={{
-                    position: "absolute",
-                    width: "300px",
-                    height: "300px",
-                    borderRadius: "50%",
-                    background: "radial-gradient(circle, rgba(43,92,230,0.15) 0%, transparent 70%)",
-                    bottom: "-20%",
-                    right: "-10%",
-                    animation: "floatOrb2 15s ease-in-out infinite"
-                }} />
-                <div style={{
-                    position: "absolute",
-                    width: "150px",
-                    height: "150px",
-                    borderRadius: "50%",
-                    background: "radial-gradient(circle, rgba(56,189,248,0.1) 0%, transparent 70%)",
-                    top: "60%",
-                    right: "20%",
-                    animation: "floatOrb3 10s ease-in-out infinite"
-                }} />
-
-                {/* Animated Particles */}
-                <AnimatedParticles />
-
-                {/* Grid Pattern Overlay */}
-                <div style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    backgroundImage: "linear-gradient(rgba(56,189,248,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(56,189,248,0.03) 1px, transparent 1px)",
-                    backgroundSize: "40px 40px",
-                    animation: "gridMove 20s linear infinite"
-                }} />
-
-                <div style={{ maxWidth: 800, margin: "0 auto", position: "relative", zIndex: 1 }}>
-                    {/* Badge */}
-                    <div style={{
-                        fontSize: 11,
-                        letterSpacing: "0.15em",
-                        textTransform: "uppercase",
-                        color: "#38BDF8",
-                        marginBottom: 16,
-                        animation: "fadeInUp 0.6s ease-out",
-                        display: "inline-block",
-                        padding: "4px 16px",
-                        background: "rgba(56,189,248,0.1)",
-                        borderRadius: "30px",
-                        backdropFilter: "blur(10px)",
-                        border: "0.5px solid rgba(56,189,248,0.2)"
-                    }}>
-                        ✨ What We Do ✨
-                    </div>
-
-                    {/* Title - Fixed: animation combined */}
-                    <h1 style={{
-                        fontFamily: "'Syne',sans-serif",
-                        fontWeight: 800,
-                        fontSize: "clamp(40px, 5vw, 56px)",
-                        color: "#fff",
-                        marginBottom: 20,
-                        background: "linear-gradient(135deg, #fff, #38BDF8, #2B5CE6)",
-                        backgroundClip: "text",
-                        WebkitBackgroundClip: "text",
-                        WebkitTextFillColor: "transparent",
-                        backgroundSize: "200% auto",
-                        animation: "gradientText 3s ease-in-out infinite, fadeInUp 0.6s ease-out 0.1s both"
-                    }}>
-                        Our Services
-                    </h1>
-
-                    {/* Subtitle 1 */}
-                    <p style={{
-                        fontSize: 18,
-                        color: "rgba(255,255,255,0.5)",
-                        lineHeight: 1.6,
-                        maxWidth: 600,
-                        margin: "0 auto 20px",
-                        animation: "fadeInUp 0.6s ease-out 0.2s both"
-                    }}>
-                        Take Your Business to the Next Level
+        <div className="services-page">
+            <section className="svc-banner">
+                <div className="svc-banner-bg" style={{ backgroundImage: `url(${ict})` }} />
+                <div className="svc-banner-overlay" />
+                <div className="svc-banner-content">
+                    <span className="svc-eyebrow">What We Do</span>
+                    <h1>Our Services</h1>
+                    <p>
+                        Security, ICT, solar, CCTV, automation, and more — supplied, installed, and supported
+                        nationwide by certified CyForce engineers.
                     </p>
-
-                    {/* Subtitle 2 */}
-                    <p style={{
-                        fontSize: 15,
-                        color: "rgba(255,255,255,0.4)",
-                        animation: "fadeInUp 0.6s ease-out 0.3s both"
-                    }}>
-                        Tailored security products and services designed to meet your unique needs
-                    </p>
-
-                    {/* Animated bouncing arrow */}
-                    <div style={{
-                        marginTop: "40px",
-                        animation: "bounce 2s ease-in-out infinite",
-                        opacity: 0.6,
-                        cursor: "pointer",
-                        transition: "opacity 0.3s ease"
-                    }}
-                         onMouseEnter={e => e.currentTarget.style.opacity = "1"}
-                         onMouseLeave={e => e.currentTarget.style.opacity = "0.6"}
-                         onClick={() => window.scrollTo({ top: window.innerHeight, behavior: "smooth" })}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 5L12 19M12 19L19 12M12 19L5 12" stroke="#38BDF8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
+                    <div className="svc-banner-stats">
+                        {HERO_STATS.map((s) => (
+                            <div key={s.label}>
+                                <strong>{s.value}</strong>
+                                <span>{s.label}</span>
+                            </div>
+                        ))}
                     </div>
                 </div>
-            </div>
+            </section>
 
-            {/* Services Grid */}
-            <div style={{ padding: "80px 48px" }}>
-                <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+            <nav className="svc-nav">
+                <div className="svc-nav-inner">
+                    {SERVICES.map((s) => (
+                        <a key={s.id} href={`#service-${s.id}`} style={{ borderColor: `${s.accent}44`, color: s.accent }}>
+                            {s.short}
+                        </a>
+                    ))}
+                </div>
+            </nav>
+
+            <section className="svc-list">
+                <div className="svc-list-inner">
                     {SERVICES.map((service, index) => (
                         <ServiceDetailCard key={service.id} service={service} index={index} />
                     ))}
                 </div>
-            </div>
+            </section>
 
-            {/* CTA Section */}
-            <div style={{
-                background: "linear-gradient(135deg, #2B5CE6, #38BDF8)",
-                margin: "40px 48px 80px",
-                borderRadius: "24px",
-                padding: "60px 48px",
-                textAlign: "center",
-                animation: "fadeInUp 0.8s ease-out",
-                position: "relative",
-                overflow: "hidden"
-            }}>
-                {/* Animated particles in CTA */}
-                <div style={{
-                    position: "absolute",
-                    width: "100%",
-                    height: "100%",
-                    top: 0,
-                    left: 0,
-                    overflow: "hidden"
-                }}>
-                    {[...Array(15)].map((_, i) => (
-                        <div key={i} style={{
-                            position: "absolute",
-                            width: "6px",
-                            height: "6px",
-                            background: "rgba(255,255,255,0.6)",
-                            borderRadius: "50%",
-                            left: `${Math.random() * 100}%`,
-                            top: `${Math.random() * 100}%`,
-                            animation: `floatParticle ${3 + Math.random() * 4}s ease-in-out infinite`,
-                            animationDelay: `${Math.random() * 3}s`
-                        }} />
-                    ))}
+            <section className="svc-cta-band">
+                <div className="svc-cta-inner">
+                    <div>
+                        <h2>Plan your next project</h2>
+                        <p>Discuss your requirements with our team — we will recommend the right approach for your project.</p>
+                    </div>
+                    <div className="svc-cta-actions">
+                        <Link to={{ pathname: '/', hash: '#contact' }} className="svc-cta-primary">Contact Us</Link>
+                        <Link to="/products" className="svc-cta-ghost">Browse Products</Link>
+                    </div>
                 </div>
-
-                <h2 style={{
-                    fontFamily: "'Syne',sans-serif",
-                    fontSize: "32px",
-                    color: "#fff",
-                    marginBottom: "16px",
-                    position: "relative",
-                    zIndex: 1
-                }}>
-                    Ready to Get Started?
-                </h2>
-                <p style={{
-                    fontSize: "16px",
-                    color: "rgba(255,255,255,0.9)",
-                    marginBottom: "30px",
-                    position: "relative",
-                    zIndex: 1
-                }}>
-                    Contact us today for a free consultation
-                </p>
-                <Link to="/#contact">
-                    <button style={{
-                        background: "#fff",
-                        color: "#2B5CE6",
-                        border: "none",
-                        borderRadius: "40px",
-                        padding: "14px 34px",
-                        fontSize: "16px",
-                        fontWeight: "bold",
-                        cursor: "pointer",
-                        transition: "all 0.3s ease",
-                        position: "relative",
-                        zIndex: 1
-                    }}
-                            onMouseEnter={e => {
-                                e.currentTarget.style.transform = "scale(1.05)";
-                                e.currentTarget.style.boxShadow = "0 10px 30px rgba(0,0,0,0.2)";
-                            }}
-                            onMouseLeave={e => {
-                                e.currentTarget.style.transform = "scale(1)";
-                                e.currentTarget.style.boxShadow = "none";
-                            }}>
-                        Chat With Us →
-                    </button>
-                </Link>
-            </div>
+            </section>
 
             <style>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        @keyframes fadeInLeft {
-          from {
-            opacity: 0;
-            transform: translateX(-50px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-        
-        @keyframes fadeInRight {
-          from {
-            opacity: 0;
-            transform: translateX(50px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-        
-        @keyframes gradientShift {
-          0%, 100% {
-            opacity: 0.5;
-            transform: scale(1);
-          }
-          50% {
-            opacity: 1;
-            transform: scale(1.05);
-          }
-        }
-        
-        @keyframes floatOrb1 {
-          0%, 100% {
-            transform: translate(0, 0) scale(1);
-          }
-          50% {
-            transform: translate(30px, 20px) scale(1.1);
-          }
-        }
-        
-        @keyframes floatOrb2 {
-          0%, 100% {
-            transform: translate(0, 0) scale(1);
-          }
-          50% {
-            transform: translate(-40px, -30px) scale(1.15);
-          }
-        }
-        
-        @keyframes floatOrb3 {
-          0%, 100% {
-            transform: translate(0, 0) scale(1);
-          }
-          50% {
-            transform: translate(20px, -20px) scale(1.08);
-          }
-        }
-        
-        @keyframes gridMove {
-          0% {
-            transform: translate(0, 0);
-          }
-          100% {
-            transform: translate(40px, 40px);
-          }
-        }
-        
-        @keyframes gradientText {
-          0%, 100% {
-            background-position: 0% 50%;
-          }
-          50% {
-            background-position: 100% 50%;
-          }
-        }
-        
-        @keyframes bounce {
-          0%, 100% {
-            transform: translateY(0);
-          }
-          50% {
-            transform: translateY(10px);
-          }
-        }
-        
-        @keyframes floatParticle {
-          0%, 100% {
-            transform: translateY(0) translateX(0);
-            opacity: 0;
-          }
-          50% {
-            opacity: 1;
-          }
-        }
-        
-        .service-card {
-          transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .service-card:hover {
-          transform: translateY(-8px);
-        }
-        
-        .image-zoom {
-          transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .image-zoom:hover {
-          transform: scale(1.08);
-        }
-        
-        .feature-item {
-          transition: all 0.3s ease;
-        }
-        
-        .feature-item:hover {
-          transform: translateX(5px);
-        }
-      `}</style>
+                .services-page { background: #060B1A; min-height: 100vh; padding-top: 88px; font-family: ${FONT_BODY}; overflow-x: hidden; }
+                .svc-banner { position: relative; min-height: 420px; display: flex; align-items: flex-end; overflow: hidden; }
+                .svc-banner-bg { position: absolute; inset: 0; background-size: cover; background-position: center; }
+                .svc-banner-overlay {
+                    position: absolute; inset: 0;
+                    background: linear-gradient(180deg, rgba(6,11,26,0.3) 0%, rgba(6,11,26,0.92) 75%);
+                }
+                .svc-banner-content {
+                    position: relative; z-index: 1; width: 100%; max-width: 1180px; margin: 0 auto;
+                    padding: clamp(48px, 8vw, 72px) clamp(20px, 4vw, 48px);
+                }
+                .svc-eyebrow {
+                    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #34D399;
+                    font-weight: 700; margin-bottom: 12px; display: block;
+                }
+                .svc-banner h1 {
+                    font-family: ${FONT_DISPLAY}; font-size: clamp(40px, 6vw, 56px); font-weight: 800;
+                    color: #fff; margin: 0 0 14px; line-height: 1.05;
+                }
+                .svc-banner p { font-size: 16px; color: rgba(255,255,255,0.55); max-width: 560px; line-height: 1.7; margin: 0 0 28px; }
+                .svc-banner-stats { display: flex; flex-wrap: wrap; gap: 24px; }
+                .svc-banner-stats strong { display: block; font-family: ${FONT_DISPLAY}; font-size: 24px; color: #fff; }
+                .svc-banner-stats span { font-size: 11px; color: rgba(255,255,255,0.4); }
+                .svc-nav {
+                    position: sticky; top: 72px; z-index: 50;
+                    background: rgba(6,11,26,0.92); backdrop-filter: blur(10px);
+                    border-bottom: 0.5px solid rgba(99,179,237,0.12);
+                }
+                .svc-nav-inner {
+                    max-width: 1180px; margin: 0 auto; padding: 12px clamp(20px, 4vw, 48px);
+                    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+                }
+                .svc-nav a {
+                    padding: 8px 16px; border-radius: 20px; border: 0.5px solid;
+                    font-size: 12px; font-weight: 600; text-decoration: none; transition: all 0.2s ease;
+                    background: rgba(255,255,255,0.03);
+                }
+                .svc-nav a:hover { background: rgba(255,255,255,0.08); transform: translateY(-1px); }
+                .svc-list { padding: clamp(56px, 8vw, 80px) clamp(20px, 4vw, 48px); }
+                .svc-list-inner { max-width: 1180px; margin: 0 auto; }
+                .svc-cta-band {
+                    margin: 0 clamp(20px, 4vw, 48px) clamp(56px, 8vw, 80px);
+                    border-radius: 16px; overflow: hidden;
+                    background: linear-gradient(135deg, #1e3a8a 0%, #2B5CE6 50%, #38BDF8 100%);
+                }
+                .svc-cta-inner {
+                    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px;
+                    padding: clamp(32px, 5vw, 44px) clamp(28px, 4vw, 40px);
+                }
+                .svc-cta-inner h2 { font-family: ${FONT_DISPLAY}; font-size: clamp(22px, 3vw, 28px); color: #fff; margin: 0 0 8px; }
+                .svc-cta-inner p { font-size: 14px; color: rgba(255,255,255,0.88); margin: 0; max-width: 480px; line-height: 1.6; }
+                .svc-cta-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+                .svc-cta-primary {
+                    padding: 13px 26px; border-radius: 10px; background: #fff; color: #2B5CE6;
+                    font-size: 14px; font-weight: 600; text-decoration: none;
+                }
+                .svc-cta-ghost {
+                    padding: 13px 26px; border-radius: 10px; color: #fff; border: 0.5px solid rgba(255,255,255,0.4);
+                    font-size: 14px; font-weight: 600; text-decoration: none;
+                }
+                @media (max-width: 768px) {
+                    .service-card { grid-template-columns: 1fr !important; }
+                    .service-card > div { order: unset !important; }
+                }
+                .service-card { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+                .service-card:hover { transform: translateY(-8px); }
+                .image-zoom { transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1); }
+                .image-zoom:hover { transform: scale(1.08); }
+                .feature-item { transition: all 0.3s ease; }
+                .feature-item:hover { transform: translateX(5px); }
+                @keyframes fadeInLeft {
+                    from { opacity: 0; transform: translateX(-50px); }
+                    to { opacity: 1; transform: translateX(0); }
+                }
+                @keyframes fadeInRight {
+                    from { opacity: 0; transform: translateX(50px); }
+                    to { opacity: 1; transform: translateX(0); }
+                }
+            `}</style>
         </div>
     );
 }
@@ -608,6 +376,7 @@ function ServiceDetailCard({ service, index }) {
 
     return (
         <div
+            id={`service-${service.id}`}
             ref={ref}
             className="service-card"
             style={{
@@ -665,26 +434,19 @@ function ServiceDetailCard({ service, index }) {
                         : "none",
                 }}
             >
-                {/* Icon and Tag */}
                 <div style={{ marginBottom: "20px" }}>
                     <div style={{
                         display: "inline-block",
-                        fontSize: "48px",
-                        transition: "transform 0.3s ease",
-                        transform: isHovered ? "scale(1.1) rotate(5deg)" : "scale(1)",
-                    }}>
-                        {service.icon}
-                    </div>
-                    <div style={{
-                        display: "inline-block",
-                        marginLeft: "12px",
                         padding: "4px 12px",
                         background: `linear-gradient(135deg, ${service.accent}20, ${service.accent}10)`,
                         borderRadius: "20px",
                         fontSize: "11px",
                         color: service.accent,
-                        verticalAlign: "middle",
+                        letterSpacing: "0.08em",
+                        textTransform: "uppercase",
                         border: `0.5px solid ${service.accent}33`,
+                        fontFamily: "'Inter', system-ui, sans-serif",
+                        fontWeight: 500,
                     }}>
                         {service.tag}
                     </div>
@@ -692,7 +454,7 @@ function ServiceDetailCard({ service, index }) {
 
                 {/* Title */}
                 <h2 style={{
-                    fontFamily: "'Syne',sans-serif",
+                    fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
                     fontSize: "36px",
                     color: "#fff",
                     marginBottom: "16px",
@@ -756,7 +518,9 @@ function ServiceDetailCard({ service, index }) {
                 </div>
 
                 {/* Button */}
-                <button style={{
+                <Link
+                    to={{ pathname: '/', hash: '#contact' }}
+                    style={{
                     background: `linear-gradient(135deg, ${service.accent}20, transparent)`,
                     color: service.accent,
                     border: `1px solid ${service.accent}`,
@@ -768,6 +532,8 @@ function ServiceDetailCard({ service, index }) {
                     transition: "all 0.3s ease",
                     position: "relative",
                     overflow: "hidden",
+                    textDecoration: "none",
+                    display: "inline-block",
                 }}
                         onMouseEnter={e => {
                             e.currentTarget.style.background = service.accent;
@@ -779,8 +545,8 @@ function ServiceDetailCard({ service, index }) {
                             e.currentTarget.style.color = service.accent;
                             e.currentTarget.style.transform = "translateX(0)";
                         }}>
-                    Request a Quote →
-                </button>
+                    Get in Touch &rarr;
+                </Link>
             </div>
         </div>
     );

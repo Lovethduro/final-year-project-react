@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import logo from './images/CYFORCE 2-1.jpg';
 
-import { API_BASE } from './utils/authFlow';
+import { API_BASE, getPostAuthPath } from './utils/authFlow';
 
 // Animated Particle Background
 function ParticleBackground() {
@@ -104,7 +104,12 @@ function EmailVerificationPage() {
         localStorage.setItem('emailVerified', 'true');
         setIsVerified(true);
         setTimeout(() => {
-            navigate("/mfa-setup");
+            navigate(getPostAuthPath({
+                emailVerified: true,
+                mustChangePassword: localStorage.getItem('mustChangePassword') === 'true',
+                mfaEnabled: localStorage.getItem('mfaEnabled') === 'true',
+                role: localStorage.getItem('userRole'),
+            }));
         }, 2000);
     };
 
@@ -308,7 +313,7 @@ function EmailVerificationPage() {
                                 Your email has been successfully verified.
                             </p>
                             <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.4)", marginBottom: "24px" }}>
-                                Redirecting you to MFA setup...
+                                Redirecting you to your dashboard...
                             </p>
                             <div style={{ display: "flex", justifyContent: "center" }}>
                                 <div style={{
@@ -525,16 +530,12 @@ function EmailVerificationPage() {
 
                             {error && (
                                 <div style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "8px",
                                     padding: "10px 12px",
                                     background: "rgba(239,68,68,0.1)",
                                     border: "1px solid rgba(239,68,68,0.3)",
                                     borderRadius: "10px"
                                 }}>
-                                    <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#EF4444", flexShrink: 0 }} />
-                                    <p style={{ fontSize: "12px", color: "#F87171" }}>{error}</p>
+                                    <p style={{ fontSize: "12px", color: "#F87171", margin: 0 }}>{error}</p>
                                 </div>
                             )}
 

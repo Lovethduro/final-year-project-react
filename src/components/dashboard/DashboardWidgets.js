@@ -1,26 +1,46 @@
 import { Link } from 'react-router-dom';
-import { theme, cardStyle } from '../../styles/theme';
+import { theme, dashboardCardStyle } from '../../styles/theme';
+
+export function MetricCard({ label, value, detail, accent = theme.accent, trend }) {
+    return (
+        <div style={{ ...dashboardCardStyle, padding: '16px 20px' }}>
+            <div style={{ fontSize: 11, letterSpacing: '0.05em', textTransform: 'uppercase', color: theme.textDim, marginBottom: 8, fontWeight: 500 }}>
+                {label}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                <div style={{ fontSize: value?.length > 8 ? 22 : 26, fontWeight: 600, color: theme.text, lineHeight: 1.2 }}>
+                    {value}
+                </div>
+                {trend != null && (
+                    <span style={{ fontSize: 12, color: trend >= 0 ? theme.success : theme.error }}>
+                        {trend >= 0 ? '+' : ''}{trend}%
+                    </span>
+                )}
+            </div>
+            {detail && <div style={{ fontSize: 12, color: theme.textMuted, marginTop: 4 }}>{detail}</div>}
+            <div style={{ width: '100%', height: 2, background: accent, borderRadius: 1, marginTop: 12, opacity: 0.7 }} />
+        </div>
+    );
+}
 
 export function WelcomeBanner({ title, subtitle, badge, children }) {
     return (
-        <div style={{
-            ...cardStyle,
-            marginBottom: 24,
-            background: 'linear-gradient(135deg, rgba(43,92,230,0.25), rgba(13,24,48,0.95))',
-            border: `0.5px solid ${theme.borderHover}`,
-        }}>
+        <div style={{ marginBottom: 24 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
                 <div>
-                    <h1 style={{ fontFamily: theme.fontHeading, fontSize: 28, fontWeight: 800, color: theme.text, marginBottom: 8 }}>{title}</h1>
-                    <p style={{ color: theme.textMuted, fontSize: 14, marginBottom: 8 }}>{subtitle}</p>
+                    <h1 style={{ fontFamily: theme.fontHeading, fontSize: 24, fontWeight: 600, color: theme.text, margin: '0 0 6px' }}>{title}</h1>
+                    {subtitle && <p style={{ color: theme.textMuted, fontSize: 14, margin: 0 }}>{subtitle}</p>}
                     {badge && (
                         <span style={{
                             display: 'inline-block',
-                            padding: '4px 12px',
-                            borderRadius: 20,
+                            marginTop: 10,
+                            padding: '3px 10px',
+                            borderRadius: 4,
                             fontSize: 12,
-                            background: `${theme.success}22`,
+                            fontWeight: 500,
+                            background: 'rgba(52,211,153,0.12)',
                             color: theme.success,
+                            border: `1px solid rgba(52,211,153,0.25)`,
                         }}>
                             {badge}
                         </span>
@@ -28,34 +48,32 @@ export function WelcomeBanner({ title, subtitle, badge, children }) {
                 </div>
                 {children}
             </div>
+            <div style={{ height: 1, background: theme.border, marginTop: 20 }} />
         </div>
     );
 }
 
 export function QuickActions({ actions }) {
     return (
-        <div style={{ ...cardStyle, marginBottom: 24 }}>
-            <h2 style={{ fontSize: 16, fontWeight: 600, color: theme.text, marginBottom: 16 }}>Quick Actions</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 12 }}>
+        <div style={{ ...dashboardCardStyle, marginBottom: 24 }}>
+            <h2 style={{ fontSize: 14, fontWeight: 600, color: theme.text, margin: '0 0 14px', letterSpacing: '0.01em' }}>Quick Actions</h2>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {actions.map((a) => {
                     const style = {
-                        ...cardStyle,
-                        padding: 16,
-                        textAlign: 'center',
+                        padding: '8px 14px',
+                        borderRadius: 6,
                         textDecoration: 'none',
                         color: theme.text,
                         cursor: 'pointer',
-                        border: `0.5px solid ${theme.border}`,
+                        border: `1px solid ${theme.border}`,
                         background: 'rgba(255,255,255,0.03)',
+                        fontSize: 13,
+                        fontWeight: 500,
+                        fontFamily: theme.fontBody,
                     };
-                    const inner = (
-                        <>
-                            <div style={{ fontSize: 24, marginBottom: 8 }}>{a.icon}</div>
-                            <div style={{ fontSize: 13 }}>{a.label}</div>
-                        </>
-                    );
+                    const inner = <span>{a.label}</span>;
                     if (a.to) return <Link key={a.label} to={a.to} style={style}>{inner}</Link>;
-                    return <button key={a.label} type="button" onClick={a.onClick} style={{ ...style, fontFamily: theme.fontBody }}>{inner}</button>;
+                    return <button key={a.label} type="button" onClick={a.onClick} style={style}>{inner}</button>;
                 })}
             </div>
         </div>
@@ -196,7 +214,7 @@ export function HorizontalBarChart({ items, maxValue }) {
             {items.map((item) => (
                 <div key={item.label} style={{ marginBottom: 12 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 4 }}>
-                        <span style={{ color: theme.text }}>{item.label}{item.overloaded ? ' ⚠️' : ''}</span>
+                        <span style={{ color: theme.text }}>{item.label}{item.overloaded ? ' (overloaded)' : ''}</span>
                         <span style={{ color: theme.textMuted }}>{item.value}</span>
                     </div>
                     <div style={{ height: 8, background: 'rgba(255,255,255,0.08)', borderRadius: 4 }}>
@@ -214,42 +232,46 @@ export function HorizontalBarChart({ items, maxValue }) {
 }
 
 export function StarRating({ rating = 0 }) {
+    if (!rating) return null;
     return (
-        <span style={{ color: theme.warning, fontSize: 14 }}>
-            {'★'.repeat(Math.round(rating))}{'☆'.repeat(5 - Math.round(rating))}
+        <span style={{ fontSize: 12, color: theme.textMuted, fontWeight: 500 }}>
+            {Number(rating).toFixed(1)}
+            <span style={{ color: theme.textDim }}> / 5</span>
         </span>
     );
 }
 
 export function StatusToggle({ value, options, onChange }) {
+    const dotColors = { available: theme.success, busy: theme.error, away: theme.warning, on_break: theme.textDim };
     return (
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {options.map((opt) => (
                 <button key={opt.value} type="button" onClick={() => onChange(opt.value)} style={{
-                    padding: '6px 12px', borderRadius: 20, border: `0.5px solid ${value === opt.value ? theme.accent : theme.border}`,
-                    background: value === opt.value ? 'rgba(43,92,230,0.25)' : 'transparent',
-                    color: value === opt.value ? theme.accent : theme.textMuted,
+                    padding: '6px 12px', borderRadius: 6, border: `1px solid ${value === opt.value ? theme.accent : theme.border}`,
+                    background: value === opt.value ? 'rgba(43,92,230,0.15)' : 'transparent',
+                    color: value === opt.value ? theme.text : theme.textMuted,
                     fontSize: 12, cursor: 'pointer', fontFamily: theme.fontBody,
+                    display: 'flex', alignItems: 'center', gap: 6,
                 }}>
-                    {opt.icon} {opt.label}
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: dotColors[opt.value] || theme.accent, flexShrink: 0 }} />
+                    {opt.label}
                 </button>
             ))}
         </div>
     );
 }
 
-export function ProgressStat({ title, value, target, icon, unit = '' }) {
+export function ProgressStat({ title, value, target, unit = '' }) {
     const pct = target > 0 ? Math.min(100, Math.round((value / target) * 100)) : 0;
     return (
-        <div style={{ ...cardStyle, padding: 20 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-                <span style={{ fontSize: 24 }}>{icon}</span>
-                <span style={{ fontSize: 12, color: theme.accent }}>{pct}%</span>
+        <div style={{ ...dashboardCardStyle, padding: '16px 20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <div style={{ fontSize: 11, letterSpacing: '0.05em', textTransform: 'uppercase', color: theme.textDim, fontWeight: 500 }}>{title}</div>
+                <span style={{ fontSize: 12, color: theme.textMuted }}>{pct}%</span>
             </div>
-            <div style={{ fontSize: 22, fontWeight: 'bold', color: theme.text }}>{value}{unit}</div>
-            <div style={{ fontSize: 13, color: theme.accent, marginBottom: 10 }}>{title}</div>
-            <div style={{ height: 6, background: 'rgba(255,255,255,0.1)', borderRadius: 4 }}>
-                <div style={{ width: `${pct}%`, height: '100%', background: `linear-gradient(90deg, ${theme.primary}, ${theme.accent})`, borderRadius: 4 }} />
+            <div style={{ fontSize: 26, fontWeight: 600, color: theme.text, marginBottom: 10 }}>{value}{unit}</div>
+            <div style={{ height: 4, background: 'rgba(255,255,255,0.08)', borderRadius: 2 }}>
+                <div style={{ width: `${pct}%`, height: '100%', background: theme.primary, borderRadius: 2 }} />
             </div>
             <div style={{ fontSize: 11, color: theme.textDim, marginTop: 6 }}>Target: {target}{unit}</div>
         </div>

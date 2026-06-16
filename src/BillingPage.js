@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { DashboardLayout } from './components/DashboardLayout';
-import { PageHeader, Card, DataTable, StatusBadge, StatCard, PrimaryButton, Alert } from './components/ui';
+import { PageHeader, Card, DataTable, StatusBadge, StatCard, PrimaryButton, Alert, Select } from './components/ui';
 import { customerApi, paymentApi, userApi, getSession } from './utils/apiClient';
 import { storeAuthSession } from './utils/authFlow';
 import { refreshNotifications } from './utils/notifications';
@@ -120,10 +120,10 @@ export default function BillingPage() {
                         {t}
                     </button>
                 ))}
-                <select value={provider} onChange={(e) => savePaymentPreference(e.target.value)} style={{ marginLeft: 'auto', background: 'rgba(255,255,255,0.05)', border: `0.5px solid ${theme.border}`, borderRadius: 8, padding: '8px 12px', color: theme.text }}>
+                <Select value={provider} onChange={(e) => savePaymentPreference(e.target.value)} style={{ marginLeft: 'auto', width: 'auto' }}>
                     <option value="paystack">Paystack (Sandbox)</option>
                     <option value="flutterwave">Flutterwave (Sandbox)</option>
-                </select>
+                </Select>
             </div>
 
             {tab === 'invoices' ? (

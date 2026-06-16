@@ -2,16 +2,16 @@ import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { DashboardLayout } from '../components/DashboardLayout';
 import { Card, DataTable, StatusBadge, PrimaryButton, Alert } from '../components/ui';
-import { WelcomeBanner, QuickActions, ActivityTimeline, StatusToggle, StarRating } from '../components/dashboard/DashboardWidgets';
+import { WelcomeBanner, QuickActions, ActivityTimeline, StatusToggle, StarRating, MetricCard } from '../components/dashboard/DashboardWidgets';
 import { useAuth } from '../hooks/useAuth';
 import { supportApi } from '../utils/apiClient';
-import { theme, cardStyle } from '../styles/theme';
+import { theme } from '../styles/theme';
 
 const STATUS_OPTIONS = [
-    { value: 'available', label: 'Available', icon: '🟢' },
-    { value: 'busy', label: 'Busy', icon: '🔴' },
-    { value: 'away', label: 'Away', icon: '🟡' },
-    { value: 'on_break', label: 'On Break', icon: '☕' },
+    { value: 'available', label: 'Available' },
+    { value: 'busy', label: 'Busy' },
+    { value: 'away', label: 'Away' },
+    { value: 'on_break', label: 'On Break' },
 ];
 
 function formatDate() {
@@ -25,23 +25,15 @@ function formatTimer(seconds) {
     return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
-function KpiCard({ title, value, icon, status = 'info' }) {
-    const colors = { success: theme.success, warning: theme.warning, error: theme.error, info: theme.accent };
-    return (
-        <div style={{ ...cardStyle, padding: 20 }}>
-            <span style={{ fontSize: 24 }}>{icon}</span>
-            <div style={{ fontSize: 26, fontWeight: 'bold', color: theme.text, margin: '12px 0 4px' }}>{value}</div>
-            <div style={{ fontSize: 13, color: colors[status] }}>{title}</div>
-        </div>
-    );
-}
-
 export default function SupportAgentDashboard() {
     const auth = useAuth();
     const [overview, setOverview] = useState(null);
     const [error, setError] = useState('');
     const [replyTicket, setReplyTicket] = useState(null);
     const [replyText, setReplyText] = useState('');
+    const [transferringId, setTransferringId] = useState(null);
+    const [transferNote, setTransferNote] = useState('');
+    const [success, setSuccess] = useState('');
     const [timer, setTimer] = useState(0);
     const formRef = useRef(null);
 
@@ -82,10 +74,24 @@ export default function SupportAgentDashboard() {
         }
     };
 
+    const transferToSales = async (ticketId) => {
+        setError('');
+        setSuccess('');
+        try {
+            await supportApi.transferToSales(ticketId, transferNote || 'Customer wants to purchase');
+            setTransferringId(null);
+            setTransferNote('');
+            setSuccess('Ticket transferred to sales.');
+            load();
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
     return (
         <DashboardLayout>
             <WelcomeBanner
-                title={`Welcome back, ${auth.fullName || 'Agent'}!`}
+                title={`Welcome back, ${auth.fullName || 'Agent'}`}
                 subtitle={formatDate()}
                 badge={`Status: ${(agentStatus.status || 'available').replace('_', ' ')}`}
             >
@@ -100,20 +106,21 @@ export default function SupportAgentDashboard() {
             </div>
 
             {error && <Alert type="error">{error}</Alert>}
+            {success && <Alert type="success">{success}</Alert>}
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 16, marginBottom: 24 }}>
-                <KpiCard title="My Open Tickets" value={stats.openTickets ?? 0} icon="🎫" status="info" />
-                <KpiCard title="Avg Response Time" value={stats.avgResponseTime || '—'} icon="⏱️" status="warning" />
-                <KpiCard title="Resolved Today" value={stats.resolvedToday ?? 0} icon="✅" status="success" />
-                <KpiCard title="Satisfaction Rating" value={stats.satisfactionRating ? `${stats.satisfactionRating}/5` : '—'} icon="⭐" status="success" />
-                <KpiCard title="SLA Compliance" value={`${stats.slaCompliance ?? 0}%`} icon="📊" status={stats.slaCompliance >= 90 ? 'success' : 'warning'} />
+                <MetricCard label="My Open Tickets" value={stats.openTickets ?? 0} accent={theme.accent} />
+                <MetricCard label="Avg Response Time" value={stats.avgResponseTime || '—'} accent={theme.warning} />
+                <MetricCard label="Resolved Today" value={stats.resolvedToday ?? 0} accent={theme.success} />
+                <MetricCard label="Satisfaction Rating" value={stats.satisfactionRating ? `${stats.satisfactionRating}/5` : '—'} accent={theme.success} />
+                <MetricCard label="SLA Compliance" value={`${stats.slaCompliance ?? 0}%`} accent={stats.slaCompliance >= 90 ? theme.success : theme.warning} />
             </div>
 
             <QuickActions actions={[
-                { icon: '➕', label: 'Create New Ticket', onClick: () => formRef.current?.scrollIntoView({ behavior: 'smooth' }) },
-                { icon: '🎫', label: 'View My Tickets', onClick: () => document.getElementById('active-tickets')?.scrollIntoView({ behavior: 'smooth' }) },
-                { to: '/dashboard/knowledge-base', icon: '📚', label: 'Search Knowledge Base' },
-                { icon: '📞', label: 'Contact Customer', onClick: () => document.getElementById('priority-tickets')?.scrollIntoView({ behavior: 'smooth' }) },
+                { label: 'Create New Ticket', onClick: () => formRef.current?.scrollIntoView({ behavior: 'smooth' }) },
+                { label: 'View My Tickets', onClick: () => document.getElementById('active-tickets')?.scrollIntoView({ behavior: 'smooth' }) },
+                { to: '/dashboard/knowledge-base', label: 'Search Knowledge Base' },
+                { label: 'Contact Customer', onClick: () => document.getElementById('priority-tickets')?.scrollIntoView({ behavior: 'smooth' }) },
             ]} />
 
             <div id="priority-tickets">
@@ -131,7 +138,22 @@ export default function SupportAgentDashboard() {
                         <div style={{ height: 6, background: 'rgba(255,255,255,0.08)', borderRadius: 4, marginBottom: 10 }}>
                             <div style={{ width: `${t.slaPercent}%`, height: '100%', background: t.slaBreached ? theme.error : theme.warning, borderRadius: 4 }} />
                         </div>
-                        <PrimaryButton onClick={() => setReplyTicket(t)} style={{ fontSize: 12, padding: '6px 14px' }}>Quick Reply</PrimaryButton>
+                        <PrimaryButton onClick={() => setReplyTicket(t)} style={{ fontSize: 12, padding: '6px 14px', marginRight: 8 }}>Quick Reply</PrimaryButton>
+                        {!t.transferredToSales && (
+                            transferringId === t.id ? (
+                                <div style={{ display: 'inline-flex', flexDirection: 'column', gap: 6, marginTop: 8 }}>
+                                    <input value={transferNote} onChange={(e) => setTransferNote(e.target.value)} placeholder="Note for sales" style={{ fontSize: 12, padding: '6px 8px', borderRadius: 6, border: `0.5px solid ${theme.border}`, background: 'rgba(255,255,255,0.05)', color: theme.text }} />
+                                    <div style={{ display: 'flex', gap: 6 }}>
+                                        <PrimaryButton onClick={() => transferToSales(t.id)} style={{ fontSize: 11, padding: '4px 10px' }}>Confirm transfer</PrimaryButton>
+                                        <button type="button" onClick={() => { setTransferringId(null); setTransferNote(''); }} style={{ fontSize: 11, padding: '4px 10px', background: 'transparent', border: `0.5px solid ${theme.border}`, color: theme.textDim, borderRadius: 6, cursor: 'pointer' }}>Cancel</button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <button type="button" onClick={() => setTransferringId(t.id)} style={{ fontSize: 12, padding: '6px 14px', borderRadius: 8, border: `0.5px solid ${theme.border}`, background: 'transparent', color: theme.accent, cursor: 'pointer' }}>
+                                    Transfer to Sales
+                                </button>
+                            )
+                        )}
                     </div>
                 )) : <p style={{ color: theme.textDim, fontSize: 13 }}>No priority tickets right now.</p>}
             </Card>
@@ -156,6 +178,21 @@ export default function SupportAgentDashboard() {
                                         </div>
                                     )},
                                     { key: 'lastUpdate', label: 'Updated' },
+                                    { key: 'actions', label: '', render: (r) => r.transferredToSales ? (
+                                        <StatusBadge status="info" label="With Sales" />
+                                    ) : transferringId === r.id ? (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 180 }}>
+                                            <input value={transferNote} onChange={(e) => setTransferNote(e.target.value)} placeholder="Note for sales" style={{ fontSize: 11, padding: '4px 6px', borderRadius: 6, border: `0.5px solid ${theme.border}`, background: 'rgba(255,255,255,0.05)', color: theme.text }} />
+                                            <div style={{ display: 'flex', gap: 4 }}>
+                                                <PrimaryButton onClick={() => transferToSales(r.id)} style={{ fontSize: 10, padding: '3px 8px' }}>Confirm</PrimaryButton>
+                                                <button type="button" onClick={() => { setTransferringId(null); setTransferNote(''); }} style={{ fontSize: 10, padding: '3px 8px', background: 'transparent', border: `0.5px solid ${theme.border}`, color: theme.textDim, borderRadius: 6, cursor: 'pointer' }}>Cancel</button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <button type="button" onClick={() => setTransferringId(r.id)} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 6, border: `0.5px solid ${theme.border}`, background: 'transparent', color: theme.accent, cursor: 'pointer' }}>
+                                            Transfer to Sales
+                                        </button>
+                                    )},
                                 ]}
                                 rows={overview?.activeTickets || []}
                             />

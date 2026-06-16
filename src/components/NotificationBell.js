@@ -2,6 +2,15 @@ import { useEffect, useState, useRef } from 'react';
 import { notificationApi } from '../utils/apiClient';
 import { theme } from '../styles/theme';
 
+function BellIcon() {
+    return (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+        </svg>
+    );
+}
+
 export function NotificationBell() {
     const [open, setOpen] = useState(false);
     const [notifications, setNotifications] = useState([]);
@@ -61,13 +70,22 @@ export function NotificationBell() {
             <button
                 type="button"
                 onClick={() => setOpen(!open)}
+                aria-label={`Notifications${unread > 0 ? `, ${unread} unread` : ''}`}
                 style={{
-                    position: 'relative', background: 'rgba(255,255,255,0.05)',
-                    border: `0.5px solid ${theme.border}`, borderRadius: 10,
-                    padding: '8px 12px', cursor: 'pointer', color: theme.text, fontSize: 18,
+                    position: 'relative',
+                    background: 'rgba(255,255,255,0.05)',
+                    border: `1px solid ${theme.border}`,
+                    borderRadius: 6,
+                    width: 36,
+                    height: 36,
+                    cursor: 'pointer',
+                    color: theme.textMuted,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                 }}
             >
-                🔔
+                <BellIcon />
                 {unread > 0 && (
                     <span style={{
                         position: 'absolute', top: -4, right: -4, background: theme.error,
@@ -83,12 +101,12 @@ export function NotificationBell() {
                 <div style={{
                     position: 'absolute', right: 0, top: 'calc(100% + 8px)', width: 360,
                     maxHeight: 420, overflowY: 'auto', background: theme.bgCard,
-                    border: `0.5px solid ${theme.border}`, borderRadius: 14,
+                    border: `1px solid ${theme.border}`, borderRadius: 8,
                     boxShadow: '0 20px 50px rgba(0,0,0,0.5)', zIndex: 500,
                 }}>
                     <div style={{
                         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                        padding: '14px 16px', borderBottom: `0.5px solid ${theme.border}`,
+                        padding: '14px 16px', borderBottom: `1px solid ${theme.border}`,
                     }}>
                         <span style={{ fontWeight: 600, color: theme.text }}>Notifications</span>
                         {unread > 0 && (
@@ -105,7 +123,7 @@ export function NotificationBell() {
                         <p style={{ padding: 20, color: theme.textMuted, fontSize: 13 }}>No notifications</p>
                     ) : notifications.map((n) => (
                         <div key={n.id} style={{
-                            padding: '12px 16px', borderBottom: `0.5px solid ${theme.border}`,
+                            padding: '12px 16px', borderBottom: `1px solid ${theme.border}`,
                             background: n.read ? 'transparent' : 'rgba(43,92,230,0.08)',
                         }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
@@ -118,12 +136,18 @@ export function NotificationBell() {
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                                     {!n.read && (
                                         <button type="button" onClick={() => markRead(n.id)} title="Mark read" style={{
-                                            background: 'none', border: 'none', cursor: 'pointer', fontSize: 14,
-                                        }}>✓</button>
+                                            background: 'none', border: 'none', cursor: 'pointer', fontSize: 11,
+                                            color: theme.accent, fontFamily: theme.fontBody,
+                                        }}>
+                                            Read
+                                        </button>
                                     )}
                                     <button type="button" onClick={() => remove(n.id)} title="Delete" style={{
-                                        background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: theme.error,
-                                    }}>✕</button>
+                                        background: 'none', border: 'none', cursor: 'pointer', fontSize: 11,
+                                        color: theme.error, fontFamily: theme.fontBody,
+                                    }}>
+                                        Delete
+                                    </button>
                                 </div>
                             </div>
                         </div>

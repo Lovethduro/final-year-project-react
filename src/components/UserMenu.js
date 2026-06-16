@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { theme } from '../styles/theme';
 import { assetUrl } from '../utils/apiClient';
+import { AvatarInitials } from './ui';
 
 export function UserMenu({ auth, profileImage, onLogout }) {
     const [open, setOpen] = useState(false);
@@ -15,6 +16,14 @@ export function UserMenu({ auth, profileImage, onLogout }) {
         return () => document.removeEventListener('mousedown', onClick);
     }, [open]);
 
+    const renderAvatar = (size) => (
+        profileImage ? (
+            <img src={assetUrl(profileImage)} alt="" style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover' }} />
+        ) : (
+            <AvatarInitials name={auth.fullName || auth.email} size={size} />
+        )
+    );
+
     return (
         <div ref={menuRef} style={{ position: 'relative' }}>
             <button
@@ -25,25 +34,15 @@ export function UserMenu({ auth, profileImage, onLogout }) {
                     alignItems: 'center',
                     gap: 10,
                     background: 'rgba(255,255,255,0.05)',
-                    border: `0.5px solid ${theme.border}`,
-                    borderRadius: 10,
+                    border: `1px solid ${theme.border}`,
+                    borderRadius: 6,
                     padding: '6px 12px 6px 6px',
                     cursor: 'pointer',
                     color: theme.text,
                     fontFamily: theme.fontBody,
                 }}
             >
-                <div style={{
-                    width: 32, height: 32, borderRadius: '50%', overflow: 'hidden',
-                    background: 'rgba(255,255,255,0.08)', flexShrink: 0,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
-                    {profileImage ? (
-                        <img src={assetUrl(profileImage)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    ) : (
-                        <span style={{ fontSize: 16 }}>👤</span>
-                    )}
-                </div>
+                {renderAvatar(32)}
                 <div style={{ textAlign: 'left', minWidth: 0 }}>
                     <div style={{ fontSize: 13, fontWeight: 600, maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {auth.fullName || 'User'}
@@ -52,29 +51,21 @@ export function UserMenu({ auth, profileImage, onLogout }) {
                         {auth.email}
                     </div>
                 </div>
-                <span style={{ fontSize: 10, color: theme.textDim }}>▼</span>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={theme.textDim} strokeWidth="2" aria-hidden="true">
+                    <polyline points="6 9 12 15 18 9" />
+                </svg>
             </button>
 
             {open && (
                 <div style={{
                     position: 'absolute', right: 0, top: 'calc(100% + 8px)', width: 260,
-                    background: theme.bgCard, border: `0.5px solid ${theme.border}`,
-                    borderRadius: 14, boxShadow: '0 20px 50px rgba(0,0,0,0.5)', zIndex: 500,
+                    background: theme.bgCard, border: `1px solid ${theme.border}`,
+                    borderRadius: 8, boxShadow: '0 20px 50px rgba(0,0,0,0.5)', zIndex: 500,
                     overflow: 'hidden',
                 }}>
-                    <div style={{ padding: '16px', borderBottom: `0.5px solid ${theme.border}` }}>
+                    <div style={{ padding: '16px', borderBottom: `1px solid ${theme.border}` }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                            <div style={{
-                                width: 44, height: 44, borderRadius: '50%', overflow: 'hidden',
-                                background: 'rgba(255,255,255,0.08)', flexShrink: 0,
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            }}>
-                                {profileImage ? (
-                                    <img src={assetUrl(profileImage)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                ) : (
-                                    <span style={{ fontSize: 20 }}>👤</span>
-                                )}
-                            </div>
+                            {renderAvatar(44)}
                             <div style={{ minWidth: 0 }}>
                                 <div style={{ fontSize: 14, fontWeight: 600, color: theme.text }}>{auth.fullName || 'User'}</div>
                                 <div style={{ fontSize: 11, color: theme.textDim, overflow: 'hidden', textOverflow: 'ellipsis' }}>{auth.email}</div>
@@ -90,10 +81,10 @@ export function UserMenu({ auth, profileImage, onLogout }) {
                         style={{
                             display: 'block', padding: '12px 16px', color: theme.text,
                             textDecoration: 'none', fontSize: 13,
-                            borderBottom: `0.5px solid ${theme.border}`,
+                            borderBottom: `1px solid ${theme.border}`,
                         }}
                     >
-                        👤 Profile Settings
+                        Profile Settings
                     </Link>
                     <button
                         type="button"
