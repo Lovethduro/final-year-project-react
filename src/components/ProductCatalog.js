@@ -2,13 +2,15 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ProductCard } from './ProductCard';
 import { productApi, getSession, customerApi, paymentApi, userApi } from '../utils/apiClient';
+import { completePaymentIfNeeded } from '../utils/paymentUtils';
 import { mapProductForDisplay, maxCartQuantity } from '../utils/productUtils';
 import { addProductToCart, readCart, writeCart, CART_UPDATED_EVENT } from '../utils/cartUtils';
 import { refreshNotifications } from '../utils/notifications';
 import { theme } from '../styles/theme';
 
 export function ProductCatalog({ variant = 'public' }) {
-    const isDashboard = variant === 'dashboard';
+    const isDashboard = variant === 'dashboard' || variant === 'staff';
+    const isStaffShop = variant === 'staff';
     const navigate = useNavigate();
     const location = useLocation();
     const [products, setProducts] = useState([]);
@@ -19,11 +21,13 @@ export function ProductCatalog({ variant = 'public' }) {
     const [cartTotal, setCartTotal] = useState(0);
     const [checkoutError, setCheckoutError] = useState('');
     const [cartNotice, setCartNotice] = useState('');
+    const [checkoutSuccess, setCheckoutSuccess] = useState('');
     const [checkingOut, setCheckingOut] = useState(false);
     const [paymentProvider, setPaymentProvider] = useState('paystack');
     const session = getSession();
     const isLoggedIn = Boolean(session.userId);
     const isCustomer = session.role === 'CUSTOMER';
+    const canCheckout = isCustomer || isStaffShop;
 
     useEffect(() => {
         productApi.list()
@@ -33,7 +37,7 @@ export function ProductCatalog({ variant = 'public' }) {
     }, []);
 
     useEffect(() => {
-        if (!isLoggedIn || !isCustomer) return;
+        if (!isLoggedIn || !canCheckout) return;
         const stored = session.preferredPaymentMethod;
         if (stored) {
             setPaymentProvider(stored);
@@ -46,7 +50,7 @@ export function ProductCatalog({ variant = 'public' }) {
                 }
             })
             .catch(() => {});
-    }, [isLoggedIn, isCustomer, session.preferredPaymentMethod]);
+    }, [isLoggedIn, canCheckout, session.preferredPaymentMethod]);
 
     useEffect(() => {
         setCart(readCart());
@@ -107,6 +111,7 @@ export function ProductCatalog({ variant = 'public' }) {
 
     const handleCheckout = async () => {
         setCheckoutError('');
+        setCheckoutSuccess('');
 
         if (!isLoggedIn) {
             if (isDashboard) {
@@ -117,8 +122,8 @@ export function ProductCatalog({ variant = 'public' }) {
             return;
         }
 
-        if (!isCustomer) {
-            setCheckoutError('Only customer accounts can checkout. Please log in with a customer account.');
+        if (!canCheckout) {
+            setCheckoutError('Please sign in with a customer or staff account to checkout.');
             return;
         }
 
@@ -137,12 +142,15 @@ export function ProductCatalog({ variant = 'public' }) {
 
             const result = await customerApi.checkout(items, paymentProvider);
 
-            if (result.sandbox || result.authorizationUrl?.includes('sandbox=1')) {
-                await paymentApi.sandboxComplete(result.reference);
+            if (await completePaymentIfNeeded(result, paymentApi)) {
                 clearCart();
                 setShowCart(false);
                 refreshNotifications();
-                if (isDashboard) {
+                if (isStaffShop) {
+                    setCheckoutSuccess(result.staffDiscountPercent
+                        ? `Order placed with ${result.staffDiscountPercent}% staff discount applied.`
+                        : 'Order placed successfully.');
+                } else if (isDashboard) {
                     navigate('/dashboard/billing');
                 }
                 return;
@@ -272,6 +280,26 @@ export function ProductCatalog({ variant = 'public' }) {
                                 {checkoutError && (
                                     <p style={{ color: '#EF4444', fontSize: 13, marginBottom: 12 }}>{checkoutError}</p>
                                 )}
+                                {canCheckout && isDashboard && (
+                                    <label style={{ display: 'block', marginBottom: 12 }}>
+                                        <span style={{ color: theme.textMuted, fontSize: 12, display: 'block', marginBottom: 6 }}>Payment method</span>
+                                        <select
+                                            value={paymentProvider}
+                                            onChange={(e) => setPaymentProvider(e.target.value)}
+                                            style={{
+                                                width: '100%',
+                                                padding: '10px 12px',
+                                                borderRadius: 8,
+                                                border: `0.5px solid ${theme.border}`,
+                                                background: 'rgba(255,255,255,0.05)',
+                                                color: '#fff',
+                                            }}
+                                        >
+                                            <option value="paystack">Paystack</option>
+                                            <option value="flutterwave">Flutterwave</option>
+                                        </select>
+                                    </label>
+                                )}
                                 <button
                                     type="button"
                                     onClick={handleCheckout}
@@ -292,7 +320,9 @@ export function ProductCatalog({ variant = 'public' }) {
                                 </button>
                                 {!isLoggedIn && (
                                     <p style={{ fontSize: 12, color: theme.textDim, marginTop: 10, textAlign: 'center' }}>
-                                        You must be logged in as a customer to pay.
+                                        {isStaffShop
+                                            ? 'Sign in with your staff account to checkout.'
+                                            : 'Sign in with your customer account to pay.'}
                                     </p>
                                 )}
                             </div>
@@ -310,6 +340,19 @@ export function ProductCatalog({ variant = 'public' }) {
 
             <div style={{ padding: isDashboard ? 0 : 0 }}>
                 <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+                    {checkoutSuccess && (
+                        <p style={{
+                            color: theme.success,
+                            background: 'rgba(34, 197, 94, 0.1)',
+                            border: `0.5px solid ${theme.success}`,
+                            borderRadius: 8,
+                            padding: '12px 16px',
+                            marginBottom: 16,
+                            fontSize: 14,
+                        }}>
+                            {checkoutSuccess}
+                        </p>
+                    )}
                     {!isDashboard && (
                         <div className="catalog-toolbar">
                             <div>

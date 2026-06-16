@@ -5,6 +5,7 @@ import { customerApi, paymentApi, getSession } from '../utils/apiClient';
 import { useAuth } from '../hooks/useAuth';
 import { theme, inputStyle as themeInputStyle } from '../styles/theme';
 import { refreshNotifications } from '../utils/notifications';
+import { completePaymentIfNeeded } from '../utils/paymentUtils';
 import {
     AgentChatHeader,
     ChatMessageRow,
@@ -117,8 +118,7 @@ export default function CustomerMessagesPage() {
                 ? await paymentApi.initPaystack({ amount: invoice.amount, description: invoice.description, invoiceId: invoice.id })
                 : await paymentApi.initFlutterwave({ amount: invoice.amount, description: invoice.description, invoiceId: invoice.id });
 
-            if (init.sandbox || init.authorizationUrl?.includes('sandbox=1')) {
-                await paymentApi.sandboxComplete(init.reference);
+            if (await completePaymentIfNeeded(init, paymentApi)) {
                 openConversation(active.id);
                 loadConversations();
                 refreshNotifications();

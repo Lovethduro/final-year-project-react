@@ -46,6 +46,12 @@ const icons = {
             <path d="M5 5h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4V7a2 2 0 0 1 2-2z" />
         </Svg>
     ),
+    support: () => (
+        <Svg>
+            <path d="M3 11h3a2 2 0 0 0 2-2V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v3a2 2 0 0 0 2 2h3" />
+            <path d="M7 11v4a5 5 0 0 0 10 0v-4" />
+        </Svg>
+    ),
     messages: () => (
         <Svg>
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
@@ -74,6 +80,13 @@ const icons = {
             <line x1="18" y1="20" x2="18" y2="10" />
             <line x1="12" y1="20" x2="12" y2="4" />
             <line x1="6" y1="20" x2="6" y2="14" />
+        </Svg>
+    ),
+    feedback: () => (
+        <Svg>
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            <path d="M8 9h8" />
+            <path d="M8 13h5" />
         </Svg>
     ),
     performance: () => (

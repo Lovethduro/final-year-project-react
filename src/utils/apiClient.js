@@ -114,6 +114,25 @@ export const quoteApi = {
     sendPortalMessage: (token, message) => api.post(`/api/quotes/portal/${token}/messages`, { message }),
 };
 
+export const publicSupportApi = {
+    config: () => api.get('/api/public/support/config'),
+    estimatedResponse: (priority = 'medium') => api.get(`/api/public/support/estimated-response?priority=${encodeURIComponent(priority)}`),
+    createTicket: (body) => api.post('/api/public/support/tickets', body),
+    createTicketWithAttachment: (fields, attachment) => {
+        const formData = new FormData();
+        Object.entries(fields).forEach(([k, v]) => { if (v) formData.append(k, v); });
+        if (attachment) formData.append('attachment', attachment);
+        return uploadRequest('/api/public/support/tickets/with-attachment', formData);
+    },
+    getPortal: (token) => api.get(`/api/public/support/tickets/portal/${token}`),
+    replyToPortal: (token, message) => api.post(`/api/public/support/tickets/portal/${token}/reply`, { message }),
+};
+
+export const knowledgeBaseApi = {
+    list: (q) => api.get(`/api/knowledge-base${q ? `?q=${encodeURIComponent(q)}` : ''}`),
+    get: (id) => api.get(`/api/knowledge-base/${id}`),
+};
+
 export const adminApi = {
     overview: () => api.get('/api/admin/dashboard/stats'),
     feedback: () => api.get('/api/admin/feedback'),
@@ -125,11 +144,18 @@ export const adminApi = {
     leads: () => api.get('/api/admin/leads'),
     auditLogs: () => api.get('/api/admin/audit-logs'),
     sendAnnouncement: (message, audience = 'all') => api.post('/api/admin/announcements', { message, audience }),
+    getSystemConfig: () => api.get('/api/admin/system-config'),
+    updateSystemConfig: (body) => api.put('/api/admin/system-config', body),
+    knowledgeBase: () => api.get('/api/admin/knowledge-base'),
+    createKnowledgeArticle: (body) => api.post('/api/admin/knowledge-base', body),
+    updateKnowledgeArticle: (id, body) => api.put(`/api/admin/knowledge-base/${id}`, body),
+    deleteKnowledgeArticle: (id) => api.delete(`/api/admin/knowledge-base/${id}`),
 };
 
 export const customerApi = {
     stats: () => api.get('/api/customer/dashboard/stats'),
     tickets: () => api.get('/api/customer/tickets'),
+    estimatedResponse: (priority = 'medium') => api.get(`/api/customer/tickets/estimated-response?priority=${encodeURIComponent(priority)}`),
     createTicket: (body) => api.post('/api/customer/tickets', body),
     createTicketWithAttachment: (fields, attachment) => {
         const formData = new FormData();
@@ -154,12 +180,19 @@ export const supportApi = {
     overview: () => api.get('/api/support/dashboard/overview'),
     stats: () => api.get('/api/support/dashboard/stats'),
     updateAgentStatus: (status) => api.put('/api/support/agent/status', { status }),
+    macros: () => api.get('/api/support/macros'),
     myTickets: () => api.get('/api/support/tickets'),
     allOpen: () => api.get('/api/support/tickets/all'),
+    getTicket: (id) => api.get(`/api/support/tickets/${id}`),
+    getTicketTimeline: (id) => api.get(`/api/support/tickets/${id}/timeline`),
+    getDuplicates: (id) => api.get(`/api/support/tickets/${id}/duplicates`),
+    mergeTicket: (primaryId, duplicateTicketId) => api.post(`/api/support/tickets/${primaryId}/merge`, { duplicateTicketId }),
     assign: (id) => api.put(`/api/support/tickets/${id}/assign`, {}),
     updateTicketStatus: (id, status) => api.put(`/api/support/tickets/${id}/status`, { status }),
     respond: (id, message, internalNote) => api.post(`/api/support/tickets/${id}/response`, { message, internalNote }),
     transferToSales: (id, note) => api.post(`/api/support/tickets/${id}/transfer-to-sales`, { note }),
+    agents: () => api.get('/api/support/agents'),
+    transferToAgent: (id, agentId, note) => api.post(`/api/support/tickets/${id}/transfer-to-agent`, { agentId, note }),
 };
 
 export const salesApi = {
@@ -167,6 +200,7 @@ export const salesApi = {
     bonuses: () => api.get('/api/sales/dashboard/bonuses'),
     stats: () => api.get('/api/sales/dashboard/stats'),
     customers: () => api.get('/api/sales/customers'),
+    createCustomer: (body) => api.post('/api/sales/customers', body),
     leads: () => api.get('/api/sales/leads'),
     createLead: (body) => api.post('/api/sales/leads', body),
     updateLead: (id, body) => api.put(`/api/sales/leads/${id}`, body),
@@ -196,6 +230,7 @@ export const salesApi = {
 };
 
 export const feedbackApi = {
+    overview: () => api.get('/api/feedback/overview'),
     listAdmin: () => api.get('/api/admin/feedback'),
     listSupervisor: () => api.get('/api/supervisor/feedback'),
     getPurchaseSurvey: (token) => api.get(`/api/feedback/purchase-survey/${token}`),
@@ -207,9 +242,47 @@ export const supervisorApi = {
     feedback: () => api.get('/api/supervisor/feedback'),
     tickets: () => api.get('/api/supervisor/tickets'),
     leads: () => api.get('/api/supervisor/leads'),
+    createLead: (body) => api.post('/api/supervisor/leads', body),
+    assignLead: (leadId, body) => api.post(`/api/supervisor/leads/${leadId}/assign`, body),
+    salesAgents: () => api.get('/api/supervisor/sales-agents'),
     performance: () => api.get('/api/supervisor/agents/performance'),
+    approvals: () => api.get('/api/supervisor/approvals'),
+    reviewApproval: (id, approve, note) => api.post(`/api/supervisor/approvals/${id}/review`, { approve, note }),
     approve: (id) => api.post(`/api/supervisor/approvals/${id}/approve`, {}),
     reject: (id) => api.post(`/api/supervisor/approvals/${id}/reject`, {}),
+    broadcast: (message, audience = 'all') => api.post('/api/supervisor/announcements', { message, audience }),
+};
+
+export const analyticsApi = {
+    overview: () => api.get('/api/analytics/overview'),
+    performance: () => api.get('/api/analytics/performance'),
+};
+
+export const teamChatApi = {
+    threads: () => api.get('/api/team-chat/threads'),
+    getThread: (id) => api.get(`/api/team-chat/threads/${id}`),
+    startThread: (body) => api.post('/api/team-chat/threads', body),
+    sendMessage: (id, message) => api.post(`/api/team-chat/threads/${id}/messages`, { message }),
+};
+
+export const calendarApi = {
+    events: (month) => api.get(`/api/calendar/events${month ? `?month=${month}` : ''}`),
+    createEvent: (body) => api.post('/api/calendar/events', body),
+    deleteEvent: (id) => api.delete(`/api/calendar/events/${id}`),
+    staff: () => api.get('/api/calendar/staff'),
+};
+
+export const leaveApi = {
+    eligibility: () => api.get('/api/leave/eligibility'),
+    myRequests: () => api.get('/api/leave/requests'),
+    pending: () => api.get('/api/leave/pending'),
+    request: (body) => api.post('/api/leave/requests', body),
+    approve: (id, note) => api.post(`/api/leave/requests/${id}/approve`, { note }),
+    reject: (id, note) => api.post(`/api/leave/requests/${id}/reject`, { note }),
+};
+
+export const referralApi = {
+    mine: () => api.get('/api/referrals/me'),
 };
 
 export const paymentApi = {
@@ -217,7 +290,7 @@ export const paymentApi = {
     initFlutterwave: (body) => api.post('/api/payments/flutterwave/initialize', body),
     verifyPaystack: (reference) => api.get(`/api/payments/paystack/verify/${reference}`),
     verifyFlutterwave: (reference) => api.get(`/api/payments/flutterwave/verify/${reference}`),
-    sandboxComplete: (reference) => api.post(`/api/payments/sandbox/complete/${reference}`, {}),
+    completeLocalPayment: (reference) => api.post(`/api/payments/complete-local/${reference}`, {}),
     transactions: () => api.get('/api/payments/transactions'),
 };
 
@@ -244,6 +317,7 @@ export const userApi = {
     },
     listUsers: () => api.get('/api/users'),
     updateUserStatus: (userId, active) => api.patch(`/api/users/${userId}/status`, { active }),
+    disableMfa: (password) => api.post('/api/users/me/mfa/disable', { password }),
 };
 
 export const dashboardApi = {

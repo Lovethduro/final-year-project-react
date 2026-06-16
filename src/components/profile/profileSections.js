@@ -1,8 +1,10 @@
 import { Card, Alert, PrimaryButton, AvatarInitials } from '../ui';
+import { Link } from 'react-router-dom';
 import { inputStyle } from '../../styles/theme';
 import { theme, formatRoleLabel } from '../../styles/theme';
 import { assetUrl } from '../../utils/apiClient';
 import { AgentStarBadge } from '../StarRatingInput';
+import { useState } from 'react';
 
 export const labelStyle = { display: 'block', fontSize: 12, color: theme.textDim, marginBottom: 6 };
 
@@ -128,6 +130,102 @@ function SecurityRow({ label, value, valueColor }) {
     );
 }
 
+export function MfaSettingsCard({ profile, onDisableMfa, disablingMfa, mfaError, mfaSuccess }) {
+    const [password, setPassword] = useState('');
+    const [showDisable, setShowDisable] = useState(false);
+
+    const handleDisable = async (e) => {
+        e.preventDefault();
+        const ok = await onDisableMfa(password);
+        if (ok) {
+            setPassword('');
+            setShowDisable(false);
+        }
+    };
+
+    return (
+        <Card title="Two-Factor Authentication (MFA)">
+            <div style={{ fontSize: 14, color: theme.textMuted, marginBottom: 14, lineHeight: 1.55 }}>
+                Add an extra layer of security to your account with an authenticator app, SMS, or email codes.
+            </div>
+            <SecurityRow
+                label="Status"
+                value={profile?.mfaEnabled ? `Enabled (${profile?.mfaMethod || 'active'})` : 'Disabled'}
+                valueColor={profile?.mfaEnabled ? theme.success : theme.warning}
+            />
+            {mfaError && <Alert type="error">{mfaError}</Alert>}
+            {mfaSuccess && <Alert type="success">{mfaSuccess}</Alert>}
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 16 }}>
+                {!profile?.mfaEnabled ? (
+                    <Link to="/mfa-setup" style={{ textDecoration: 'none' }}>
+                        <PrimaryButton type="button">Enable MFA</PrimaryButton>
+                    </Link>
+                ) : (
+                    <>
+                        <Link to="/mfa-setup" style={{ textDecoration: 'none' }}>
+                            <button type="button" style={{
+                                padding: '8px 14px',
+                                borderRadius: 8,
+                                border: `0.5px solid ${theme.border}`,
+                                background: 'transparent',
+                                color: theme.text,
+                                cursor: 'pointer',
+                                fontSize: 13,
+                            }}>
+                                Reconfigure
+                            </button>
+                        </Link>
+                        <button
+                            type="button"
+                            onClick={() => setShowDisable((open) => !open)}
+                            style={{
+                                padding: '8px 14px',
+                                borderRadius: 8,
+                                border: `0.5px solid ${theme.error}55`,
+                                background: 'transparent',
+                                color: theme.error,
+                                cursor: 'pointer',
+                                fontSize: 13,
+                            }}
+                        >
+                            Disable MFA
+                        </button>
+                    </>
+                )}
+            </div>
+            {showDisable && profile?.mfaEnabled && (
+                <form onSubmit={handleDisable} style={{ marginTop: 16 }}>
+                    <label style={labelStyle}>Confirm your password to disable MFA</label>
+                    <input
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        style={inputStyle}
+                        autoComplete="current-password"
+                        required
+                    />
+                    <div style={{ display: 'flex', gap: 8 }}>
+                        <PrimaryButton type="submit" disabled={disablingMfa}>
+                            {disablingMfa ? 'Disabling…' : 'Confirm disable'}
+                        </PrimaryButton>
+                        <button type="button" onClick={() => { setShowDisable(false); setPassword(''); }} style={{
+                            padding: '8px 14px',
+                            borderRadius: 8,
+                            border: `0.5px solid ${theme.border}`,
+                            background: 'transparent',
+                            color: theme.textDim,
+                            cursor: 'pointer',
+                            fontSize: 13,
+                        }}>
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            )}
+        </Card>
+    );
+}
+
 export function StaffSecurityCard({ profile, role }) {
     const showRating = ['SALES_AGENT', 'SUPPORT_AGENT'].includes(role);
     return (
@@ -139,11 +237,6 @@ export function StaffSecurityCard({ profile, role }) {
                     label="Email verified"
                     value={profile?.emailVerified ? 'Yes' : 'No'}
                     valueColor={profile?.emailVerified ? theme.success : theme.warning}
-                />
-                <SecurityRow
-                    label="MFA"
-                    value={profile?.mfaEnabled ? `Enabled (${profile?.mfaMethod || 'active'})` : 'Not enabled'}
-                    valueColor={profile?.mfaEnabled ? theme.success : theme.warning}
                 />
                 <SecurityRow
                     label="Account status"
@@ -172,11 +265,6 @@ export function CustomerSecurityCard({ profile, formatPaymentMethod }) {
                     label="Email verified"
                     value={profile?.emailVerified ? 'Yes' : 'No'}
                     valueColor={profile?.emailVerified ? theme.success : theme.warning}
-                />
-                <SecurityRow
-                    label="MFA"
-                    value={profile?.mfaEnabled ? `Enabled (${profile?.mfaMethod || 'active'})` : 'Not enabled'}
-                    valueColor={profile?.mfaEnabled ? theme.success : theme.warning}
                 />
                 <SecurityRow
                     label="Account status"

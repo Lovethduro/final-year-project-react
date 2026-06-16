@@ -137,7 +137,14 @@ export default function SalesMessagesPage() {
     const fieldStyle = { ...themeInputStyle, marginBottom: 0 };
     const canManageDeal = auth.role === 'SALES_AGENT' || auth.isAdmin;
     const showQueue = auth.role === 'SALES_AGENT';
-    const canReply = active && active.status !== 'closed' && active.status !== 'unassigned';
+    const isSupervisorView = auth.role === 'SUPERVISOR';
+    const canReply = active && (
+        auth.role === 'SALES_AGENT'
+            ? active.status !== 'closed' && active.status !== 'unassigned'
+            : isSupervisorView
+                ? active.status === 'forwarded'
+                : false
+    );
 
     const metaParts = active ? [
         active.isGuest && 'Quote request (guest)',
@@ -233,6 +240,18 @@ export default function SalesMessagesPage() {
                                     background: 'rgba(43,92,230,0.06)',
                                 }}>
                                     Replies are sent to {active.customerEmail} with a link back to their quote portal.
+                                </div>
+                            )}
+
+                            {isSupervisorView && active.status !== 'forwarded' && (
+                                <div style={{
+                                    padding: '10px 20px',
+                                    fontSize: 12,
+                                    color: theme.textMuted,
+                                    borderBottom: `1px solid ${theme.border}`,
+                                    background: 'rgba(251,191,36,0.08)',
+                                }}>
+                                    View-only mode. You can reply when a sales agent forwards this conversation for supervisor review.
                                 </div>
                             )}
 

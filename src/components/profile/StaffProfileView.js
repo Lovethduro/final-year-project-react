@@ -11,7 +11,10 @@ import {
     PasswordCard,
     StaffSecurityCard,
     StaffWorkCard,
+    MfaSettingsCard,
 } from './profileSections';
+import { Link } from 'react-router-dom';
+import { theme } from '../../styles/theme';
 
 const STAFF_PHOTO_HINT = {
     SALES_AGENT: 'Shown to customers in sales chat. Use a clear, professional headshot. Max 5MB.',
@@ -33,6 +36,7 @@ export default function StaffProfileView({ role }) {
         profile, form, error, success, saving, uploading,
         passwordForm, setPasswordForm, passwordSaving, passwordSuccess,
         handleChange, handleImageUpload, handleSave, handlePasswordChange, handleMotivationalToggle,
+        handleDisableMfa, disablingMfa, mfaError, mfaSuccess,
         profileImage,
     } = settings;
 
@@ -83,7 +87,22 @@ export default function StaffProfileView({ role }) {
                 </Card>
 
                 <PreferencesCard form={form} onMotivationalToggle={handleMotivationalToggle} staff />
+                <MfaSettingsCard
+                    profile={profile}
+                    onDisableMfa={handleDisableMfa}
+                    disablingMfa={disablingMfa}
+                    mfaError={mfaError}
+                    mfaSuccess={mfaSuccess}
+                />
                 <StaffSecurityCard profile={profile} role={role} />
+                <Card title="Staff purchases">
+                    <p style={{ fontSize: 13, color: theme.textMuted, lineHeight: 1.55, margin: '0 0 14px' }}>
+                        Billing and subscriptions are for customer accounts. Staff can buy products separately with an employee discount.
+                    </p>
+                    <Link to="/staff/shop" style={{ color: theme.accent, fontSize: 13, textDecoration: 'none', fontWeight: 600 }}>
+                        Open Staff Store →
+                    </Link>
+                </Card>
                 <PasswordCard
                     passwordForm={passwordForm}
                     setPasswordForm={setPasswordForm}

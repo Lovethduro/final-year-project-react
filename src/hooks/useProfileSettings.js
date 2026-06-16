@@ -42,6 +42,9 @@ export function useProfileSettings() {
     });
     const [passwordSaving, setPasswordSaving] = useState(false);
     const [passwordSuccess, setPasswordSuccess] = useState('');
+    const [disablingMfa, setDisablingMfa] = useState(false);
+    const [mfaError, setMfaError] = useState('');
+    const [mfaSuccess, setMfaSuccess] = useState('');
 
     useEffect(() => {
         userApi.getProfile()
@@ -143,6 +146,25 @@ export function useProfileSettings() {
         }
     };
 
+    const handleDisableMfa = async (password) => {
+        setDisablingMfa(true);
+        setMfaError('');
+        setMfaSuccess('');
+        try {
+            await userApi.disableMfa(password);
+            const updated = await userApi.getProfile();
+            setProfile(updated);
+            syncSessionFromProfile(updated, getSession());
+            setMfaSuccess('MFA has been disabled.');
+            return true;
+        } catch (err) {
+            setMfaError(err.message);
+            return false;
+        } finally {
+            setDisablingMfa(false);
+        }
+    };
+
     return {
         profile,
         form,
@@ -159,6 +181,10 @@ export function useProfileSettings() {
         handleSave,
         handlePasswordChange,
         handleMotivationalToggle,
+        handleDisableMfa,
+        disablingMfa,
+        mfaError,
+        mfaSuccess,
         profileImage: getProfileImageUrl(profile),
     };
 }

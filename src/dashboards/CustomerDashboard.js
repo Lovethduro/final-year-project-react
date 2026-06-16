@@ -107,7 +107,8 @@ export default function CustomerDashboard() {
             </div>
 
             <QuickActions actions={[
-                { label: 'Create Ticket', to: '/customer/tickets' },
+                { label: 'Contact Support', to: '/customer/support' },
+                { label: 'My Tickets', to: '/customer/tickets' },
                 { label: 'Message Sales', to: '/customer/messages' },
                 { label: 'Hot Deals', to: '/customer/hot-deals' },
                 { label: 'Help Center', to: '/dashboard/knowledge-base' },

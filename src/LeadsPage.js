@@ -61,6 +61,10 @@ export default function LeadsPage() {
     const [emailForm, setEmailForm] = useState({ subject: '', message: '' });
     const [emailSending, setEmailSending] = useState(false);
     const [emailSuccess, setEmailSuccess] = useState('');
+    const [assignLead, setAssignLead] = useState(null);
+    const [agents, setAgents] = useState([]);
+    const [assignForm, setAssignForm] = useState({ agentId: '', emergency: false, customerRequest: false, reason: '', proofUrl: '' });
+    const [assigning, setAssigning] = useState(false);
 
     const load = () => {
         setLoading(true);
@@ -80,6 +84,12 @@ export default function LeadsPage() {
             .finally(() => setLoading(false));
     };
 
+    useEffect(() => {
+        if (auth.role === 'SUPERVISOR' || auth.role === 'ADMIN') {
+            supervisorApi.salesAgents().then(setAgents).catch(() => setAgents([]));
+        }
+    }, [auth.role]);
+
     useEffect(() => { load(); }, [auth.role]);
 
     const filtered = leads.filter((lead) => {
@@ -93,12 +103,37 @@ export default function LeadsPage() {
         e.preventDefault();
         setError('');
         try {
-            await salesApi.createLead(form);
+            const create = auth.role === 'SUPERVISOR' || auth.role === 'ADMIN'
+                ? supervisorApi.createLead(form)
+                : salesApi.createLead(form);
+            await create;
             setShowForm(false);
             setForm({ name: '', email: '', phone: '', company: '', source: 'website' });
             load();
         } catch (err) {
             setError(err.message);
+        }
+    };
+
+    const submitAssign = async (e) => {
+        e.preventDefault();
+        if (!assignLead) return;
+        setAssigning(true);
+        setError('');
+        try {
+            const result = await supervisorApi.assignLead(assignLead.id, assignForm);
+            setAssignLead(null);
+            setAssignForm({ agentId: '', emergency: false, customerRequest: false, reason: '', proofUrl: '' });
+            if (result.needsApproval) {
+                setEmailSuccess(result.message || 'Sent for admin approval.');
+            } else {
+                setEmailSuccess(result.message || 'Lead assigned.');
+            }
+            load();
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setAssigning(false);
         }
     };
 
@@ -187,8 +222,10 @@ export default function LeadsPage() {
                         <Select value={form.source} onChange={(e) => setForm({ ...form, source: e.target.value })}>
                             <option value="website">Website</option>
                             <option value="referral">Referral</option>
+                            <option value="linkedin">LinkedIn</option>
                             <option value="event">Event</option>
                             <option value="cold_call">Cold Call</option>
+                            <option value="social">Social</option>
                         </Select>
                         <PrimaryButton type="submit">Save Lead</PrimaryButton>
                     </form>
@@ -226,7 +263,16 @@ export default function LeadsPage() {
                                 label: 'Actions',
                                 render: (r) => (
                                     <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                                        {r.conversationId && (
+                                        {(auth.role === 'SUPERVISOR' || auth.role === 'ADMIN') && (
+                                            <button
+                                                type="button"
+                                                onClick={() => { setAssignLead(r); setAssignForm({ agentId: '', emergency: false, customerRequest: false, reason: '', proofUrl: '' }); }}
+                                                style={{ fontSize: 12, color: theme.accent, background: 'transparent', border: `1px solid ${theme.border}`, borderRadius: 6, padding: '4px 8px', cursor: 'pointer' }}
+                                            >
+                                                Assign
+                                            </button>
+                                        )}
+                                        {auth.role === 'SALES_AGENT' && r.conversationId && (
                                             <Link
                                                 to={`/sales/messages?conversation=${r.conversationId}`}
                                                 style={{
@@ -241,7 +287,7 @@ export default function LeadsPage() {
                                                 Message
                                             </Link>
                                         )}
-                                        {r.email && (
+                                        {auth.role === 'SALES_AGENT' && r.email && (
                                             <button
                                                 type="button"
                                                 onClick={() => openEmailModal(r)}
@@ -265,7 +311,7 @@ export default function LeadsPage() {
                             {
                                 key: 'status',
                                 label: 'Status',
-                                render: (r) => ['ADMIN', 'SUPERVISOR', 'SALES_AGENT'].includes(auth.role) ? (
+                                render: (r) => auth.role === 'SALES_AGENT' ? (
                                     <Select
                                         value={r.status || 'new'}
                                         onChange={(e) => updateStatus(r.id, e.target.value)}
@@ -371,6 +417,40 @@ export default function LeadsPage() {
                                 <PrimaryButton type="submit" disabled={emailSending}>
                                     {emailSending ? 'Sending…' : 'Send email'}
                                 </PrimaryButton>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+            {assignLead && (
+                <div role="dialog" aria-modal="true" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, zIndex: 1000 }} onClick={() => !assigning && setAssignLead(null)}>
+                    <div style={{ ...inputStyle, width: '100%', maxWidth: 520, background: theme.bgCard, borderRadius: 12, padding: 24, marginBottom: 0 }} onClick={(e) => e.stopPropagation()}>
+                        <h3 style={{ fontFamily: theme.fontHeading, color: theme.text, margin: '0 0 8px', fontSize: 18 }}>Assign {assignLead.name}</h3>
+                        <p style={{ color: theme.textMuted, fontSize: 13, margin: '0 0 16px' }}>
+                            Assign to the sales agent with the lightest load. Same agent cannot be assigned more than once per month unless you request an exception with proof.
+                        </p>
+                        <form onSubmit={submitAssign}>
+                            <Select required value={assignForm.agentId} onChange={(e) => setAssignForm({ ...assignForm, agentId: e.target.value })} style={{ marginBottom: 12 }}>
+                                <option value="">Select sales agent</option>
+                                {agents.map((a) => (
+                                    <option key={a.id} value={a.id} disabled={!a.canAssign}>
+                                        {a.name} ({a.activeLeads} active leads){!a.canAssign ? ' — at capacity' : ''}
+                                    </option>
+                                ))}
+                            </Select>
+                            <label style={{ display: 'flex', gap: 8, fontSize: 12, color: theme.textMuted, marginBottom: 8 }}>
+                                <input type="checkbox" checked={assignForm.emergency} onChange={(e) => setAssignForm({ ...assignForm, emergency: e.target.checked })} />
+                                Emergency exception (requires admin approval)
+                            </label>
+                            <label style={{ display: 'flex', gap: 8, fontSize: 12, color: theme.textMuted, marginBottom: 8 }}>
+                                <input type="checkbox" checked={assignForm.customerRequest} onChange={(e) => setAssignForm({ ...assignForm, customerRequest: e.target.checked })} />
+                                Customer specifically requested this agent (attach proof)
+                            </label>
+                            <input style={inputStyle} placeholder="Reason / notes" value={assignForm.reason} onChange={(e) => setAssignForm({ ...assignForm, reason: e.target.value })} />
+                            <input style={inputStyle} placeholder="Proof URL (optional)" value={assignForm.proofUrl} onChange={(e) => setAssignForm({ ...assignForm, proofUrl: e.target.value })} />
+                            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+                                <button type="button" onClick={() => setAssignLead(null)} disabled={assigning} style={{ padding: '10px 16px', borderRadius: 8, border: `1px solid ${theme.border}`, background: 'transparent', color: theme.textMuted, cursor: 'pointer' }}>Cancel</button>
+                                <PrimaryButton type="submit" disabled={assigning}>{assigning ? 'Assigning…' : 'Assign lead'}</PrimaryButton>
                             </div>
                         </form>
                     </div>

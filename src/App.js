@@ -28,7 +28,9 @@ import TicketsPage from './TicketsPage';
 import SalesPage from './SalesPage';
 import LeadsPage from './LeadsPage';
 import AnalyticsPage from './AnalyticsPage';
+import FeedbackPage from './FeedbackPage';
 import PerformancePage from './PerformancePage';
+import StaffShopPage from './dashboards/StaffShopPage';
 import KnowledgeBasePage from './KnowledgeBasePage';
 import UserManagementPage from './UserManagementPage';
 import RolePermissionsPage from './RolePermissionsPage';
@@ -52,9 +54,18 @@ import { contentApi, productApi } from './utils/apiClient';
 import CustomerDashboard from './dashboards/CustomerDashboard';
 import CustomerProductsPage from './dashboards/CustomerProductsPage';
 import CustomerTicketsPage from './dashboards/CustomerTicketsPage';
+import ContactSupportPage from './dashboards/ContactSupportPage';
+import PublicSupportPage from './PublicSupportPage';
+import SupportPortalPage from './SupportPortalPage';
+import PublicHelpPage from './PublicHelpPage';
 import CustomerMessagesPage from './dashboards/CustomerMessagesPage';
 import SalesPlaybookPage from './SalesPlaybookPage';
 import SalesMessagesPage from './dashboards/SalesMessagesPage';
+import TeamChatPage from './dashboards/TeamChatPage';
+import CalendarPage from './dashboards/CalendarPage';
+import LeavePage from './dashboards/LeavePage';
+import BroadcastPage from './dashboards/BroadcastPage';
+import ApprovalsPage from './dashboards/ApprovalsPage';
 import SalesAgentDashboard from './dashboards/SalesAgentDashboard';
 import SupportAgentDashboard from './dashboards/SupportAgentDashboard';
 import SupervisorDashboard from './dashboards/SupervisorDashboard';
@@ -1177,6 +1188,8 @@ function AppShell() {
     || location.pathname.startsWith('/sales/')
     || location.pathname.startsWith('/support/')
     || location.pathname.startsWith('/supervisor/')
+    || location.pathname.startsWith('/staff/')
+    || location.pathname.startsWith('/team/')
     || location.pathname === '/profile';
   const [scrolled, setScrolled] = useState(false);
   const [auth, setAuth] = useState(null);
@@ -1505,6 +1518,9 @@ function AppShell() {
             <Route path="/payment/callback" element={<PaymentCallbackPage />} />
             <Route path="/survey/purchase/:token" element={<PurchaseSurveyPage />} />
             <Route path="/quote/portal/:token" element={<QuotePortalPage />} />
+            <Route path="/support" element={<PublicSupportPage />} />
+            <Route path="/support/portal/:token" element={<SupportPortalPage />} />
+            <Route path="/help" element={<PublicHelpPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
@@ -1520,9 +1536,15 @@ function AppShell() {
             <Route path="/customer/dashboard" element={<ProtectedRoute roles={['CUSTOMER']}><CustomerDashboard /></ProtectedRoute>} />
             <Route path="/customer/products" element={<ProtectedRoute roles={['CUSTOMER']}><CustomerProductsPage /></ProtectedRoute>} />
             <Route path="/customer/tickets" element={<ProtectedRoute roles={['CUSTOMER']}><CustomerTicketsPage /></ProtectedRoute>} />
+            <Route path="/customer/support" element={<ProtectedRoute roles={['CUSTOMER']}><ContactSupportPage /></ProtectedRoute>} />
             <Route path="/customer/messages" element={<ProtectedRoute roles={['CUSTOMER']}><CustomerMessagesPage /></ProtectedRoute>} />
             <Route path="/customer/hot-deals" element={<ProtectedRoute roles={['CUSTOMER']}><HotDealsPage /></ProtectedRoute>} />
-            <Route path="/sales/messages" element={<ProtectedRoute roles={['SALES_AGENT', 'SUPERVISOR', 'ADMIN']}><SalesMessagesPage /></ProtectedRoute>} />
+            <Route path="/sales/messages" element={<ProtectedRoute roles={['SALES_AGENT', 'SUPERVISOR']}><SalesMessagesPage /></ProtectedRoute>} />
+            <Route path="/team/messages" element={<ProtectedRoute roles={['SALES_AGENT', 'SUPPORT_AGENT', 'SUPERVISOR', 'ADMIN']}><TeamChatPage /></ProtectedRoute>} />
+            <Route path="/dashboard/calendar" element={<ProtectedRoute roles={['ADMIN', 'SUPERVISOR', 'SALES_AGENT', 'SUPPORT_AGENT']}><CalendarPage /></ProtectedRoute>} />
+            <Route path="/dashboard/leave" element={<ProtectedRoute roles={['ADMIN', 'SUPERVISOR', 'SALES_AGENT', 'SUPPORT_AGENT']}><LeavePage /></ProtectedRoute>} />
+            <Route path="/dashboard/broadcast" element={<ProtectedRoute roles={['ADMIN', 'SUPERVISOR']}><BroadcastPage /></ProtectedRoute>} />
+            <Route path="/dashboard/approvals" element={<ProtectedRoute roles={['ADMIN', 'SUPERVISOR']}><ApprovalsPage /></ProtectedRoute>} />
             <Route path="/sales/playbook" element={<ProtectedRoute roles={['SALES_AGENT', 'SUPERVISOR', 'ADMIN']}><SalesPlaybookPage /></ProtectedRoute>} />
             <Route path="/sales/dashboard" element={<ProtectedRoute roles={['SALES_AGENT']}><SalesAgentDashboard /></ProtectedRoute>} />
             <Route path="/support/dashboard" element={<ProtectedRoute roles={['SUPPORT_AGENT']}><SupportAgentDashboard /></ProtectedRoute>} />
@@ -1532,11 +1554,13 @@ function AppShell() {
             <Route path="/dashboard/sales" element={<ProtectedRoute roles={['ADMIN', 'SUPERVISOR', 'SALES_AGENT']}><SalesPage /></ProtectedRoute>} />
             <Route path="/dashboard/leads" element={<ProtectedRoute roles={['ADMIN', 'SUPERVISOR', 'SALES_AGENT']}><LeadsPage /></ProtectedRoute>} />
             <Route path="/dashboard/analytics" element={<ProtectedRoute roles={['ADMIN', 'SUPERVISOR']}><AnalyticsPage /></ProtectedRoute>} />
+            <Route path="/dashboard/feedback" element={<ProtectedRoute roles={['ADMIN', 'SUPERVISOR']}><FeedbackPage /></ProtectedRoute>} />
             <Route path="/dashboard/performance" element={<ProtectedRoute roles={['ADMIN', 'SUPERVISOR']}><PerformancePage /></ProtectedRoute>} />
             <Route path="/dashboard/knowledge-base" element={<ProtectedRoute roles={['ADMIN', 'SUPERVISOR', 'SUPPORT_AGENT', 'CUSTOMER']}><KnowledgeBasePage /></ProtectedRoute>} />
             <Route path="/dashboard/users" element={<ProtectedRoute roles={['ADMIN', 'SUPERVISOR']}><UserManagementPage /></ProtectedRoute>} />
             <Route path="/dashboard/roles" element={<ProtectedRoute roles={['ADMIN']}><RolePermissionsPage /></ProtectedRoute>} />
-            <Route path="/dashboard/billing" element={<ProtectedRoute roles={['ADMIN', 'SUPERVISOR', 'CUSTOMER']}><BillingPage /></ProtectedRoute>} />
+            <Route path="/dashboard/billing" element={<ProtectedRoute roles={['CUSTOMER', 'ADMIN', 'SUPERVISOR', 'SALES_AGENT', 'SUPPORT_AGENT']}><BillingPage /></ProtectedRoute>} />
+            <Route path="/staff/shop" element={<ProtectedRoute roles={['ADMIN', 'SUPERVISOR', 'SALES_AGENT', 'SUPPORT_AGENT']}><StaffShopPage /></ProtectedRoute>} />
             <Route path="/dashboard/compliance" element={<ProtectedRoute roles={['ADMIN']}><ComplianceReportsPage /></ProtectedRoute>} />
             <Route path="/dashboard/data" element={<ProtectedRoute roles={['ADMIN']}><DataManagementPage /></ProtectedRoute>} />
             <Route path="/dashboard/modules" element={<ProtectedRoute roles={['ADMIN']}><ModuleConfigPage /></ProtectedRoute>} />

@@ -1,7 +1,9 @@
 import { DashboardLayout } from '../DashboardLayout';
 import { PageHeader, Card, PrimaryButton, Select } from '../ui';
 import { inputStyle } from '../../styles/theme';
-import { formatPaymentMethod } from '../../utils/apiClient';
+import { formatPaymentMethod, referralApi } from '../../utils/apiClient';
+import { useEffect, useState } from 'react';
+import { theme } from '../../styles/theme';
 import { useProfileSettings } from '../../hooks/useProfileSettings';
 import {
     labelStyle,
@@ -10,16 +12,23 @@ import {
     PreferencesCard,
     PasswordCard,
     CustomerSecurityCard,
+    MfaSettingsCard,
 } from './profileSections';
 
 export default function CustomerProfileView() {
+    const [referral, setReferral] = useState(null);
     const settings = useProfileSettings();
     const {
         profile, form, error, success, saving, uploading,
         passwordForm, setPasswordForm, passwordSaving, passwordSuccess,
         handleChange, handleImageUpload, handleSave, handlePasswordChange, handleMotivationalToggle,
+        handleDisableMfa, disablingMfa, mfaError, mfaSuccess,
         profileImage,
     } = settings;
+
+    useEffect(() => {
+        referralApi.mine().then(setReferral).catch(() => setReferral(null));
+    }, []);
 
     return (
         <DashboardLayout>
@@ -79,6 +88,28 @@ export default function CustomerProfileView() {
                 </Card>
 
                 <PreferencesCard form={form} onMotivationalToggle={handleMotivationalToggle} />
+                {referral && (
+                    <Card title="Referrals & Rewards">
+                        <p style={{ fontSize: 13, color: theme.textMuted, margin: '0 0 10px' }}>{referral.inviteMessage}</p>
+                        <div style={{ fontSize: 22, fontWeight: 700, color: theme.accent, letterSpacing: 1, marginBottom: 8 }}>{referral.referralCode}</div>
+                        <div style={{ fontSize: 13, color: theme.textMuted }}>
+                            Successful referrals: <strong>{referral.successfulReferrals}</strong>
+                            {referral.earnedDiscountPercent > 0 && (
+                                <> · Current reward: <strong>{referral.earnedDiscountPercent}% off</strong></>
+                            )}
+                            {referral.nextTierAt > 0 && (
+                                <> · Next tier at <strong>{referral.nextTierAt}</strong> referrals ({referral.nextTierDiscountPercent}% off)</>
+                            )}
+                        </div>
+                    </Card>
+                )}
+                <MfaSettingsCard
+                    profile={profile}
+                    onDisableMfa={handleDisableMfa}
+                    disablingMfa={disablingMfa}
+                    mfaError={mfaError}
+                    mfaSuccess={mfaSuccess}
+                />
                 <CustomerSecurityCard profile={profile} formatPaymentMethod={formatPaymentMethod} />
                 <PasswordCard
                     passwordForm={passwordForm}

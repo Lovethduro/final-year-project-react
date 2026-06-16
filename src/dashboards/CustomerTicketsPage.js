@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { DashboardLayout } from '../components/DashboardLayout';
 import { PageHeader, Card, DataTable, StatusBadge, PrimaryButton, Alert, Select } from '../components/ui';
 import { useAuth } from '../hooks/useAuth';
@@ -22,6 +23,7 @@ export default function CustomerTicketsPage() {
     const [ticketRating, setTicketRating] = useState(0);
     const [ticketRatingComment, setTicketRatingComment] = useState('');
     const [ticketRated, setTicketRated] = useState(false);
+    const [estimatedResponse, setEstimatedResponse] = useState(null);
 
     const loadTickets = () => {
         customerApi.tickets().then(setTickets).catch((err) => setError(err.message));
@@ -38,6 +40,7 @@ export default function CustomerTicketsPage() {
             const data = await customerApi.getTicket(id);
             setSelected(data.ticket);
             setMessages(data.messages || []);
+            setEstimatedResponse(data.estimatedResponse || null);
         } catch (err) {
             setError(err.message);
         }
@@ -95,7 +98,24 @@ export default function CustomerTicketsPage() {
             <PageHeader
                 title="My Support Tickets"
                 subtitle="Only your tickets are shown here"
-                action={<PrimaryButton onClick={() => setShowForm(true)}>+ New Ticket</PrimaryButton>}
+                action={(
+                    <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                        <Link
+                            to="/customer/support"
+                            style={{
+                                fontSize: 13,
+                                color: theme.accent,
+                                textDecoration: 'none',
+                                padding: '8px 14px',
+                                border: `0.5px solid ${theme.border}`,
+                                borderRadius: 8,
+                            }}
+                        >
+                            Contact Support
+                        </Link>
+                        <PrimaryButton onClick={() => setShowForm(true)}>+ New Ticket</PrimaryButton>
+                    </div>
+                )}
             />
             {error && <Alert type="error">{error}</Alert>}
 
@@ -110,6 +130,7 @@ export default function CustomerTicketsPage() {
                             <option value="technical">Technical</option>
                         </Select>
                         <Select value={form.priority} onChange={(e) => setForm({ ...form, priority: e.target.value })}>
+                            <option value="urgent">Urgent</option>
                             <option value="low">Low</option>
                             <option value="medium">Medium</option>
                             <option value="high">High</option>
@@ -149,6 +170,21 @@ export default function CustomerTicketsPage() {
                             Status: <StatusBadge status={selected.status === 'resolved' ? 'success' : 'warning'} label={selected.status} />
                             {' · '}Priority: {selected.priority}
                         </div>
+                        {estimatedResponse && (
+                            <div style={{
+                                marginBottom: 12,
+                                borderRadius: 8,
+                                border: `0.5px solid ${theme.accent}55`,
+                                background: 'rgba(56,189,248,0.08)',
+                                padding: '10px 12px',
+                                fontSize: 12,
+                                color: theme.textMuted,
+                            }}>
+                                <span style={{ color: theme.text, fontWeight: 600 }}>Estimated first response:</span>{' '}
+                                <span style={{ color: theme.accent, fontWeight: 600 }}>{estimatedResponse.estimatedLabel}</span>
+                                {' · '}SLA target: {estimatedResponse.policyLabel}
+                            </div>
+                        )}
                         <p style={{ fontSize: 14, color: theme.text, marginBottom: 12 }}>{selected.description}</p>
                         {selected.assigneeName && (
                             <AgentChatHeader
@@ -193,7 +229,7 @@ export default function CustomerTicketsPage() {
                         {ticketRated && (
                             <p style={{ fontSize: 13, color: theme.success, marginTop: 12 }}>Thank you for your feedback!</p>
                         )}
-                        <button type="button" onClick={() => setSelected(null)} style={{ marginTop: 12, background: 'transparent', border: 'none', color: theme.textDim, cursor: 'pointer', fontSize: 12 }}>← Back to list</button>
+                        <button type="button" onClick={() => { setSelected(null); setEstimatedResponse(null); }} style={{ marginTop: 12, background: 'transparent', border: 'none', color: theme.textDim, cursor: 'pointer', fontSize: 12 }}>← Back to list</button>
                     </Card>
                 )}
             </div>

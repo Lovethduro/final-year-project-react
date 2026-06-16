@@ -120,9 +120,9 @@ export default function SupervisorDashboard() {
             <QuickActions actions={[
                 { to: '/dashboard/tickets', label: 'View All Tickets' },
                 { to: '/dashboard/performance', label: 'Team Performance' },
-                { to: '/dashboard/analytics', label: 'Broadcast Message' },
-                { to: '/dashboard/tickets', label: 'View Escalations' },
-                { to: '/dashboard/analytics', label: 'Generate Report' },
+                { to: '/dashboard/broadcast', label: 'Broadcast Message' },
+                { to: '/dashboard/approvals', label: 'Approvals' },
+                { to: '/team/messages', label: 'Message Admin' },
             ]} />
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 20 }}>
@@ -154,10 +154,10 @@ export default function SupervisorDashboard() {
                                     { key: 'email', label: 'Email' },
                                     { key: 'role', label: 'Role' },
                                     { key: 'type', label: 'Type' },
-                                    { key: 'actions', label: '', render: (r) => (
+                                    { key: 'actions', label: 'Actions', render: (r) => (
                                         <div style={{ display: 'flex', gap: 8 }}>
-                                            <button type="button" disabled={actionId === r.id} onClick={() => handleApprove(r.id)} style={{ padding: '4px 10px', borderRadius: 6, border: 'none', background: theme.success, color: '#fff', fontSize: 11, cursor: 'pointer' }}>Approve</button>
-                                            <button type="button" disabled={actionId === r.id} onClick={() => handleReject(r.id)} style={{ padding: '4px 10px', borderRadius: 6, border: `0.5px solid ${theme.border}`, background: 'transparent', color: theme.textMuted, fontSize: 11, cursor: 'pointer' }}>Reject</button>
+                                            <button type="button" disabled={actionId === (r.id || r.approvalId)} onClick={() => handleApprove(r.id || r.approvalId)} style={{ padding: '4px 10px', borderRadius: 6, border: 'none', background: theme.success, color: '#fff', fontSize: 11, cursor: 'pointer' }}>Approve</button>
+                                            <button type="button" disabled={actionId === (r.id || r.approvalId)} onClick={() => handleReject(r.id || r.approvalId)} style={{ padding: '4px 10px', borderRadius: 6, border: `0.5px solid ${theme.border}`, background: 'transparent', color: theme.textMuted, fontSize: 11, cursor: 'pointer' }}>Reject</button>
                                         </div>
                                     )},
                                 ]}

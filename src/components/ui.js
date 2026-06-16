@@ -54,7 +54,7 @@ export function StatCard({ title, value, trend, status = 'info', progress, progr
                 <div style={{ fontSize: 11, letterSpacing: '0.05em', textTransform: 'uppercase', color: theme.textDim, fontWeight: 500 }}>{title}</div>
                 {trend && (
                     <span style={{ fontSize: 12, color: trend.isPositive ? theme.success : theme.error }}>
-                        {trend.isPositive ? '+' : '-'}{trend.value}%
+                        {trend.isPositive ? '+' : '-'}{trend.value}{trend.suffix ?? '%'}
                     </span>
                 )}
             </div>

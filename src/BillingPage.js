@@ -4,6 +4,7 @@ import { PageHeader, Card, DataTable, StatusBadge, StatCard, PrimaryButton, Aler
 import { customerApi, paymentApi, userApi, getSession } from './utils/apiClient';
 import { storeAuthSession } from './utils/authFlow';
 import { refreshNotifications } from './utils/notifications';
+import { completePaymentIfNeeded } from './utils/paymentUtils';
 import { theme } from './styles/theme';
 
 function formatAmount(kobo) {
@@ -12,8 +13,10 @@ function formatAmount(kobo) {
 }
 
 export default function BillingPage() {
+    const session = getSession();
+    const isStaff = ['ADMIN', 'SUPERVISOR', 'SALES_AGENT', 'SUPPORT_AGENT'].includes(session.role);
     const [overview, setOverview] = useState(null);
-    const [tab, setTab] = useState('invoices');
+    const [tab, setTab] = useState(isStaff ? 'transactions' : 'invoices');
     const [error, setError] = useState('');
     const [paying, setPaying] = useState(null);
     const [provider, setProvider] = useState('paystack');
@@ -64,8 +67,7 @@ export default function BillingPage() {
                 ? await paymentApi.initPaystack({ amount: invoice.amount, description: invoice.description, invoiceId: invoice.id })
                 : await paymentApi.initFlutterwave({ amount: invoice.amount, description: invoice.description, invoiceId: invoice.id });
 
-            if (init.sandbox || init.authorizationUrl?.includes('sandbox=1')) {
-                await paymentApi.sandboxComplete(init.reference);
+            if (await completePaymentIfNeeded(init, paymentApi)) {
                 load();
                 userApi.getProfile().then((updated) => {
                     const session = getSession();
@@ -101,17 +103,20 @@ export default function BillingPage() {
 
     return (
         <DashboardLayout>
-            <PageHeader title="Billing & Subscriptions" subtitle="Manage invoices and pay with Paystack or Flutterwave (sandbox)" />
+            <PageHeader
+                title={isStaff ? 'Purchases & Payments' : 'Billing & Subscriptions'}
+                subtitle={isStaff ? 'View your staff store purchases and payment history' : 'Manage invoices and pay with Paystack or Flutterwave'}
+            />
             {error && <Alert type="error">{error}</Alert>}
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16, marginBottom: 20 }}>
-                <StatCard title="Monthly Revenue" value={formatAmount(overview?.monthlyRevenue)} icon="💰" status="success" />
-                <StatCard title="Paid Invoices" value={overview?.activePlans ?? 0} icon="📋" status="info" />
-                <StatCard title="Pending" value={overview?.pendingInvoices ?? 0} icon="⏳" status="warning" />
+                <StatCard title={isStaff ? 'Total Spent' : 'Monthly Revenue'} value={formatAmount(overview?.monthlyRevenue)} icon="💰" status="success" />
+                <StatCard title={isStaff ? 'Successful Payments' : 'Paid Invoices'} value={overview?.activePlans ?? 0} icon="📋" status="info" />
+                {!isStaff && <StatCard title="Pending" value={overview?.pendingInvoices ?? 0} icon="⏳" status="warning" />}
             </div>
 
             <div style={{ display: 'flex', gap: 12, marginBottom: 16, alignItems: 'center', flexWrap: 'wrap' }}>
-                {['invoices', 'transactions'].map((t) => (
+                {(isStaff ? ['transactions'] : ['invoices', 'transactions']).map((t) => (
                     <button key={t} type="button" onClick={() => setTab(t)} style={{
                         padding: '8px 16px', borderRadius: 8, border: 'none', cursor: 'pointer',
                         background: tab === t ? theme.primary : 'rgba(255,255,255,0.05)',
@@ -121,8 +126,8 @@ export default function BillingPage() {
                     </button>
                 ))}
                 <Select value={provider} onChange={(e) => savePaymentPreference(e.target.value)} style={{ marginLeft: 'auto', width: 'auto' }}>
-                    <option value="paystack">Paystack (Sandbox)</option>
-                    <option value="flutterwave">Flutterwave (Sandbox)</option>
+                    <option value="paystack">Paystack</option>
+                    <option value="flutterwave">Flutterwave</option>
                 </Select>
             </div>
 

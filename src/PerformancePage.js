@@ -1,28 +1,43 @@
+import { useEffect, useState } from 'react';
 import { DashboardLayout } from './components/DashboardLayout';
-import { PageHeader, Card, DataTable, StatusBadge } from './components/ui';
-
-const agents = [
-    { id: '1', name: 'Jane Smith', role: 'Support Agent', ticketsResolved: 48, avgResponse: '1.8h', rating: 4.9 },
-    { id: '2', name: 'David Park', role: 'Support Agent', ticketsResolved: 42, avgResponse: '2.1h', rating: 4.7 },
-    { id: '3', name: 'Mike Sales', role: 'Sales Agent', ticketsResolved: 35, avgResponse: '2.4h', rating: 4.6 },
-    { id: '4', name: 'Emily Support', role: 'Support Agent', ticketsResolved: 51, avgResponse: '1.6h', rating: 4.8 },
-];
+import { PageHeader, Card, DataTable, StatusBadge, Alert } from './components/ui';
+import { analyticsApi } from './utils/apiClient';
 
 export default function PerformancePage() {
+    const [agents, setAgents] = useState([]);
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        analyticsApi.performance()
+            .then(setAgents)
+            .catch((err) => setError(err.message))
+            .finally(() => setLoading(false));
+    }, []);
+
     return (
         <DashboardLayout>
-            <PageHeader title="Agent Performance" subtitle="Leaderboard and team productivity metrics" />
+            <PageHeader title="Agent Performance" subtitle="Live leaderboard from tickets and leads" />
+            {error && <Alert type="error">{error}</Alert>}
             <Card title="Leaderboard">
-                <DataTable
-                    columns={[
-                        { key: 'name', label: 'Agent' },
-                        { key: 'role', label: 'Role' },
-                        { key: 'ticketsResolved', label: 'Resolved' },
-                        { key: 'avgResponse', label: 'Avg Response' },
-                        { key: 'rating', label: 'Rating', render: (row) => <StatusBadge status="success" label={`${row.rating}/5`} /> },
-                    ]}
-                    rows={agents}
-                />
+                {loading ? <p>Loading…</p> : (
+                    <DataTable
+                        columns={[
+                            { key: 'name', label: 'Agent' },
+                            { key: 'role', label: 'Role' },
+                            { key: 'ticketsResolved', label: 'Tickets Resolved' },
+                            { key: 'leadsOwned', label: 'Leads Owned' },
+                            { key: 'avgResponse', label: 'Avg Response' },
+                            { key: 'rating', label: 'Rating', render: (row) => (
+                                typeof row.rating === 'number'
+                                    ? <StatusBadge status="success" label={`${row.rating}/5`} />
+                                    : row.rating
+                            ) },
+                        ]}
+                        rows={agents}
+                        emptyMessage="No agent performance data yet."
+                    />
+                )}
             </Card>
         </DashboardLayout>
     );

@@ -211,6 +211,8 @@ function RegisterPage() {
         companyName: "",
         password: "",
         confirmPassword: "",
+        hearAboutUs: "",
+        referralCode: "",
     });
     const [selectedCustomerType, setSelectedCustomerType] = useState("");
     const [customerTypeOpen, setCustomerTypeOpen] = useState(false);
@@ -334,7 +336,9 @@ function RegisterPage() {
             phone: fullPhoneNumber,
             companyName: needsCompanyName ? capitalizeWords(formData.companyName.trim()) : null,
             customerType: selectedCustomerType,
-            password: formData.password
+            password: formData.password,
+            hearAboutUs: formData.hearAboutUs || null,
+            referralCode: formData.referralCode?.trim() || null,
         };
 
         try {
@@ -792,6 +796,54 @@ function RegisterPage() {
                                     </div>
                                 </div>
                             )}
+
+                            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                                <label style={{ fontSize: "12px", fontWeight: "500", color: "rgba(255,255,255,0.7)", marginLeft: "4px" }}>
+                                    How did you hear about us?
+                                </label>
+                                <select
+                                    value={formData.hearAboutUs}
+                                    onChange={(e) => handleChange("hearAboutUs", e.target.value)}
+                                    style={{
+                                        width: "100%",
+                                        padding: "10px 12px",
+                                        background: "rgba(15,23,42,0.5)",
+                                        border: "1px solid rgba(51,65,85,1)",
+                                        borderRadius: "10px",
+                                        fontSize: "14px",
+                                        color: "#fff",
+                                    }}
+                                >
+                                    <option value="">Select an option</option>
+                                    <option value="website">Website / Search</option>
+                                    <option value="referral">Referral</option>
+                                    <option value="linkedin">LinkedIn</option>
+                                    <option value="event">Event</option>
+                                    <option value="social">Social media</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+
+                            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                                <label style={{ fontSize: "12px", fontWeight: "500", color: "rgba(255,255,255,0.7)", marginLeft: "4px" }}>
+                                    Referral code (optional)
+                                </label>
+                                <input
+                                    type="text"
+                                    value={formData.referralCode}
+                                    onChange={(e) => handleChange("referralCode", e.target.value.toUpperCase())}
+                                    placeholder="Enter a friend's code"
+                                    style={{
+                                        width: "100%",
+                                        padding: "10px 12px",
+                                        background: "rgba(15,23,42,0.5)",
+                                        border: "1px solid rgba(51,65,85,1)",
+                                        borderRadius: "10px",
+                                        fontSize: "14px",
+                                        color: "#fff",
+                                    }}
+                                />
+                            </div>
 
                             {/* Password with requirements */}
                             <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
