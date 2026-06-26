@@ -139,9 +139,9 @@ export function DonutChart({ slices }) {
             }} />
             <div style={{ flex: 1 }}>
                 {slices.map((slice) => (
-                    <div key={slice.label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 6 }}>
+                    <div key={slice.label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 6, gap: 12 }}>
                         <span style={{ color: theme.textMuted }}><span style={{ color: slice.color }}>●</span> {slice.label}</span>
-                        <span style={{ color: theme.text }}>{slice.value}</span>
+                        <span style={{ color: theme.text, whiteSpace: 'nowrap' }}>{slice.display ?? slice.value}</span>
                     </div>
                 ))}
             </div>

@@ -122,7 +122,6 @@ export default function SupervisorDashboard() {
                 { to: '/dashboard/performance', label: 'Team Performance' },
                 { to: '/dashboard/broadcast', label: 'Broadcast Message' },
                 { to: '/dashboard/approvals', label: 'Approvals' },
-                { to: '/team/messages', label: 'Message Admin' },
             ]} />
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 20 }}>
@@ -216,7 +215,11 @@ export default function SupervisorDashboard() {
                         {(overview?.teamAvailability || []).map((m) => (
                             <div key={m.userId} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: `0.5px solid ${theme.border}` }}>
                                 <span style={{ fontSize: 13, color: theme.text }}>{m.name}</span>
-                                <StatusBadge status={m.status === 'available' ? 'success' : m.status === 'busy' ? 'error' : 'warning'} label={m.status?.replace('_', ' ')} />
+                                <StatusBadge status={
+                                    m.status === 'available' || m.status === 'online' ? 'success'
+                                        : m.status === 'busy' || m.status === 'unavailable' || m.status === 'offline' ? 'error'
+                                            : 'warning'
+                                } label={m.status?.replace('_', ' ')} />
                             </div>
                         ))}
                     </Card>

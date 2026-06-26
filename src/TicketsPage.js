@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { DashboardLayout } from './components/DashboardLayout';
-import { PageHeader, Card, DataTable, StatusBadge, SearchInput, StatCard, PrimaryButton, Alert, Select } from './components/ui';
+import { PageHeader, Card, DataTable, StatusBadge, SearchInput, StatCard, PrimaryButton, Alert, Select, ConfirmDialog } from './components/ui';
 import { adminApi, supportApi, assetUrl } from './utils/apiClient';
 import { useAuth } from './hooks/useAuth';
 import { theme } from './styles/theme';
@@ -53,6 +53,7 @@ export default function TicketsPage() {
     const [timeline, setTimeline] = useState([]);
     const [duplicates, setDuplicates] = useState([]);
     const [mergingId, setMergingId] = useState(null);
+    const [mergeConfirm, setMergeConfirm] = useState(null);
     const [reply, setReply] = useState('');
     const [macros, setMacros] = useState([]);
     const [selectedMacroId, setSelectedMacroId] = useState('');
@@ -64,6 +65,9 @@ export default function TicketsPage() {
     const [agents, setAgents] = useState([]);
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
+    const [takingOver, setTakingOver] = useState(false);
+
+    const isAdmin = auth.role === 'ADMIN';
 
     const reload = useCallback(() => {
         const load = auth.role === 'SUPPORT_AGENT'
@@ -99,8 +103,30 @@ export default function TicketsPage() {
             setSelected(data.ticket);
             setTimeline(timelineData || []);
             setDuplicates(duplicateData || []);
+            if (auth.role === 'ADMIN') {
+                const ticket = data.ticket;
+                setInternalNote(!(ticket.adminTakeover || ticket.slaEscalated));
+            }
         } catch (err) {
             setError(err.message);
+        }
+    };
+
+    const handleTakeover = async () => {
+        if (!selected) return;
+        setError('');
+        setTakingOver(true);
+        try {
+            const ticket = await supportApi.takeover(selected.id);
+            setSelected(ticket);
+            setInternalNote(false);
+            setMessage('You have taken over this ticket. The customer has been notified.');
+            await openTicket(selected.id);
+            reload();
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setTakingOver(false);
         }
     };
 
@@ -108,10 +134,11 @@ export default function TicketsPage() {
         e.preventDefault();
         if (!selected || !reply.trim()) return;
         setError('');
+        const noteOnly = isAdmin && !(selected.adminTakeover || selected.slaEscalated);
         try {
-            await supportApi.respond(selected.id, reply.trim(), internalNote);
+            await supportApi.respond(selected.id, reply.trim(), noteOnly || internalNote);
             setReply('');
-            setInternalNote(false);
+            setInternalNote(isAdmin && !(selected.adminTakeover || selected.slaEscalated));
             await openTicket(selected.id);
             reload();
         } catch (err) {
@@ -199,21 +226,28 @@ export default function TicketsPage() {
         setReply((prev) => (prev?.trim() ? `${prev}\n\n${text}` : text));
     };
 
-    const handleMergeDuplicate = async (duplicateId) => {
+    const openMergeConfirm = (duplicateId) => {
         if (!selected || !duplicateId) return;
         const duplicate = duplicates.find((d) => d.id === duplicateId);
         const label = duplicate?.ticketNumber || duplicateId.slice(-6).toUpperCase();
-        if (!window.confirm(
-            `Merge ${label} (“${duplicate?.subject || 'other ticket'}”) into this ticket (“${selected.subject}”)?\n\nMessages will move here and the other ticket will be closed.`
-        )) {
-            return;
-        }
+        setMergeConfirm({
+            duplicateId,
+            label,
+            duplicateSubject: duplicate?.subject || 'other ticket',
+            primarySubject: selected.subject,
+        });
+    };
+
+    const confirmMergeDuplicate = async () => {
+        if (!selected || !mergeConfirm?.duplicateId) return;
+        const { duplicateId, label } = mergeConfirm;
         setError('');
         setMessage('');
         setMergingId(duplicateId);
         try {
             await supportApi.mergeTicket(selected.id, duplicateId);
             setMessage(`Merged ticket ${label} into this ticket.`);
+            setMergeConfirm(null);
             await openTicket(selected.id);
             reload();
         } catch (err) {
@@ -245,13 +279,23 @@ export default function TicketsPage() {
         marginBottom: 12,
     };
 
-    const canChat = selected && !['closed', 'resolved', 'merged'].includes(selected.status) && !selected.transferredToSales;
+    const ticketOpen = selected
+        && !['closed', 'resolved', 'merged'].includes(selected.status)
+        && !selected.transferredToSales;
+    const adminCanReplyToCustomer = isAdmin && ticketOpen && (selected?.adminTakeover || selected?.slaEscalated);
+    const adminNoteOnly = isAdmin && ticketOpen && !adminCanReplyToCustomer;
+    const canChat = ticketOpen && (!isAdmin || adminCanReplyToCustomer || adminNoteOnly);
+    const canManageTicket = !isAdmin || selected?.adminTakeover || selected?.slaEscalated;
 
     return (
         <DashboardLayout>
             <PageHeader
                 title="Support Tickets"
-                subtitle={auth.role === 'SUPPORT_AGENT' ? 'Chat with customers and resolve support requests' : 'Track and resolve customer support requests'}
+                subtitle={auth.role === 'SUPPORT_AGENT'
+                    ? 'Chat with customers and resolve support requests'
+                    : isAdmin
+                        ? 'Monitor support threads — add internal notes, or take over escalated tickets to reply'
+                        : 'Track and resolve customer support requests'}
             />
             {error && <Alert type="error">{error}</Alert>}
             {message && <Alert type="success">{message}</Alert>}
@@ -305,7 +349,7 @@ export default function TicketsPage() {
                                                 onClick={() => openTicket(r.id)}
                                                 style={{ fontSize: 11, padding: '4px 10px', borderRadius: 6, border: 'none', background: theme.primary, color: '#fff', cursor: 'pointer' }}
                                             >
-                                                Chat
+                                                {isAdmin ? 'View' : 'Chat'}
                                             </button>
                                         )}
                                         {auth.role === 'SUPPORT_AGENT' && !r.transferredToSales && (
@@ -352,6 +396,14 @@ export default function TicketsPage() {
                             {selected.slaEscalated && (
                                 <StatusBadge status="error" label="SLA escalated" />
                             )}
+                            {selected.adminTakeover && (
+                                <StatusBadge status="info" label="Admin takeover" />
+                            )}
+                            {isAdmin && ticketOpen && !selected.adminTakeover && (
+                                <PrimaryButton onClick={handleTakeover} disabled={takingOver} style={{ fontSize: 11, padding: '4px 12px' }}>
+                                    {takingOver ? 'Taking over…' : 'Take over ticket'}
+                                </PrimaryButton>
+                            )}
                             {auth.role === 'SUPPORT_AGENT' && !selected.assigneeId && (
                                 <PrimaryButton onClick={assignToMe} style={{ fontSize: 11, padding: '4px 12px' }}>Assign to me</PrimaryButton>
                             )}
@@ -389,7 +441,7 @@ export default function TicketsPage() {
                                     </>
                                 )
                             )}
-                            <Select value={selected.status} onChange={(e) => updateStatus(e.target.value)} style={{ width: 'auto', minWidth: 140, marginBottom: 0, fontSize: 12 }}>
+                            <Select value={selected.status} onChange={(e) => updateStatus(e.target.value)} disabled={!canManageTicket} style={{ width: 'auto', minWidth: 140, marginBottom: 0, fontSize: 12, opacity: canManageTicket ? 1 : 0.6 }}>
                                 <option value="open">Open</option>
                                 <option value="in_progress">In Progress</option>
                                 <option value="resolved">Resolved</option>
@@ -397,6 +449,34 @@ export default function TicketsPage() {
                             </Select>
                         </div>
                         <p style={{ fontSize: 14, color: theme.text, marginBottom: 12 }}>{selected.description}</p>
+                        {isAdmin && adminNoteOnly && (
+                            <div style={{
+                                marginBottom: 12,
+                                padding: '10px 12px',
+                                borderRadius: 8,
+                                fontSize: 12,
+                                color: theme.textMuted,
+                                border: `1px solid ${theme.border}`,
+                                background: 'rgba(251,191,36,0.08)',
+                            }}>
+                                Oversight mode — you can add internal notes for the team. Use <strong style={{ color: theme.text }}>Take over ticket</strong> or wait for SLA escalation to reply to the customer.
+                            </div>
+                        )}
+                        {isAdmin && adminCanReplyToCustomer && (
+                            <div style={{
+                                marginBottom: 12,
+                                padding: '10px 12px',
+                                borderRadius: 8,
+                                fontSize: 12,
+                                color: theme.textMuted,
+                                border: `1px solid ${theme.border}`,
+                                background: 'rgba(52,211,153,0.08)',
+                            }}>
+                                {selected.adminTakeover
+                                    ? 'You have taken over this ticket — customer-visible replies are enabled.'
+                                    : 'SLA escalated — you may reply to the customer on this ticket.'}
+                            </div>
+                        )}
                         {duplicates.length > 0 && (
                             <div style={{ marginBottom: 16, padding: 12, borderRadius: 8, border: `0.5px solid ${theme.warning}44`, background: 'rgba(245,158,11,0.08)' }}>
                                 <div style={{ fontSize: 12, fontWeight: 600, color: theme.warning, marginBottom: 4 }}>Likely duplicate tickets</div>
@@ -434,7 +514,7 @@ export default function TicketsPage() {
                                             <button
                                                 type="button"
                                                 disabled={mergingId === dup.id}
-                                                onClick={() => handleMergeDuplicate(dup.id)}
+                                                onClick={() => openMergeConfirm(dup.id)}
                                                 style={{ fontSize: 11, padding: '6px 12px', borderRadius: 6, border: 'none', background: dup.confidence === 'high' ? theme.warning : 'rgba(245,158,11,0.35)', color: '#111', cursor: mergingId === dup.id ? 'not-allowed' : 'pointer', opacity: mergingId === dup.id ? 0.7 : 1 }}
                                             >
                                                 {mergingId === dup.id ? 'Merging…' : 'Merge into this'}
@@ -482,7 +562,7 @@ export default function TicketsPage() {
                         </div>
                         {canChat ? (
                             <form onSubmit={sendReply}>
-                                {isStaff && (
+                                {isStaff && !adminNoteOnly && (
                                     <div style={{ marginBottom: 10 }}>
                                         <Select value={selectedMacroId} onChange={(e) => applyMacro(e.target.value)} style={{ marginBottom: 8 }}>
                                             <option value="">Insert a macro...</option>
@@ -495,16 +575,18 @@ export default function TicketsPage() {
                                 <textarea
                                     value={reply}
                                     onChange={(e) => setReply(e.target.value)}
-                                    placeholder="Write a reply to the customer..."
-                                    rows={6}
-                                    style={{ ...inputStyle, minHeight: 140, resize: 'vertical', marginBottom: 12 }}
+                                    placeholder={adminNoteOnly ? 'Add an internal note for the support team…' : 'Write a reply to the customer...'}
+                                    rows={adminNoteOnly ? 4 : 6}
+                                    style={{ ...inputStyle, minHeight: adminNoteOnly ? 100 : 140, resize: 'vertical', marginBottom: 12 }}
                                     required
                                 />
-                                <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: theme.textMuted, marginBottom: 12 }}>
-                                    <input type="checkbox" checked={internalNote} onChange={(e) => setInternalNote(e.target.checked)} />
-                                    Internal note (not visible to customer)
-                                </label>
-                                <PrimaryButton type="submit">Send Message</PrimaryButton>
+                                {isStaff && !adminNoteOnly && (
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: theme.textMuted, marginBottom: 12 }}>
+                                        <input type="checkbox" checked={internalNote} onChange={(e) => setInternalNote(e.target.checked)} />
+                                        Internal note (not visible to customer)
+                                    </label>
+                                )}
+                                <PrimaryButton type="submit">{adminNoteOnly ? 'Add internal note' : 'Send Message'}</PrimaryButton>
                             </form>
                         ) : (
                             <p style={{ fontSize: 13, color: theme.textDim }}>This ticket is closed or transferred — chat is read-only.</p>
@@ -513,6 +595,24 @@ export default function TicketsPage() {
                     </Card>
                 )}
             </div>
+
+            <ConfirmDialog
+                open={Boolean(mergeConfirm)}
+                title="Merge tickets?"
+                message={mergeConfirm ? (
+                    <>
+                        Merge <strong>{mergeConfirm.label}</strong> (“{mergeConfirm.duplicateSubject}”) into this ticket (“{mergeConfirm.primarySubject}”)?
+                        <br /><br />
+                        Messages will move here and the other ticket will be closed.
+                    </>
+                ) : ''}
+                confirmLabel={mergingId ? 'Merging…' : 'Merge tickets'}
+                cancelLabel="Cancel"
+                danger
+                loading={Boolean(mergingId)}
+                onConfirm={confirmMergeDuplicate}
+                onCancel={() => { if (!mergingId) setMergeConfirm(null); }}
+            />
         </DashboardLayout>
     );
 }

@@ -1,5 +1,13 @@
+export const MIN_LOCAL_PHONE_DIGITS = 6;
+export const MAX_LOCAL_PHONE_DIGITS = 11;
+export const MAX_E164_DIGITS = 15;
+
 export function digitsOnly(value) {
     return (value || '').replace(/\D/g, '');
+}
+
+export function clampLocalPhoneDigits(localNumber, maxDigits = MAX_LOCAL_PHONE_DIGITS) {
+    return digitsOnly(localNumber).slice(0, maxDigits);
 }
 
 export function formatInternationalPhone(countryCode, localNumber) {
@@ -10,14 +18,24 @@ export function formatInternationalPhone(countryCode, localNumber) {
     return `${normalizedCode}${local}`;
 }
 
-export function isValidLocalPhone(localNumber, minDigits = 6) {
-    return digitsOnly(localNumber).length >= minDigits;
+export function isValidLocalPhone(
+    localNumber,
+    minDigits = MIN_LOCAL_PHONE_DIGITS,
+    maxDigits = MAX_LOCAL_PHONE_DIGITS,
+) {
+    const len = digitsOnly(localNumber).length;
+    return len >= minDigits && len <= maxDigits;
 }
 
-export function isValidInternationalPhone(phone, minDigits = 10) {
+export function isValidInternationalPhone(
+    phone,
+    minDigits = 10,
+    maxDigits = MAX_E164_DIGITS,
+) {
     const normalized = (phone || '').trim();
     if (!normalized.startsWith('+')) return false;
-    return digitsOnly(normalized).length >= minDigits;
+    const len = digitsOnly(normalized).length;
+    return len >= minDigits && len <= maxDigits;
 }
 
 export function countryOptionValue(country) {

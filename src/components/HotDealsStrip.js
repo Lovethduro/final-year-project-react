@@ -159,6 +159,11 @@ export function HotDealsStrip({
                                     {deal.description}
                                 </p>
                             )}
+                            {deal.expiresAt && (
+                                <p style={{ margin: '0 0 12px', fontSize: 12, color: theme.textDim }}>
+                                    Ends {new Date(deal.expiresAt).toLocaleString()}
+                                </p>
+                            )}
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
                                 {deal.price != null && (
                                     <span style={{ fontSize: compact ? 16 : 18, fontWeight: 700, color: theme.accent }}>

@@ -4,6 +4,8 @@ import { PageHeader, Card, DataTable, StatusBadge, SearchInput, FilterSelect, Pr
 import { adminApi, userApi } from './utils/apiClient';
 import { useAuth } from './hooks/useAuth';
 import { inputStyle } from './styles/theme';
+import { Link } from 'react-router-dom';
+import { ROLE_API_VALUES } from './config/roleAccess';
 
 const ROLE_OPTIONS = ['All', 'ADMIN', 'SUPERVISOR', 'SALES_AGENT', 'SUPPORT_AGENT', 'CUSTOMER'];
 const STATUS_OPTIONS = ['All', 'Active', 'Inactive', 'Pending'];
@@ -41,10 +43,11 @@ export default function UserManagementPage() {
     const [showCreate, setShowCreate] = useState(false);
     const [createForm, setCreateForm] = useState(emptyCreateForm);
     const [creating, setCreating] = useState(false);
+    const [updatingRoleId, setUpdatingRoleId] = useState('');
 
     const loadUsers = () => {
         setLoading(true);
-        userApi.listUsers()
+        return userApi.listUsers()
             .then(setUsers)
             .catch((err) => setError(err.message))
             .finally(() => setLoading(false));
@@ -66,6 +69,21 @@ export default function UserManagementPage() {
             setUsers((prev) => prev.map((u) => (u.id === updated.id ? updated : u)));
         } catch (err) {
             setError(err.message);
+        }
+    };
+
+    const handleRoleChange = async (user, roleValue) => {
+        setUpdatingRoleId(user.id);
+        setError('');
+        setSuccess('');
+        try {
+            await adminApi.updateUser(user.id, { role: roleValue });
+            await loadUsers();
+            setSuccess(`Role updated for ${user.fullName}.`);
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setUpdatingRoleId('');
         }
     };
 
@@ -102,7 +120,9 @@ export default function UserManagementPage() {
         <DashboardLayout>
             <PageHeader
                 title="User Management"
-                subtitle="Manage system users, roles, and account status"
+                subtitle={auth.isAdmin
+                    ? <>Assign roles here. See the <Link to="/dashboard/roles" style={{ color: '#38BDF8' }}>Roles Overview</Link> for what each role can access.</>
+                    : 'Manage system users and account status'}
                 action={(
                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                         {auth.isAdmin && (
@@ -189,7 +209,23 @@ export default function UserManagementPage() {
                         columns={[
                             { key: 'fullName', label: 'Name' },
                             { key: 'email', label: 'Email' },
-                            { key: 'role', label: 'Role', render: (row) => formatRole(row.role) },
+                            { key: 'role', label: 'Role', render: (row) => {
+                                if (auth.isAdmin && row.id !== auth.userId) {
+                                    return (
+                                        <Select
+                                            value={ROLE_API_VALUES[row.role] || 'customer'}
+                                            onChange={(e) => handleRoleChange(row, e.target.value)}
+                                            disabled={updatingRoleId === row.id}
+                                            style={{ minWidth: 150, fontSize: 12 }}
+                                        >
+                                            {CREATE_ROLE_OPTIONS.map((opt) => (
+                                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                            ))}
+                                        </Select>
+                                    );
+                                }
+                                return formatRole(row.role);
+                            }},
                             { key: 'status', label: 'Status', render: (row) => {
                                 if (!row.emailVerified) return <StatusBadge status="pending" label="Pending" />;
                                 return <StatusBadge status={row.active ? 'active' : 'inactive'} label={row.active ? 'Active' : 'Inactive'} />;

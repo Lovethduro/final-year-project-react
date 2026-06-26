@@ -2,6 +2,7 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import logo from './images/CYFORCE 2-1.jpg';
+import { LegalBackLink } from './components/LegalBackLink';
 
 function PrivacyPage() {
     useEffect(() => {
@@ -18,33 +19,7 @@ function PrivacyPage() {
             paddingBottom: "60px"
         }}>
             <div style={{ maxWidth: "1000px", margin: "0 auto", padding: "0 20px" }}>
-                {/* Back Button - At the top */}
-                <div style={{ marginBottom: "20px" }}>
-                    <Link to="/" style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: "8px",
-                        padding: "8px 16px",
-                        background: "rgba(255,255,255,0.05)",
-                        color: "#38BDF8",
-                        textDecoration: "none",
-                        borderRadius: "8px",
-                        fontSize: "14px",
-                        fontWeight: "500",
-                        transition: "all 0.2s",
-                        border: "0.5px solid rgba(56,189,248,0.2)"
-                    }}
-                          onMouseEnter={(e) => {
-                              e.currentTarget.style.background = "rgba(56,189,248,0.1)";
-                              e.currentTarget.style.transform = "translateX(-5px)";
-                          }}
-                          onMouseLeave={(e) => {
-                              e.currentTarget.style.background = "rgba(255,255,255,0.05)";
-                              e.currentTarget.style.transform = "translateX(0)";
-                          }}>
-                        <span style={{ fontSize: "16px" }}>←</span> Back to Home
-                    </Link>
-                </div>
+                <LegalBackLink />
 
                 {/* Header */}
                 <div style={{ textAlign: "center", marginBottom: "40px" }}>

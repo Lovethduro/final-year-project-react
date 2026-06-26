@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { COUNTRY_CODES, GROUPED_COUNTRY_CODES } from '../constants/countryCodes';
-import { countryOptionValue, digitsOnly } from '../utils/phoneFormat';
+import { clampLocalPhoneDigits, countryOptionValue, MAX_LOCAL_PHONE_DIGITS } from '../utils/phoneFormat';
 
 const DEFAULT_COUNTRY = COUNTRY_CODES.find((c) => c.country === 'Nigeria') || COUNTRY_CODES[0];
 
@@ -16,6 +16,7 @@ export function PhoneWithCountryCode({
     onLocalNumberChange,
     placeholder = '801 234 5678',
     required = false,
+    maxDigits = MAX_LOCAL_PHONE_DIGITS,
     inputStyle = {},
     labelStyle = {},
 }) {
@@ -145,7 +146,8 @@ export function PhoneWithCountryCode({
                     autoComplete="tel-national"
                     placeholder={placeholder}
                     value={localNumber}
-                    onChange={(e) => onLocalNumberChange(digitsOnly(e.target.value))}
+                    onChange={(e) => onLocalNumberChange(clampLocalPhoneDigits(e.target.value, maxDigits))}
+                    maxLength={maxDigits}
                     required={required}
                 />
             </div>

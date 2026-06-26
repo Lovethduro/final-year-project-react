@@ -23,7 +23,6 @@ export default function SystemConfigPage() {
         maxLoginAttempts: '5',
         maintenanceMode: false,
         emailNotifications: true,
-        smsNotifications: true,
     });
 
     useEffect(() => {
@@ -42,7 +41,6 @@ export default function SystemConfigPage() {
                     maxLoginAttempts: String(data.maxLoginAttempts ?? 5),
                     maintenanceMode: !!data.maintenanceMode,
                     emailNotifications: data.emailNotifications !== false,
-                    smsNotifications: data.smsNotifications !== false,
                 });
             })
             .catch((err) => setError(err.message))
@@ -71,7 +69,6 @@ export default function SystemConfigPage() {
                 maxLoginAttempts: Number(config.maxLoginAttempts),
                 maintenanceMode: config.maintenanceMode,
                 emailNotifications: config.emailNotifications,
-                smsNotifications: config.smsNotifications,
             });
             setSaved(true);
             setTimeout(() => setSaved(false), 3000);
@@ -151,7 +148,6 @@ export default function SystemConfigPage() {
                         {[
                             { key: 'maintenanceMode', label: 'Maintenance Mode' },
                             { key: 'emailNotifications', label: 'Email Notifications' },
-                            { key: 'smsNotifications', label: 'SMS Notifications' },
                         ].map((item) => (
                             <label key={item.key} style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'rgba(255,255,255,0.8)', fontSize: 14 }}>
                                 <input type="checkbox" checked={config[item.key]} onChange={handleChange(item.key)} />

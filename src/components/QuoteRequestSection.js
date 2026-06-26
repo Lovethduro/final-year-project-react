@@ -1,11 +1,22 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { quoteApi, productApi } from '../utils/apiClient';
+import { saveQuotePortalSession } from '../utils/quotePortalStorage';
+import { QuoteGuestChat } from './QuoteGuestChat';
+import { QuoteChatResume } from './QuoteChatResume';
 import { QUOTE_OFFERINGS } from '../constants/quoteOfferings';
 import { FONT_BODY, FONT_DISPLAY } from '../styles/landingFonts';
 import { Select } from './ui';
 import { PhoneWithCountryCode } from './PhoneWithCountryCode';
-import { formatInternationalPhone, isValidLocalPhone } from '../utils/phoneFormat';
+import {
+    formatInternationalPhone,
+    isValidLocalPhone,
+    MAX_LOCAL_PHONE_DIGITS,
+    MIN_LOCAL_PHONE_DIGITS,
+} from '../utils/phoneFormat';
+
+const MIN_QUOTE_QUANTITY = 1;
+const MAX_QUOTE_QUANTITY = 999;
 
 const EMPTY_FORM = {
     name: '',
@@ -127,15 +138,24 @@ function ProductFields({ form, setForm, products, loadingProducts }) {
                     </option>
                 ))}
             </Select>
-            <label style={labelStyle}>Quantity *</label>
+            <label style={labelStyle}>Quantity * (max {MAX_QUOTE_QUANTITY})</label>
             <input
                 style={inputStyle}
                 type="number"
-                min="1"
+                min={MIN_QUOTE_QUANTITY}
+                max={MAX_QUOTE_QUANTITY}
                 step="1"
                 placeholder="Quantity"
                 value={form.quantity}
-                onChange={(e) => setForm({ ...form, quantity: e.target.value })}
+                onChange={(e) => {
+                    const raw = e.target.value.replace(/\D/g, '');
+                    if (!raw) {
+                        setForm({ ...form, quantity: '' });
+                        return;
+                    }
+                    const num = Math.min(MAX_QUOTE_QUANTITY, Math.max(MIN_QUOTE_QUANTITY, parseInt(raw, 10)));
+                    setForm({ ...form, quantity: String(num) });
+                }}
                 required
             />
         </>
@@ -257,6 +277,9 @@ export function QuoteRequestSection() {
     const [loadingProducts, setLoadingProducts] = useState(true);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [portalToken, setPortalToken] = useState('');
+    const [assignedAgent, setAssignedAgent] = useState('');
+    const [resumeKey, setResumeKey] = useState(0);
     const [loading, setLoading] = useState(false);
 
     const selected = QUOTE_OFFERINGS.find((opt) => opt.id === activeType);
@@ -282,6 +305,9 @@ export function QuoteRequestSection() {
         setActiveType(null);
         setForm(EMPTY_FORM);
         setError('');
+        setPortalToken('');
+        setAssignedAgent('');
+        setSuccess('');
     };
 
     const openModal = (type) => {
@@ -289,29 +315,44 @@ export function QuoteRequestSection() {
         setForm(EMPTY_FORM);
         setError('');
         setSuccess('');
+        setPortalToken('');
+        setAssignedAgent('');
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!isValidLocalPhone(form.phone)) {
-            setError('Please enter a valid phone number with country code (at least 6 digits).');
+            setError(`Please enter a valid phone number (${MIN_LOCAL_PHONE_DIGITS}–${MAX_LOCAL_PHONE_DIGITS} digits).`);
             return;
         }
         if (activeType !== 'products_only' && !isValidLocalPhone(form.siteContactPhone)) {
-            setError('Please enter a valid site contact phone number with country code (at least 6 digits).');
+            setError(`Please enter a valid site contact phone (${MIN_LOCAL_PHONE_DIGITS}–${MAX_LOCAL_PHONE_DIGITS} digits).`);
             return;
+        }
+        if (activeType !== 'installation_only') {
+            const qty = Number(form.quantity);
+            if (!Number.isFinite(qty) || qty < MIN_QUOTE_QUANTITY || qty > MAX_QUOTE_QUANTITY) {
+                setError(`Quantity must be between ${MIN_QUOTE_QUANTITY} and ${MAX_QUOTE_QUANTITY}.`);
+                return;
+            }
         }
         setLoading(true);
         setError('');
         setSuccess('');
         try {
             const data = await quoteApi.request(buildPayload(activeType, form));
-            setSuccess(data.message || 'Quote request sent! Check your email for a link to message your sales agent.');
+            const token = data.portalToken || '';
+            if (token) {
+                saveQuotePortalSession({
+                    token,
+                    agentName: data.assignedAgent,
+                });
+                setPortalToken(token);
+                setResumeKey((k) => k + 1);
+            }
+            setAssignedAgent(data.assignedAgent || '');
+            setSuccess(data.message || 'Quote request sent! You can message your sales agent below.');
             setForm(EMPTY_FORM);
-            setTimeout(() => {
-                setActiveType(null);
-                setSuccess('');
-            }, 2800);
         } catch (err) {
             setError(err.message);
         } finally {
@@ -355,11 +396,13 @@ export function QuoteRequestSection() {
                 <p className="quote-section-foot">
                     Prefer to talk first? <Link to={{ pathname: '/', hash: '#contact' }}>Contact our Abuja office</Link> or call +234 (0) 901 066 9297.
                 </p>
+
+                <QuoteChatResume key={resumeKey} />
             </div>
 
             {activeType && selected && (
                 <div role="dialog" aria-modal="true" className="quote-modal-overlay" onClick={closeModal}>
-                    <div className="quote-modal" onClick={(e) => e.stopPropagation()}>
+                    <div className={`quote-modal${portalToken ? ' quote-modal--chat' : ''}`} onClick={(e) => e.stopPropagation()}>
                         <div className="quote-modal-header">
                             <div>
                                 <span className="quote-compare-tag">{selected.tag}</span>
@@ -370,11 +413,32 @@ export function QuoteRequestSection() {
                         </div>
 
                         {success ? (
-                            <div style={{
-                                padding: 16, borderRadius: 10, background: 'rgba(52,211,153,0.12)',
-                                border: '0.5px solid rgba(52,211,153,0.35)', color: '#34D399', fontSize: 14,
-                            }}>
-                                {success}
+                            <div>
+                                <div style={{
+                                    padding: 16, borderRadius: 10, background: 'rgba(52,211,153,0.12)',
+                                    border: '0.5px solid rgba(52,211,153,0.35)', color: '#34D399', fontSize: 14,
+                                    marginBottom: portalToken ? 16 : 0,
+                                }}>
+                                    {success}
+                                    {assignedAgent && !portalToken && (
+                                        <span> {assignedAgent} will follow up shortly.</span>
+                                    )}
+                                </div>
+                                {portalToken && (
+                                    <>
+                                        <p style={{ ...labelStyle, marginBottom: 12, color: 'rgba(255,255,255,0.5)' }}>
+                                            Step 2 — message {assignedAgent || 'your sales agent'} (saved on this device)
+                                        </p>
+                                        <QuoteGuestChat
+                                            token={portalToken}
+                                            compact
+                                            onInvalidToken={() => setPortalToken('')}
+                                        />
+                                        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', marginTop: 12, marginBottom: 0 }}>
+                                            You can close this and return anytime from the chat section below. We also emailed you a backup link.
+                                        </p>
+                                    </>
+                                )}
                             </div>
                         ) : (
                             <form onSubmit={handleSubmit}>
@@ -474,6 +538,7 @@ export function QuoteRequestSection() {
                     padding: 28px 26px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto;
                     box-shadow: 0 32px 64px rgba(0,0,0,0.45);
                 }
+                .quote-modal--chat { max-width: 640px; }
                 .quote-modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; gap: 12px; }
                 .quote-modal-close { background: none; border: none; color: rgba(255,255,255,0.45); font-size: 24px; cursor: pointer; }
             `}</style>

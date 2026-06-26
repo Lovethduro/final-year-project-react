@@ -25,6 +25,7 @@ export function getSession() {
         phone: storage.getItem('userPhone'),
         token: storage.getItem('authToken'),
         role: storage.getItem('userRole'),
+        sessionId: storage.getItem('sessionId'),
         mfaEnabled: storage.getItem('mfaEnabled') === 'true',
         emailVerified: storage.getItem('emailVerified') === 'true',
         avatarUrl: storage.getItem('userAvatarUrl'),
@@ -32,6 +33,7 @@ export function getSession() {
         memberSince: storage.getItem('userMemberSince'),
         rememberMe: isSessionPersistent(),
         mustChangePassword: storage.getItem('mustChangePassword') === 'true',
+        profileComplete: storage.getItem('profileComplete') !== 'false',
         showMotivationalMessages: storage.getItem('showMotivationalMessages') !== 'false',
     };
 }
@@ -92,6 +94,36 @@ async function request(path, options = {}) {
     return data;
 }
 
+async function downloadFile(path, filename) {
+    const session = getSession();
+    const headers = {};
+    if (session.userId) headers['X-User-Id'] = session.userId;
+    if (session.token) headers['Authorization'] = `Bearer ${session.token}`;
+
+    const response = await fetch(`${API_ROOT}${path}`, { headers });
+    if (!response.ok) {
+        const text = await response.text();
+        let message = 'Download failed';
+        try {
+            const data = JSON.parse(text);
+            message = data?.error || data?.message || message;
+        } catch {
+            if (text) message = text;
+        }
+        throw new Error(message);
+    }
+
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
+}
+
 export const api = {
     get: (path) => request(path),
     post: (path, body) => request(path, { method: 'POST', body: JSON.stringify(body) }),
@@ -143,6 +175,16 @@ export const adminApi = {
     tickets: () => api.get('/api/admin/tickets'),
     leads: () => api.get('/api/admin/leads'),
     auditLogs: () => api.get('/api/admin/audit-logs'),
+    securityAudit: () => api.get('/api/admin/security-audit'),
+    sessions: () => api.get('/api/admin/sessions'),
+    securityAuditReport: (format = 'csv') => downloadFile(
+        `/api/admin/security-audit/report?format=${encodeURIComponent(format)}`,
+        `security-audit-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.${format}`
+    ),
+    auditLogsReport: (format = 'csv') => downloadFile(
+        `/api/admin/audit-logs/report?format=${encodeURIComponent(format)}`,
+        `audit-log-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.${format}`
+    ),
     sendAnnouncement: (message, audience = 'all') => api.post('/api/admin/announcements', { message, audience }),
     getSystemConfig: () => api.get('/api/admin/system-config'),
     updateSystemConfig: (body) => api.put('/api/admin/system-config', body),
@@ -150,6 +192,13 @@ export const adminApi = {
     createKnowledgeArticle: (body) => api.post('/api/admin/knowledge-base', body),
     updateKnowledgeArticle: (id, body) => api.put(`/api/admin/knowledge-base/${id}`, body),
     deleteKnowledgeArticle: (id) => api.delete(`/api/admin/knowledge-base/${id}`),
+    dataManagementOverview: () => api.get('/api/admin/data-management/overview'),
+    updateDataRetention: (retentionDays) => api.put('/api/admin/data-management/retention', { retentionDays }),
+    runDataBackup: () => api.post('/api/admin/data-management/backup', {}),
+    exportData: (format = 'csv') => downloadFile(
+        `/api/admin/data-management/export?format=${encodeURIComponent(format)}`,
+        `cyforce-data-export-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.${format}`
+    ),
 };
 
 export const customerApi = {
@@ -190,6 +239,7 @@ export const supportApi = {
     assign: (id) => api.put(`/api/support/tickets/${id}/assign`, {}),
     updateTicketStatus: (id, status) => api.put(`/api/support/tickets/${id}/status`, { status }),
     respond: (id, message, internalNote) => api.post(`/api/support/tickets/${id}/response`, { message, internalNote }),
+    takeover: (id) => api.post(`/api/support/tickets/${id}/takeover`, {}),
     transferToSales: (id, note) => api.post(`/api/support/tickets/${id}/transfer-to-sales`, { note }),
     agents: () => api.get('/api/support/agents'),
     transferToAgent: (id, agentId, note) => api.post(`/api/support/tickets/${id}/transfer-to-agent`, { agentId, note }),
@@ -258,27 +308,23 @@ export const analyticsApi = {
     performance: () => api.get('/api/analytics/performance'),
 };
 
-export const teamChatApi = {
-    threads: () => api.get('/api/team-chat/threads'),
-    getThread: (id) => api.get(`/api/team-chat/threads/${id}`),
-    startThread: (body) => api.post('/api/team-chat/threads', body),
-    sendMessage: (id, message) => api.post(`/api/team-chat/threads/${id}/messages`, { message }),
-};
-
 export const calendarApi = {
     events: (month) => api.get(`/api/calendar/events${month ? `?month=${month}` : ''}`),
     createEvent: (body) => api.post('/api/calendar/events', body),
+    updateEvent: (id, body) => api.put(`/api/calendar/events/${id}`, body),
     deleteEvent: (id) => api.delete(`/api/calendar/events/${id}`),
     staff: () => api.get('/api/calendar/staff'),
 };
 
 export const leaveApi = {
     eligibility: () => api.get('/api/leave/eligibility'),
+    all: () => api.get('/api/leave/all'),
     myRequests: () => api.get('/api/leave/requests'),
     pending: () => api.get('/api/leave/pending'),
     request: (body) => api.post('/api/leave/requests', body),
     approve: (id, note) => api.post(`/api/leave/requests/${id}/approve`, { note }),
     reject: (id, note) => api.post(`/api/leave/requests/${id}/reject`, { note }),
+    cancel: (id) => api.post(`/api/leave/requests/${id}/cancel`, {}),
 };
 
 export const referralApi = {
@@ -295,9 +341,11 @@ export const paymentApi = {
 };
 
 export const authApi = {
+    logout: (sessionId) => api.post('/api/auth/logout', sessionId ? { sessionId } : {}),
     forgotPassword: (email) => api.post('/api/auth/forgot-password', { email }),
     resetPassword: (token, password) => api.post('/api/auth/reset-password', { token, password }),
     changePassword: (currentPassword, newPassword) => api.post('/api/auth/change-password', { currentPassword, newPassword }),
+    completeProfile: (body) => api.post('/api/auth/complete-profile', body),
     verifyMfaLogin: (challengeToken, code) => api.post('/api/auth/mfa/login/verify', { challengeToken, code }),
     resendMfaLogin: (challengeToken) => api.post('/api/auth/mfa/login/resend', { challengeToken }),
 };

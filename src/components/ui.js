@@ -1,5 +1,5 @@
 import { theme, dashboardCardStyle, inputStyle, selectStyle, buttonPrimary, buttonGhost } from '../styles/theme';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export { inputStyle, selectStyle };
 
@@ -175,8 +175,12 @@ export function PrimaryButton({ children, onClick, disabled, type = 'button', st
     );
 }
 
-export function GhostButton({ children, onClick }) {
-    return <button onClick={onClick} style={buttonGhost}>{children}</button>;
+export function GhostButton({ children, onClick, disabled, type = 'button', style }) {
+    return (
+        <button type={type} onClick={onClick} disabled={disabled} style={{ ...buttonGhost, opacity: disabled ? 0.6 : 1, ...style }}>
+            {children}
+        </button>
+    );
 }
 
 export function Select({ children, style, className = '', ...props }) {
@@ -303,6 +307,118 @@ export function ConfirmDialog({
                         }}
                     >
                         {loading ? 'Removing…' : confirmLabel}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export function ReviewNoteDialog({
+    open,
+    title,
+    message,
+    noteLabel = 'Note (optional)',
+    notePlaceholder = '',
+    confirmLabel = 'Confirm',
+    cancelLabel = 'Cancel',
+    onConfirm,
+    onCancel,
+    loading = false,
+    danger = false,
+}) {
+    const [note, setNote] = useState('');
+
+    useEffect(() => {
+        if (open) setNote('');
+    }, [open]);
+
+    useEffect(() => {
+        if (!open) return undefined;
+        const onKeyDown = (e) => {
+            if (e.key === 'Escape' && !loading) onCancel();
+        };
+        window.addEventListener('keydown', onKeyDown);
+        return () => window.removeEventListener('keydown', onKeyDown);
+    }, [open, loading, onCancel]);
+
+    if (!open) return null;
+
+    return (
+        <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="review-note-dialog-title"
+            onClick={loading ? undefined : onCancel}
+            style={{
+                position: 'fixed',
+                inset: 0,
+                zIndex: 1000,
+                background: 'rgba(4,10,21,0.82)',
+                backdropFilter: 'blur(6px)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: 24,
+            }}
+        >
+            <div
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                    background: theme.bgCard,
+                    border: `0.5px solid ${theme.border}`,
+                    borderRadius: 16,
+                    padding: '28px 32px',
+                    width: '100%',
+                    maxWidth: 440,
+                    boxShadow: '0 32px 80px rgba(0,0,0,0.7)',
+                    fontFamily: theme.fontBody,
+                }}
+            >
+                <h2
+                    id="review-note-dialog-title"
+                    style={{
+                        margin: '0 0 10px',
+                        fontFamily: theme.fontHeading,
+                        fontSize: 20,
+                        fontWeight: 700,
+                        color: theme.text,
+                    }}
+                >
+                    {title}
+                </h2>
+                {message && (
+                    <p style={{ margin: '0 0 16px', fontSize: 14, color: theme.textMuted, lineHeight: 1.6 }}>
+                        {message}
+                    </p>
+                )}
+                <label style={{ display: 'block', fontSize: 12, color: theme.textDim, marginBottom: 6 }}>
+                    {noteLabel}
+                </label>
+                <textarea
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    placeholder={notePlaceholder}
+                    rows={3}
+                    disabled={loading}
+                    style={{ ...inputStyle, width: '100%', marginBottom: 24, resize: 'vertical' }}
+                />
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+                    <GhostButton onClick={onCancel} disabled={loading}>
+                        {cancelLabel}
+                    </GhostButton>
+                    <button
+                        type="button"
+                        onClick={() => onConfirm(note)}
+                        disabled={loading}
+                        style={{
+                            ...buttonPrimary,
+                            background: danger ? theme.error : theme.primary,
+                            opacity: loading ? 0.6 : 1,
+                            cursor: loading ? 'not-allowed' : 'pointer',
+                        }}
+                    >
+                        {loading ? 'Saving…' : confirmLabel}
                     </button>
                 </div>
             </div>

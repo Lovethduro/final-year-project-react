@@ -4,9 +4,9 @@ export const API_BASE = `${process.env.REACT_APP_API_URL || 'http://localhost:80
 export const LOGIN_MFA_ENABLED = false;
 
 export const SESSION_KEYS = [
-    'userId', 'userEmail', 'userName', 'userPhone', 'authToken', 'userRole',
+    'userId', 'userEmail', 'userName', 'userPhone', 'authToken', 'userRole', 'sessionId',
     'mfaEnabled', 'emailVerified', 'userAvatarUrl', 'userPaymentMethod', 'userMemberSince',
-    'mustChangePassword', 'showMotivationalMessages',
+    'mustChangePassword', 'showMotivationalMessages', 'profileComplete',
 ];
 
 const REMEMBER_EMAIL_KEY = 'cyforce_remember_email';
@@ -47,26 +47,31 @@ export function storeAuthSession(data, rememberMe = false) {
     if (data.phone) storage.setItem('userPhone', data.phone);
     if (data.token) storage.setItem('authToken', data.token);
     if (data.role) storage.setItem('userRole', data.role);
+    if (data.sessionId) storage.setItem('sessionId', data.sessionId);
     storage.setItem('mfaEnabled', String(Boolean(data.mfaEnabled)));
     storage.setItem('emailVerified', String(Boolean(data.emailVerified)));
     storage.setItem('mustChangePassword', String(Boolean(data.mustChangePassword)));
+    storage.setItem('profileComplete', String(data.profileComplete !== false));
     storage.setItem('showMotivationalMessages', String(data.showMotivationalMessages !== false));
     if (data.avatarUrl) storage.setItem('userAvatarUrl', data.avatarUrl);
     if (data.preferredPaymentMethod) storage.setItem('userPaymentMethod', data.preferredPaymentMethod);
     if (data.createdAt) storage.setItem('userMemberSince', data.createdAt);
 }
 
-/** Saved email/role for login form convenience only — never stores a password. */
+/** Saved email/role/method for login form convenience only — never stores a password. */
 export function loadRememberedLogin() {
     migrateLegacyRememberedLogin();
     try {
         const raw = localStorage.getItem(REMEMBER_EMAIL_KEY);
         if (!raw) return null;
         const data = JSON.parse(raw);
-        if (!data?.email) return null;
+        if (!data?.email && data?.loginMethod !== 'google' && data?.loginMethod !== 'microsoft') {
+            return null;
+        }
         return {
-            email: data.email,
+            email: data.email || '',
             role: data.role || '',
+            loginMethod: data.loginMethod || 'password',
         };
     } catch {
         return null;
@@ -77,16 +82,24 @@ export function hasRememberedEmail() {
     return Boolean(loadRememberedLogin()?.email);
 }
 
-/** Save or clear remembered email/role after a successful login. */
-export function saveRememberedLogin({ email, role, remember }) {
-    if (remember && email) {
+/** Save or clear remembered email/role/method after a successful login. */
+export function saveRememberedLogin({ email, role, remember, loginMethod = 'password' }) {
+    const method = loginMethod || 'password';
+    const normalizedEmail = email?.trim().toLowerCase() || '';
+
+    if (remember && (normalizedEmail || method === 'google' || method === 'microsoft')) {
         localStorage.setItem(REMEMBER_EMAIL_KEY, JSON.stringify({
-            email: email.trim().toLowerCase(),
+            email: normalizedEmail,
             role: role || '',
+            loginMethod: method,
         }));
     } else {
         clearRememberedEmail();
     }
+}
+
+export function isOAuthLoginMethod(method) {
+    return method === 'google' || method === 'microsoft';
 }
 
 export function clearRememberedEmail() {
@@ -111,9 +124,15 @@ function migrateLegacyRememberedLogin() {
     }
 }
 
+export function needsProfileCompletion(data) {
+    const role = (data?.role || '').toUpperCase();
+    return role === 'CUSTOMER' && data?.profileComplete === false;
+}
+
 export function getPostAuthPath(data) {
     if (!data.emailVerified) return '/verify-email';
     if (data.mustChangePassword) return '/change-password';
     if (LOGIN_MFA_ENABLED && !data.mfaEnabled) return '/mfa-setup';
+    if (needsProfileCompletion(data)) return '/complete-profile';
     return getDashboardPath(data.role);
 }

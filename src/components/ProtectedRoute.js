@@ -2,7 +2,13 @@ import { Navigate } from 'react-router-dom';
 import { getSession } from '../utils/apiClient';
 import { getDashboardPath, LOGIN_MFA_ENABLED } from '../utils/authFlow';
 
-export default function ProtectedRoute({ children, roles, allowPasswordChange = false, allowMfaSetup = false }) {
+export default function ProtectedRoute({
+    children,
+    roles,
+    allowPasswordChange = false,
+    allowMfaSetup = false,
+    allowProfileCompletion = false,
+}) {
     const session = getSession();
 
     if (!session.userId || !session.token) {
@@ -19,6 +25,11 @@ export default function ProtectedRoute({ children, roles, allowPasswordChange = 
 
     if (LOGIN_MFA_ENABLED && !session.mfaEnabled && !allowMfaSetup && !session.mustChangePassword) {
         return <Navigate to="/mfa-setup" replace />;
+    }
+
+    const isCustomer = (session.role || 'CUSTOMER').toUpperCase() === 'CUSTOMER';
+    if (isCustomer && !session.profileComplete && !allowProfileCompletion) {
+        return <Navigate to="/complete-profile" replace />;
     }
 
     if (roles?.length) {

@@ -5,7 +5,6 @@ const services = [
     { name: 'API Server', status: 'online', uptime: '99.9%', latency: '45ms' },
     { name: 'MongoDB', status: 'online', uptime: '99.8%', latency: '12ms' },
     { name: 'Email Service', status: 'online', uptime: '99.5%', latency: '230ms' },
-    { name: 'SMS (Termii)', status: 'warning', uptime: '98.2%', latency: '890ms' },
     { name: 'Authentication', status: 'online', uptime: '100%', latency: '38ms' },
 ];
 
@@ -16,7 +15,7 @@ export default function SystemHealthPage() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16, marginBottom: 20 }}>
                 <StatCard title="Services Online" value={`${services.filter((s) => s.status === 'online').length}/${services.length}`} icon="💚" status="success" />
                 <StatCard title="Avg Uptime" value="99.7%" icon="📈" status="info" />
-                <StatCard title="Alerts" value="1" icon="⚠️" status="warning" />
+                <StatCard title="Alerts" value="0" icon="⚠️" status="success" />
             </div>
             <Card title="Service Status">
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

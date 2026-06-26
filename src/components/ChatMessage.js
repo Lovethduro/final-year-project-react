@@ -74,7 +74,7 @@ export function ChatMessageRow({ message, isMine, showAvatar = true }) {
                         {isEmail && <span style={{ marginLeft: 6, color: theme.accent }}>· Email</span>}
                     </div>
                 )}
-                <div style={{ fontSize: 14, color: theme.text, lineHeight: 1.5 }}>{message.message}</div>
+                <div style={{ fontSize: 14, color: theme.text, lineHeight: 1.5 }}>{message.message ?? message.body ?? ''}</div>
             </div>
         </div>
     );

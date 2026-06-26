@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import logo from './images/CYFORCE 2-1.jpg';
-import { API_BASE, getPostAuthPath, loadRememberedLogin, saveRememberedLogin, storeAuthSession } from './utils/authFlow';
+import { API_BASE, getPostAuthPath, isOAuthLoginMethod, loadRememberedLogin, saveRememberedLogin, storeAuthSession } from './utils/authFlow';
 import { authApi } from './utils/apiClient';
 
 // Animated Particle Background
@@ -125,12 +125,19 @@ function LoginPage() {
 
     useEffect(() => {
         const remembered = loadRememberedLogin();
-        if (remembered?.email) {
+        if (!remembered) return;
+
+        setRememberMe(true);
+        if (remembered.role) {
+            setSelectedRole(remembered.role);
+        }
+
+        if (isOAuthLoginMethod(remembered.loginMethod)) {
+            return;
+        }
+
+        if (remembered.email) {
             setEmail(remembered.email);
-            setRememberMe(true);
-            if (remembered.role) {
-                setSelectedRole(remembered.role);
-            }
         }
     }, []);
 
@@ -180,6 +187,7 @@ function LoginPage() {
                 email: email.trim().toLowerCase(),
                 role: selectedRole,
                 remember: rememberMe,
+                loginMethod: 'password',
             });
 
             navigate(getPostAuthPath(data));
@@ -201,6 +209,7 @@ function LoginPage() {
                 email: email.trim().toLowerCase() || data.email,
                 role: data.role || selectedRole,
                 remember: rememberMe,
+                loginMethod: 'password',
             });
             navigate(getPostAuthPath(data));
         } catch (err) {
@@ -222,7 +231,6 @@ function LoginPage() {
 
     const mfaMethodLabel = () => {
         const method = mfaChallenge?.mfaMethod || 'authenticator';
-        if (method === 'sms') return `Enter the code sent to ${mfaChallenge?.phone || 'your phone'}`;
         if (method === 'email') return `Enter the code sent to ${mfaChallenge?.email || 'your email'}`;
         return 'Enter the 6-digit code from your authenticator app';
     };
@@ -251,6 +259,7 @@ function LoginPage() {
                     email: result.data.email,
                     role: accountRole,
                     remember: true,
+                    loginMethod: provider,
                 });
             } else {
                 saveRememberedLogin({ remember: false });
@@ -396,7 +405,7 @@ function LoginPage() {
                                 }}>
                                     {isLoading ? 'Verifying…' : 'Verify & Sign In'}
                                 </button>
-                                {(mfaChallenge?.mfaMethod === 'sms' || mfaChallenge?.mfaMethod === 'email') && (
+                                {mfaChallenge?.mfaMethod === 'email' && (
                                     <button type="button" onClick={handleMfaResend} style={{
                                         background: 'transparent', border: 'none', color: '#2DD4BF', fontSize: 13, cursor: 'pointer',
                                     }}>
@@ -592,7 +601,7 @@ function LoginPage() {
                                     }}
                                 />
                                 <label htmlFor="remember-me" style={{ fontSize: "13px", color: "rgba(255,255,255,0.5)", cursor: "pointer" }}>
-                                    Remember me on this device
+                                    Remember me
                                 </label>
                             </div>
 
@@ -665,7 +674,7 @@ function LoginPage() {
                                         Signing in...
                                     </>
                                 ) : (
-                                    "Sign in to Account"
+                                    "Sign in"
                                 )}
                             </button>
                         </form>

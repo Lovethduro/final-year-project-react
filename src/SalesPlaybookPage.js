@@ -187,9 +187,11 @@ export default function SalesPlaybookPage() {
                 subtitle="Product guides, discount rules, and talk tracks for customer enquiries"
                 action={(
                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                        <Link to="/sales/messages" style={{ fontSize: 13, color: theme.accent, textDecoration: 'none', alignSelf: 'center' }}>
-                            Back to messages
-                        </Link>
+                        {!auth.isAdmin && (
+                            <Link to="/sales/messages" style={{ fontSize: 13, color: theme.accent, textDecoration: 'none', alignSelf: 'center' }}>
+                                Back to messages
+                            </Link>
+                        )}
                         {canManage && <PrimaryButton onClick={startCreate}>Add guide</PrimaryButton>}
                     </div>
                 )}

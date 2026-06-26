@@ -135,7 +135,7 @@ export default function SalesMessagesPage() {
     };
 
     const fieldStyle = { ...themeInputStyle, marginBottom: 0 };
-    const canManageDeal = auth.role === 'SALES_AGENT' || auth.isAdmin;
+    const canManageDeal = auth.role === 'SALES_AGENT';
     const showQueue = auth.role === 'SALES_AGENT';
     const isSupervisorView = auth.role === 'SUPERVISOR';
     const canReply = active && (

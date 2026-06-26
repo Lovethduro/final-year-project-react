@@ -256,7 +256,6 @@ export default function LeadsPage() {
                                 ) : '—';
                             } },
                             { key: 'source', label: 'Source' },
-                            { key: 'score', label: 'Score', render: (r) => r.score ?? '—' },
                             { key: 'ownerName', label: 'Owner', render: (r) => r.ownerName || 'Unassigned' },
                             {
                                 key: 'actions',

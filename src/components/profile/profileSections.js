@@ -146,7 +146,7 @@ export function MfaSettingsCard({ profile, onDisableMfa, disablingMfa, mfaError,
     return (
         <Card title="Two-Factor Authentication (MFA)">
             <div style={{ fontSize: 14, color: theme.textMuted, marginBottom: 14, lineHeight: 1.55 }}>
-                Add an extra layer of security to your account with an authenticator app, SMS, or email codes.
+                Add an extra layer of security to your account with an authenticator app or email codes.
             </div>
             <SecurityRow
                 label="Status"

@@ -14,6 +14,7 @@ import AboutPage from './AboutPage';
 import ProductsPage from './ProductsPage';
 import LoginPage from './LoginPage';
 import RegisterPage from "./RegisterPage";
+import CompleteProfilePage from './CompleteProfilePage';
 import EmailVerificationPage from './EmailVerificationPage';
 import MFASetupPage from './MFASetupPage';
 import ForgotPasswordPage from './ForgotPasswordPage';
@@ -40,7 +41,6 @@ import PurchaseSurveyPage from './PurchaseSurveyPage';
 import QuotePortalPage from './QuotePortalPage';
 import ComplianceReportsPage from './ComplianceReportsPage';
 import DataManagementPage from './DataManagementPage';
-import ModuleConfigPage from './ModuleConfigPage';
 import SecurityAuditPage from './SecurityAuditPage';
 import SystemConfigPage from './SystemConfigPage';
 import SystemHealthPage from './SystemHealthPage';
@@ -61,7 +61,7 @@ import PublicHelpPage from './PublicHelpPage';
 import CustomerMessagesPage from './dashboards/CustomerMessagesPage';
 import SalesPlaybookPage from './SalesPlaybookPage';
 import SalesMessagesPage from './dashboards/SalesMessagesPage';
-import TeamChatPage from './dashboards/TeamChatPage';
+import ConversationMonitorPage from './dashboards/ConversationMonitorPage';
 import CalendarPage from './dashboards/CalendarPage';
 import LeavePage from './dashboards/LeavePage';
 import BroadcastPage from './dashboards/BroadcastPage';
@@ -1211,7 +1211,7 @@ function AppShell() {
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700&display=swap');
   *{margin:0;padding:0;box-sizing:border-box;}
   body{background:#060B1A;overflow-x:hidden;font-family:'Inter',system-ui,sans-serif;}
-  #quote-request, #contact, #services, #hot-deals {
+  #quote-request, #quote-chat, #contact, #services, #hot-deals {
     scroll-margin-top: 92px;
   }
   .cyforce-landing-page { font-family: 'Inter', system-ui, sans-serif; width: 100%; overflow-x: hidden; }
@@ -1526,6 +1526,7 @@ function AppShell() {
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/verify-email" element={<EmailVerificationPage />} />
+            <Route path="/complete-profile" element={<ProtectedRoute allowProfileCompletion roles={['CUSTOMER']}><CompleteProfilePage /></ProtectedRoute>} />
             <Route path="/mfa-setup" element={<ProtectedRoute allowMfaSetup><MFASetupPage /></ProtectedRoute>} />
             <Route path="/change-password" element={<ProtectedRoute allowPasswordChange allowMfaSetup><ChangePasswordPage /></ProtectedRoute>} />
             <Route path="/terms" element={<TermsPage />} />
@@ -1540,7 +1541,7 @@ function AppShell() {
             <Route path="/customer/messages" element={<ProtectedRoute roles={['CUSTOMER']}><CustomerMessagesPage /></ProtectedRoute>} />
             <Route path="/customer/hot-deals" element={<ProtectedRoute roles={['CUSTOMER']}><HotDealsPage /></ProtectedRoute>} />
             <Route path="/sales/messages" element={<ProtectedRoute roles={['SALES_AGENT', 'SUPERVISOR']}><SalesMessagesPage /></ProtectedRoute>} />
-            <Route path="/team/messages" element={<ProtectedRoute roles={['SALES_AGENT', 'SUPPORT_AGENT', 'SUPERVISOR', 'ADMIN']}><TeamChatPage /></ProtectedRoute>} />
+            <Route path="/dashboard/conversations" element={<ProtectedRoute roles={['ADMIN']}><ConversationMonitorPage /></ProtectedRoute>} />
             <Route path="/dashboard/calendar" element={<ProtectedRoute roles={['ADMIN', 'SUPERVISOR', 'SALES_AGENT', 'SUPPORT_AGENT']}><CalendarPage /></ProtectedRoute>} />
             <Route path="/dashboard/leave" element={<ProtectedRoute roles={['ADMIN', 'SUPERVISOR', 'SALES_AGENT', 'SUPPORT_AGENT']}><LeavePage /></ProtectedRoute>} />
             <Route path="/dashboard/broadcast" element={<ProtectedRoute roles={['ADMIN', 'SUPERVISOR']}><BroadcastPage /></ProtectedRoute>} />
@@ -1563,7 +1564,6 @@ function AppShell() {
             <Route path="/staff/shop" element={<ProtectedRoute roles={['ADMIN', 'SUPERVISOR', 'SALES_AGENT', 'SUPPORT_AGENT']}><StaffShopPage /></ProtectedRoute>} />
             <Route path="/dashboard/compliance" element={<ProtectedRoute roles={['ADMIN']}><ComplianceReportsPage /></ProtectedRoute>} />
             <Route path="/dashboard/data" element={<ProtectedRoute roles={['ADMIN']}><DataManagementPage /></ProtectedRoute>} />
-            <Route path="/dashboard/modules" element={<ProtectedRoute roles={['ADMIN']}><ModuleConfigPage /></ProtectedRoute>} />
             <Route path="/dashboard/security" element={<ProtectedRoute roles={['ADMIN']}><SecurityAuditPage /></ProtectedRoute>} />
             <Route path="/dashboard/system-config" element={<ProtectedRoute roles={['ADMIN']}><SystemConfigPage /></ProtectedRoute>} />
             <Route path="/dashboard/system-health" element={<ProtectedRoute roles={['ADMIN', 'SUPERVISOR']}><SystemHealthPage /></ProtectedRoute>} />

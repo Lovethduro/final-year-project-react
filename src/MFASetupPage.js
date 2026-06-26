@@ -183,7 +183,6 @@ function formatSecretKey(secret) {
 const MFA_METHODS = [
     { value: "authenticator", label: "Authenticator App", description: "Google Authenticator, Authy, etc. — use setup key if QR scan fails", icon: "📱", recommended: true },
     { value: "email", label: "Email Verification", description: "Receive codes via email", icon: "✉️", recommended: false },
-    { value: "sms", label: "SMS Verification", description: "Receive codes via text message", icon: "💬", recommended: false }
 ];
 
 function MFASetupPage() {
@@ -191,7 +190,6 @@ function MFASetupPage() {
     const session = getSession();
     const userId = session.userId;
     const userEmail = session.email || '';
-    const userPhone = session.phone || '';
 
     const [selectedMethod, setSelectedMethod] = useState("authenticator");
     const [step, setStep] = useState("select");
@@ -281,12 +279,8 @@ function MFASetupPage() {
                 saveMfaSetupState(userId, secret, authUrl);
                 setInfoMessage(data.message || '');
                 setStep('setup');
-            } else if (selectedMethod === 'email' || selectedMethod === 'sms') {
-                setInfoMessage(data.message || (
-                    selectedMethod === 'sms'
-                        ? `A code was sent to ${userPhone || 'your phone'}`
-                        : `A code was sent to ${userEmail}`
-                ));
+            } else if (selectedMethod === 'email') {
+                setInfoMessage(data.message || `A code was sent to ${userEmail}`);
                 setStep('verify');
             }
         } catch (setupError) {
@@ -535,9 +529,7 @@ function MFASetupPage() {
                             {step === "select" && "Setup Two-Factor Authentication"}
                             {step === "setup" && "Add CyForce to your authenticator app"}
                             {step === "verify" && (
-                                selectedMethod === "email" ? "Verify Email Code"
-                                    : selectedMethod === "sms" ? "Verify SMS Code"
-                                    : "Verify Your Code"
+                                selectedMethod === "email" ? "Verify Email Code" : "Verify Your Code"
                             )}
                         </h1>
                         <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.5)" }}>
@@ -545,7 +537,6 @@ function MFASetupPage() {
                             {step === "setup" && "On a laptop? Enter the setup key manually — Google Authenticator often cannot scan desktop screens."}
                             {step === "verify" && (
                                 selectedMethod === "email" ? "Enter the code we sent to your email"
-                                    : selectedMethod === "sms" ? "Enter the code we sent to your phone"
                                     : "Enter the 6-digit code from your app"
                             )}
                         </p>
@@ -675,7 +666,7 @@ function MFASetupPage() {
                                     <p style={{ fontSize: "13px", color: "#FDE68A", margin: 0, lineHeight: 1.55 }}>
                                         <strong>Can&apos;t scan the code?</strong> Google Authenticator on phones often shows
                                         &quot;Try using camera on your iPhone or iPad&quot; when the QR code is on a laptop screen.
-                                        Use <strong>Enter a setup key</strong> below instead — or choose SMS / Email on the previous step.
+                                        Use <strong>Enter a setup key</strong> below instead — or choose Email on the previous step.
                                     </p>
                                 </div>
 
@@ -746,7 +737,7 @@ function MFASetupPage() {
                                     color: "rgba(255,255,255,0.55)",
                                     cursor: "pointer",
                                 }}>
-                                    Use SMS or Email instead
+                                    Use Email instead
                                 </button>
                                 <button type="button" onClick={handleStartOver} disabled={isLoading} style={{
                                     width: "100%",
@@ -763,7 +754,7 @@ function MFASetupPage() {
                             </div>
                         )}
 
-                        {step === "verify" && (selectedMethod === "email" || selectedMethod === "sms") && (
+                        {step === "verify" && selectedMethod === "email" && (
                             <div style={{
                                 padding: "16px",
                                 marginBottom: "16px",
@@ -774,9 +765,7 @@ function MFASetupPage() {
                             }}>
                                 <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>
                                     Enter the 6-digit code sent to{" "}
-                                    <strong style={{ color: "#fff" }}>
-                                        {selectedMethod === "sms" ? (userPhone || "your phone") : userEmail}
-                                    </strong>
+                                    <strong style={{ color: "#fff" }}>{userEmail}</strong>
                                 </p>
                             </div>
                         )}
@@ -814,16 +803,14 @@ function MFASetupPage() {
                                         justifyContent: "center"
                                     }}>
                                         <span style={{ fontSize: "32px" }}>
-                                            {selectedMethod === "email" ? "✉️" : selectedMethod === "sms" ? "💬" : "🔑"}
+                                            {selectedMethod === "email" ? "✉️" : "🔑"}
                                         </span>
                                     </div>
                                 </div>
 
                                 <div style={{ textAlign: "center" }}>
                                     <label style={{ fontSize: "12px", fontWeight: "500", color: "rgba(255,255,255,0.7)", display: "block", marginBottom: "12px" }}>
-                                        {selectedMethod === "email" ? "Enter Email Code"
-                                            : selectedMethod === "sms" ? "Enter SMS Code"
-                                            : "Enter 6-Digit Code"}
+                                        {selectedMethod === "email" ? "Enter Email Code" : "Enter 6-Digit Code"}
                                     </label>
                                     <OTPInput value={otp} onChange={setOtp} length={6} />
                                 </div>

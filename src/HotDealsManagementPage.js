@@ -14,14 +14,46 @@ const EMPTY_FORM = {
     originalPrice: '',
     discountPercent: '',
     ctaLabel: 'Shop now',
+    startsAt: '',
+    expiresAt: '',
     active: true,
 };
+
+function formatDatetimeLocal(date) {
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function defaultSchedule() {
+    const start = new Date();
+    start.setMinutes(0, 0, 0);
+    const end = new Date(start);
+    end.setDate(end.getDate() + 7);
+    return {
+        startsAt: formatDatetimeLocal(start),
+        expiresAt: formatDatetimeLocal(end),
+    };
+}
+
+function toDatetimeLocalValue(value) {
+    if (!value) return '';
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return '';
+    return formatDatetimeLocal(parsed);
+}
+
+function scheduleStatusMeta(deal) {
+    if (deal.scheduleStatus === 'live') return { label: 'Live', tone: 'success' };
+    if (deal.scheduleStatus === 'scheduled') return { label: 'Scheduled', tone: 'info' };
+    if (deal.scheduleStatus === 'expired') return { label: 'Expired', tone: 'error' };
+    return { label: deal.active ? 'Hidden' : 'Draft', tone: 'warning' };
+}
 
 export default function HotDealsManagementPage() {
     const auth = useAuth();
     const [deals, setDeals] = useState([]);
     const [products, setProducts] = useState([]);
-    const [form, setForm] = useState(EMPTY_FORM);
+    const [form, setForm] = useState({ ...EMPTY_FORM, ...defaultSchedule() });
     const [imageFile, setImageFile] = useState(null);
     const [previewImage, setPreviewImage] = useState(null);
     const [editingId, setEditingId] = useState(null);
@@ -43,7 +75,7 @@ export default function HotDealsManagementPage() {
     }, []);
 
     const resetForm = () => {
-        setForm(EMPTY_FORM);
+        setForm({ ...EMPTY_FORM, ...defaultSchedule() });
         setImageFile(null);
         setPreviewImage(null);
         setEditingId(null);
@@ -75,6 +107,8 @@ export default function HotDealsManagementPage() {
             originalPrice: deal.originalPrice != null ? String(deal.originalPrice) : '',
             discountPercent: deal.discountPercent != null ? String(deal.discountPercent) : '',
             ctaLabel: deal.ctaLabel || 'Shop now',
+            startsAt: toDatetimeLocalValue(deal.startsAt),
+            expiresAt: toDatetimeLocalValue(deal.expiresAt),
             active: Boolean(deal.active),
         });
         setImageFile(null);
@@ -116,6 +150,12 @@ export default function HotDealsManagementPage() {
             if (!form.productId) {
                 throw new Error('Please select the product this hot deal applies to.');
             }
+            if (form.active && (!form.startsAt || !form.expiresAt)) {
+                throw new Error('Published hot deals need a start and end date/time.');
+            }
+            if (form.active && new Date(form.expiresAt) <= new Date(form.startsAt)) {
+                throw new Error('End time must be after the start time.');
+            }
             const payload = {
                 title: form.title,
                 description: form.description,
@@ -125,6 +165,8 @@ export default function HotDealsManagementPage() {
                 originalPrice: form.originalPrice,
                 discountPercent: form.discountPercent,
                 ctaLabel: form.ctaLabel,
+                startsAt: form.startsAt,
+                expiresAt: form.expiresAt,
                 active: String(form.active),
             };
             if (editingId) {
@@ -172,7 +214,7 @@ export default function HotDealsManagementPage() {
         <DashboardLayout>
             <PageHeader
                 title="Hot Deals"
-                subtitle="Link each deal to a catalog product. Shop now adds that product to the customer's cart at the deal price."
+                subtitle="Schedule each deal with a start and end time. While live, the linked product uses the deal price and reverts automatically when the deal ends."
                 action={editingId ? <PrimaryButton onClick={resetForm}>+ New Deal</PrimaryButton> : null}
             />
             {error && <Alert type="error">{error}</Alert>}
@@ -198,6 +240,26 @@ export default function HotDealsManagementPage() {
                         <input style={inputStyle} placeholder="Badge (e.g. Limited Time)" value={form.badge} onChange={(e) => setForm({ ...form, badge: e.target.value })} />
                         <input style={inputStyle} type="number" min="0" placeholder="Deal price (NGN)" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
                         <input style={inputStyle} type="number" min="0" placeholder="Original price (NGN)" value={form.originalPrice} onChange={(e) => setForm({ ...form, originalPrice: e.target.value })} />
+                        <label style={{ fontSize: 12, color: theme.textDim, display: 'block', marginBottom: 6 }}>Starts</label>
+                        <input
+                            style={inputStyle}
+                            type="datetime-local"
+                            value={form.startsAt}
+                            onChange={(e) => setForm({ ...form, startsAt: e.target.value })}
+                            required={form.active}
+                        />
+                        <label style={{ fontSize: 12, color: theme.textDim, display: 'block', marginBottom: 6 }}>Ends</label>
+                        <input
+                            style={inputStyle}
+                            type="datetime-local"
+                            value={form.expiresAt}
+                            min={form.startsAt || undefined}
+                            onChange={(e) => setForm({ ...form, expiresAt: e.target.value })}
+                            required={form.active}
+                        />
+                        <p style={{ fontSize: 12, color: theme.textDim, margin: '0 0 12px' }}>
+                            The product price updates when the deal goes live and returns to the original price when it ends.
+                        </p>
                         <input style={{ ...inputStyle, padding: 8 }} type="file" accept="image/*" onChange={(e) => handleImageChange(e.target.files?.[0] || null)} />
                         <p style={{ fontSize: 12, color: theme.textDim, marginBottom: 12 }}>
                             {editingId ? 'Leave image empty to keep the current photo.' : 'Image is required for new deals.'}
@@ -230,8 +292,23 @@ export default function HotDealsManagementPage() {
                             <img src={assetUrl(r.imageUrl)} alt="" style={{ width: 48, height: 36, objectFit: 'cover', borderRadius: 6 }} />
                         ) : '—' },
                         { key: 'price', label: 'Price', render: (r) => r.price != null ? `₦${Number(r.price).toLocaleString()}` : '—' },
-                        { key: 'discountPercent', label: 'Discount', render: (r) => r.discountPercent ? `${r.discountPercent}%` : '—' },
-                        { key: 'active', label: 'Status', render: (r) => <StatusBadge status={r.active ? 'success' : 'warning'} label={r.active ? 'Live' : 'Hidden'} /> },
+                        {
+                            key: 'schedule',
+                            label: 'Schedule',
+                            render: (r) => (
+                                r.startsAt || r.expiresAt
+                                    ? `${r.startsAt ? new Date(r.startsAt).toLocaleString() : '?'} → ${r.expiresAt ? new Date(r.expiresAt).toLocaleString() : '?'}`
+                                    : '—'
+                            ),
+                        },
+                        {
+                            key: 'active',
+                            label: 'Status',
+                            render: (r) => {
+                                const meta = scheduleStatusMeta(r);
+                                return <StatusBadge status={meta.tone} label={meta.label} />;
+                            },
+                        },
                         { key: 'actions', label: '', render: (r) => (
                             <div style={{ display: 'flex', gap: 8 }}>
                                 <button type="button" onClick={() => startEdit(r)} style={{ fontSize: 12, padding: '4px 10px', borderRadius: 6, border: `0.5px solid ${theme.border}`, background: 'transparent', color: theme.accent, cursor: 'pointer' }}>Edit</button>
