@@ -138,6 +138,7 @@ export const notificationApi = {
     markRead: (id) => api.patch(`/api/notifications/${id}/read`, {}),
     markAllRead: () => api.patch('/api/notifications/read-all', {}),
     delete: (id) => api.delete(`/api/notifications/${id}`),
+    deleteAll: () => api.delete('/api/notifications'),
 };
 
 export const quoteApi = {
@@ -250,6 +251,10 @@ export const salesApi = {
     bonuses: () => api.get('/api/sales/dashboard/bonuses'),
     stats: () => api.get('/api/sales/dashboard/stats'),
     customers: () => api.get('/api/sales/customers'),
+    customersReport: (format = 'csv') => downloadFile(
+        `/api/sales/customers/report?format=${encodeURIComponent(format)}`,
+        `customers-${new Date().toISOString().slice(0, 10)}.${format}`
+    ),
     createCustomer: (body) => api.post('/api/sales/customers', body),
     leads: () => api.get('/api/sales/leads'),
     createLead: (body) => api.post('/api/sales/leads', body),
@@ -294,6 +299,7 @@ export const supervisorApi = {
     leads: () => api.get('/api/supervisor/leads'),
     createLead: (body) => api.post('/api/supervisor/leads', body),
     assignLead: (leadId, body) => api.post(`/api/supervisor/leads/${leadId}/assign`, body),
+    previewLeadAssignment: (leadId) => api.get(`/api/supervisor/leads/${leadId}/assign/preview`),
     salesAgents: () => api.get('/api/supervisor/sales-agents'),
     performance: () => api.get('/api/supervisor/agents/performance'),
     approvals: () => api.get('/api/supervisor/approvals'),

@@ -50,6 +50,7 @@ import HotDealsManagementPage from './HotDealsManagementPage';
 import HotDealsPage from './HotDealsPage';
 import { HotDealsStrip } from './components/HotDealsStrip';
 import { QuoteRequestSection } from './components/QuoteRequestSection';
+import GoogleStarsBadge from './GoogleStarsBadge';
 import { contentApi, productApi } from './utils/apiClient';
 import CustomerDashboard from './dashboards/CustomerDashboard';
 import CustomerProductsPage from './dashboards/CustomerProductsPage';
@@ -269,7 +270,27 @@ function LandingPage() {
       <ServicesSection />
       <HotDealsLandingSection />
       <QuoteRequestSection />
+      <GoogleReviewsSection />
     </div>
+  );
+}
+
+function GoogleReviewsSection() {
+  return (
+    <section className="cyforce-landing-section cyforce-landing-section--alt cyforce-landing-section--bordered">
+      <div className="cyforce-landing-container">
+        <div className="cyforce-landing-section-header">
+          <p className="cyforce-landing-eyebrow">Client feedback</p>
+          <h2 className="cyforce-landing-title">Google Reviews</h2>
+          <p className="cyforce-landing-subtitle">
+            See what customers say about working with CyForce Technologies.
+          </p>
+        </div>
+        <div className="cyforce-contact-reviews">
+          <GoogleStarsBadge />
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -677,16 +698,6 @@ function HeroSection() {
                     onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.18)"; e.currentTarget.style.color = "rgba(255,255,255,0.72)"; }}
             >Get Started Free</Link>
           </div>
-        </div>
-
-        {/* Scroll cue */}
-        <div style={{
-          position: "absolute", bottom: 28, left: "50%", transform: "translateX(-50%)", zIndex: 2,
-          display: "flex", flexDirection: "column", alignItems: "center", gap: 5,
-          opacity: vis ? 0.6 : 0, transition: "opacity 1s ease 1.3s",
-        }}>
-          <span style={{ fontSize: 9, letterSpacing: "0.14em", color: "rgba(255,255,255,0.35)", textTransform: "uppercase", fontFamily: "'Inter', system-ui, sans-serif" }}>Scroll</span>
-          <div style={{ width: 1, height: 32, background: "linear-gradient(to bottom,rgba(99,179,237,0.5),transparent)", animation: "scrollDrop 1.9s ease-in-out infinite" }} />
         </div>
       </section>
   );
@@ -1191,6 +1202,16 @@ function AppShell() {
     || location.pathname.startsWith('/staff/')
     || location.pathname.startsWith('/team/')
     || location.pathname === '/profile';
+  const hidePublicChrome = location.pathname === '/payment/callback'
+    || location.pathname.startsWith('/survey/purchase/')
+    || location.pathname === '/mfa-setup'
+    || location.pathname === '/change-password'
+    || location.pathname === '/verify-email'
+    || location.pathname === '/complete-profile'
+    || location.pathname === '/login'
+    || location.pathname === '/register'
+    || location.pathname === '/forgot-password'
+    || location.pathname === '/reset-password';
   const [scrolled, setScrolled] = useState(false);
   const [auth, setAuth] = useState(null);
 
@@ -1313,6 +1334,8 @@ function AppShell() {
     display: flex;
     justify-content: center;
     padding-top: 8px;
+    min-height: 140px;
+    width: 100%;
   }
   @media (max-width: 900px) {
     .cyforce-contact-layout { grid-template-columns: 1fr; }
@@ -1473,12 +1496,6 @@ function AppShell() {
   
   @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
   @keyframes pulse{0%,100%{box-shadow:0 0 8px #38BDF8;opacity:1}50%{box-shadow:0 0 18px #38BDF8;opacity:0.55}}
-  @keyframes scrollDrop{
-    0%{transform:scaleY(0);transform-origin:top}
-    50%{transform:scaleY(1);transform-origin:top}
-    51%{transform:scaleY(1);transform-origin:bottom}
-    100%{transform:scaleY(0);transform-origin:bottom}
-  }
   @keyframes kenBurnsA{from{transform:scale(1) translate(0,0)}to{transform:scale(1.08) translate(-1%,-1%)}}
   @keyframes kenBurnsB{from{transform:scale(1) translate(0,0)}to{transform:scale(1.08) translate(1%,1%)}}
   @keyframes modalIn{from{opacity:0;transform:scale(0.94) translateY(12px)}to{opacity:1;transform:none}}
@@ -1508,7 +1525,7 @@ function AppShell() {
 
           <ScrollToTop />
           {auth && <AuthModal mode={auth} onClose={() => setAuth(null)} />}
-          {!isDashboard && <NavBar scrolled={scrolled} onAuth={setAuth} />}
+          {!isDashboard && !hidePublicChrome && <NavBar scrolled={scrolled} onAuth={setAuth} />}
 
           <Routes>
             <Route path="/" element={<LandingPage />} />
@@ -1572,8 +1589,8 @@ function AppShell() {
             <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
           </Routes>
 
-          {!isDashboard && <Footer />}
-          {!isDashboard && <AIChatbot />}
+          {!isDashboard && !hidePublicChrome && <Footer />}
+          {!isDashboard && !hidePublicChrome && <AIChatbot />}
         </>
   );
 }

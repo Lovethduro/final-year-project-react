@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { notificationApi } from '../utils/apiClient';
+import { PurchaseSurveyForm } from './PurchaseSurveyForm';
 import { theme } from '../styles/theme';
 
 function BellIcon() {
@@ -15,6 +16,7 @@ export function NotificationBell() {
     const [open, setOpen] = useState(false);
     const [notifications, setNotifications] = useState([]);
     const [unread, setUnread] = useState(0);
+    const [expandedSurveyId, setExpandedSurveyId] = useState(null);
     const panelRef = useRef(null);
 
     const load = () => {
@@ -56,6 +58,13 @@ export function NotificationBell() {
 
     const remove = async (id) => {
         await notificationApi.delete(id);
+        load();
+    };
+
+    const removeAll = async () => {
+        if (!notifications.length) return;
+        await notificationApi.deleteAll();
+        setExpandedSurveyId(null);
         load();
     };
 
@@ -109,13 +118,23 @@ export function NotificationBell() {
                         padding: '14px 16px', borderBottom: `1px solid ${theme.border}`,
                     }}>
                         <span style={{ fontWeight: 600, color: theme.text }}>Notifications</span>
-                        {unread > 0 && (
-                            <button type="button" onClick={markAllRead} style={{
-                                background: 'none', border: 'none', color: theme.accent,
-                                fontSize: 12, cursor: 'pointer',
-                            }}>
-                                Mark all read
-                            </button>
+                        {notifications.length > 0 && (
+                            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                                {unread > 0 && (
+                                    <button type="button" onClick={markAllRead} style={{
+                                        background: 'none', border: 'none', color: theme.accent,
+                                        fontSize: 12, cursor: 'pointer',
+                                    }}>
+                                        Mark all read
+                                    </button>
+                                )}
+                                <button type="button" onClick={removeAll} style={{
+                                    background: 'none', border: 'none', color: theme.error,
+                                    fontSize: 12, cursor: 'pointer',
+                                }}>
+                                    Clear all
+                                </button>
+                            </div>
                         )}
                     </div>
 
@@ -132,6 +151,41 @@ export function NotificationBell() {
                                         {n.title}
                                     </div>
                                     <div style={{ fontSize: 12, color: theme.textMuted, lineHeight: 1.4 }}>{n.message}</div>
+                                    {n.surveyToken && (
+                                        <div style={{ marginTop: 10 }}>
+                                            {expandedSurveyId === n.id ? (
+                                                <PurchaseSurveyForm
+                                                    token={n.surveyToken}
+                                                    compact
+                                                    onComplete={() => {
+                                                        setExpandedSurveyId(null);
+                                                        markRead(n.id);
+                                                        load();
+                                                    }}
+                                                />
+                                            ) : (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setExpandedSurveyId(n.id);
+                                                        if (!n.read) markRead(n.id);
+                                                    }}
+                                                    style={{
+                                                        background: 'none',
+                                                        border: `1px solid ${theme.border}`,
+                                                        borderRadius: 6,
+                                                        color: theme.accent,
+                                                        fontSize: 12,
+                                                        padding: '6px 10px',
+                                                        cursor: 'pointer',
+                                                        fontFamily: theme.fontBody,
+                                                    }}
+                                                >
+                                                    Rate your purchase
+                                                </button>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                                     {!n.read && (

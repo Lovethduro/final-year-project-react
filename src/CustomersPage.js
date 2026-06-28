@@ -10,6 +10,7 @@ import {
     FilterSelect,
     StatCard,
     PrimaryButton,
+    GhostButton,
     Alert,
     Select,
     AvatarInitials,
@@ -32,30 +33,6 @@ const ghostButtonStyle = {
     cursor: 'pointer',
     fontFamily: theme.fontBody,
 };
-
-function exportCustomersCsv(rows) {
-    const headers = ['Name', 'Company', 'Email', 'Phone', 'Type', 'Status', 'Lifetime Value', 'Tickets', 'Last Contact', 'Member Since'];
-    const lines = rows.map((row) => [
-        row.name,
-        row.company,
-        row.email,
-        row.phone || '',
-        row.type,
-        row.status,
-        row.lifetimeValue || '₦0',
-        row.tickets ?? 0,
-        row.lastContact || '',
-        row.memberSince || '',
-    ].map((value) => `"${String(value ?? '').replace(/"/g, '""')}"`).join(','));
-    const csv = [headers.join(','), ...lines].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `customers-${new Date().toISOString().slice(0, 10)}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
-}
 
 function CustomerAvatar({ customer }) {
     const imageUrl = assetUrl(customer.avatarUrl);
@@ -85,6 +62,7 @@ export default function CustomersPage() {
     const [loading, setLoading] = useState(true);
     const [showAddModal, setShowAddModal] = useState(false);
     const [saving, setSaving] = useState(false);
+    const [exporting, setExporting] = useState('');
     const [form, setForm] = useState({
         fullName: '',
         email: '',
@@ -155,14 +133,28 @@ export default function CustomersPage() {
         }
     };
 
+    const handleExport = async (format) => {
+        setExporting(format);
+        setError('');
+        setSuccess('');
+        try {
+            await salesApi.customersReport(format);
+            setSuccess(`Customer list downloaded as ${format.toUpperCase()}.`);
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setExporting('');
+        }
+    };
+
     const headerActions = (
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <button type="button" style={ghostButtonStyle} onClick={() => setSuccess('CSV import will be available in a future update.')}>
-                Import
-            </button>
-            <button type="button" style={ghostButtonStyle} onClick={() => exportCustomersCsv(filtered)} disabled={!filtered.length}>
-                Export
-            </button>
+            <GhostButton onClick={() => handleExport('csv')} disabled={!!exporting || loading || !customers.length}>
+                {exporting === 'csv' ? 'Exporting…' : 'Export CSV'}
+            </GhostButton>
+            <GhostButton onClick={() => handleExport('pdf')} disabled={!!exporting || loading || !customers.length}>
+                {exporting === 'pdf' ? 'Generating…' : 'Download PDF'}
+            </GhostButton>
             <PrimaryButton onClick={() => { setShowAddModal(true); setSuccess(''); setError(''); }}>
                 Add Customer
             </PrimaryButton>

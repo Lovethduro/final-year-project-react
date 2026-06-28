@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import logo from './images/CYFORCE 2-1.jpg';
 
 import { QRCodeSVG } from 'qrcode.react';
-import { API_BASE, getPostAuthPath } from './utils/authFlow';
+import { API_BASE, getPostAuthPath, LOGIN_MFA_ENABLED } from './utils/authFlow';
 import { getSession } from './utils/apiClient';
 
 // Animated Particle Background
@@ -190,6 +190,47 @@ function MFASetupPage() {
     const session = getSession();
     const userId = session.userId;
     const userEmail = session.email || '';
+    const isProfileSetup = !LOGIN_MFA_ENABLED;
+
+    const dismissSetup = () => navigate('/profile', { replace: true });
+
+    const cardDismiss = isProfileSetup ? (
+        <button
+            type="button"
+            onClick={dismissSetup}
+            aria-label="Close"
+            style={{
+                position: 'absolute',
+                top: 16,
+                right: 16,
+                width: 32,
+                height: 32,
+                borderRadius: 8,
+                border: '1px solid rgba(255,255,255,0.08)',
+                background: 'rgba(255,255,255,0.04)',
+                color: 'rgba(255,255,255,0.45)',
+                fontSize: 20,
+                lineHeight: 1,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'color 0.2s, border-color 0.2s, background 0.2s',
+            }}
+            onMouseEnter={(e) => {
+                e.currentTarget.style.color = 'rgba(255,255,255,0.8)';
+                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.16)';
+                e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
+            }}
+            onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'rgba(255,255,255,0.45)';
+                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
+                e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+            }}
+        >
+            ×
+        </button>
+    ) : null;
 
     const [selectedMethod, setSelectedMethod] = useState("authenticator");
     const [step, setStep] = useState("select");
@@ -339,19 +380,22 @@ function MFASetupPage() {
         }
     };
 
+    const pageShellStyle = {
+        minHeight: "100vh",
+        width: "100%",
+        background: "#0F172A",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        position: "relative",
+        overflow: "hidden",
+        fontFamily: "'DM Sans', sans-serif",
+        padding: "24px 16px",
+    };
+
     if (step === "complete") {
         return (
-            <div style={{
-                minHeight: "100vh",
-                width: "100%",
-                background: "#0F172A",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                position: "relative",
-                overflow: "hidden",
-                fontFamily: "'DM Sans', sans-serif"
-            }}>
+            <div style={pageShellStyle}>
                 <div style={{
                     position: "absolute",
                     inset: 0,
@@ -384,6 +428,7 @@ function MFASetupPage() {
 
                 <div style={{ position: "relative", zIndex: 10, width: "100%", maxWidth: "420px", margin: "0 16px" }}>
                     <div style={{
+                        position: "relative",
                         backdropFilter: "blur(12px)",
                         background: "rgba(255,255,255,0.05)",
                         border: "1px solid rgba(255,255,255,0.1)",
@@ -391,6 +436,7 @@ function MFASetupPage() {
                         boxShadow: "0 25px 50px rgba(0,0,0,0.3)",
                         overflow: "hidden"
                     }}>
+                        {cardDismiss}
                         <div style={{ padding: "32px", textAlign: "center" }}>
                             <div style={{ display: "flex", justifyContent: "center", marginBottom: "24px" }}>
                                 <div style={{
@@ -414,12 +460,12 @@ function MFASetupPage() {
                             </p>
                             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                                 <button
-                                    onClick={() => navigate(getPostAuthPath({
+                                    onClick={() => navigate(isProfileSetup ? '/profile' : getPostAuthPath({
                                         emailVerified: true,
                                         mustChangePassword: false,
                                         mfaEnabled: true,
                                         role: session.role,
-                                    }))}
+                                    }), { replace: true })}
                                     style={{
                                         width: "100%",
                                         padding: "12px",
@@ -435,8 +481,9 @@ function MFASetupPage() {
                                     onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.02)"}
                                     onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
                                 >
-                                    Continue to Dashboard
+                                    {isProfileSetup ? 'Done' : 'Continue to Dashboard'}
                                 </button>
+                                {!isProfileSetup && (
                                 <Link to="/login" style={{
                                     width: "100%",
                                     padding: "12px",
@@ -453,6 +500,7 @@ function MFASetupPage() {
                                       onMouseLeave={(e) => e.target.style.background = "transparent"}>
                                     Back to Login
                                 </Link>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -462,19 +510,7 @@ function MFASetupPage() {
     }
 
     return (
-        <div style={{
-            minHeight: "100vh",
-            width: "100%",
-            background: "#0F172A",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            position: "relative",
-            overflow: "hidden",
-            fontFamily: "'DM Sans', sans-serif",
-            paddingTop: "80px",
-            paddingBottom: "40px"
-        }}>
+        <div style={pageShellStyle}>
             {/* Background Effects */}
             <div style={{
                 position: "absolute",
@@ -509,6 +545,7 @@ function MFASetupPage() {
             {/* Main Card */}
             <div style={{ position: "relative", zIndex: 10, width: "100%", maxWidth: "480px", margin: "0 16px" }}>
                 <div style={{
+                    position: "relative",
                     backdropFilter: "blur(12px)",
                     background: "rgba(255,255,255,0.05)",
                     border: "1px solid rgba(255,255,255,0.1)",
@@ -516,6 +553,7 @@ function MFASetupPage() {
                     boxShadow: "0 25px 50px rgba(0,0,0,0.3)",
                     overflow: "hidden"
                 }}>
+                    {cardDismiss}
                     {/* Header */}
                     <div style={{ padding: "32px 32px 24px 32px", textAlign: "center", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
                         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
@@ -526,14 +564,16 @@ function MFASetupPage() {
                             </div>
                         </div>
                         <h1 style={{ fontSize: "24px", fontWeight: "bold", color: "#fff", marginTop: "24px", marginBottom: "8px" }}>
-                            {step === "select" && "Setup Two-Factor Authentication"}
+                            {step === "select" && (isProfileSetup ? "Enable Two-Factor Authentication" : "Setup Two-Factor Authentication")}
                             {step === "setup" && "Add CyForce to your authenticator app"}
                             {step === "verify" && (
                                 selectedMethod === "email" ? "Verify Email Code" : "Verify Your Code"
                             )}
                         </h1>
                         <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.5)" }}>
-                            {step === "select" && "Add an extra layer of security to your account"}
+                            {step === "select" && (isProfileSetup
+                                ? "Protect your account with an authenticator app or email codes"
+                                : "Add an extra layer of security to your account")}
                             {step === "setup" && "On a laptop? Enter the setup key manually — Google Authenticator often cannot scan desktop screens."}
                             {step === "verify" && (
                                 selectedMethod === "email" ? "Enter the code we sent to your email"
@@ -875,6 +915,7 @@ function MFASetupPage() {
                 </div>
 
                 {/* Footer Links */}
+                {!isProfileSetup && (
                 <div style={{
                     marginTop: "32px",
                     textAlign: "center",
@@ -888,6 +929,7 @@ function MFASetupPage() {
                     <Link to="/terms" style={{ color: "inherit", textDecoration: "none" }}>Terms of Service</Link>
                     <Link to="/login" style={{ color: "inherit", textDecoration: "none" }}>Back to Login</Link>
                 </div>
+                )}
             </div>
 
             <style>{`

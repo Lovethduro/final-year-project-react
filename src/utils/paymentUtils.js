@@ -4,8 +4,7 @@ export function shouldAutoCompletePayment(init) {
 
 export async function completePaymentIfNeeded(init, paymentApi) {
     if (!init?.reference || !shouldAutoCompletePayment(init)) {
-        return false;
+        return null;
     }
-    await paymentApi.completeLocalPayment(init.reference);
-    return true;
+    return paymentApi.completeLocalPayment(init.reference);
 }

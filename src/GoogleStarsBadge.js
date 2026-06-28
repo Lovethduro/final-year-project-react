@@ -1,44 +1,50 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
-function GoogleStarsBadge() {
-    const containerRef = useRef(null);
-    const [loadFailed, setLoadFailed] = useState(false);
+const ELFSIGHT_SCRIPT_ID = 'elfsight-platform-script';
+const ELFSIGHT_APP_CLASS = 'elfsight-app-8c79923b-21dd-4956-ab69-4e1aa11aae3a';
 
-    useEffect(() => {
-        const container = containerRef.current;
-        if (!container) return;
+function loadElfsightScript() {
+    if (document.getElementById(ELFSIGHT_SCRIPT_ID)) {
+        return Promise.resolve();
+    }
 
+    return new Promise((resolve, reject) => {
         const script = document.createElement('script');
+        script.id = ELFSIGHT_SCRIPT_ID;
         script.src = 'https://apps.elfsight.com/p/platform.js';
         script.defer = true;
         script.async = true;
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error('Failed to load Google reviews widget'));
+        document.body.appendChild(script);
+    });
+}
 
-        script.onerror = () => {
-            setLoadFailed(true);
-        };
+function GoogleStarsBadge() {
+    const widgetRef = useRef(null);
 
-        try {
-            container.appendChild(script);
-        } catch {
-            setLoadFailed(true);
-        }
+    useEffect(() => {
+        let cancelled = false;
+
+        loadElfsightScript()
+            .then(() => {
+                if (cancelled || !widgetRef.current) return;
+                window.dispatchEvent(new Event('load'));
+            })
+            .catch(() => {
+                // Widget script blocked or offline — section stays empty.
+            });
 
         return () => {
-            if (script.parentNode) {
-                script.parentNode.removeChild(script);
-            }
+            cancelled = true;
         };
     }, []);
-
-    if (loadFailed) {
-        return null;
-    }
 
     return (
         <div data-cyforce-landing-reviews>
             <div
-                ref={containerRef}
-                className="elfsight-app-8c79923b-21dd-4956-ab69-4e1aa11aae3a"
+                ref={widgetRef}
+                className={ELFSIGHT_APP_CLASS}
                 data-elfsight-app-lazy
             />
         </div>

@@ -6,6 +6,7 @@ import { completePaymentIfNeeded } from '../utils/paymentUtils';
 import { mapProductForDisplay, maxCartQuantity } from '../utils/productUtils';
 import { addProductToCart, readCart, writeCart, CART_UPDATED_EVENT } from '../utils/cartUtils';
 import { refreshNotifications } from '../utils/notifications';
+import { PurchaseSurveyForm } from './PurchaseSurveyForm';
 import { theme } from '../styles/theme';
 
 export function ProductCatalog({ variant = 'public' }) {
@@ -22,6 +23,7 @@ export function ProductCatalog({ variant = 'public' }) {
     const [checkoutError, setCheckoutError] = useState('');
     const [cartNotice, setCartNotice] = useState('');
     const [checkoutSuccess, setCheckoutSuccess] = useState('');
+    const [surveyToken, setSurveyToken] = useState(null);
     const [checkingOut, setCheckingOut] = useState(false);
     const [paymentProvider, setPaymentProvider] = useState('paystack');
     const session = getSession();
@@ -112,6 +114,7 @@ export function ProductCatalog({ variant = 'public' }) {
     const handleCheckout = async () => {
         setCheckoutError('');
         setCheckoutSuccess('');
+        setSurveyToken(null);
 
         if (!isLoggedIn) {
             if (isDashboard) {
@@ -142,16 +145,22 @@ export function ProductCatalog({ variant = 'public' }) {
 
             const result = await customerApi.checkout(items, paymentProvider);
 
-            if (await completePaymentIfNeeded(result, paymentApi)) {
+            const paymentResult = await completePaymentIfNeeded(result, paymentApi);
+            if (paymentResult) {
                 clearCart();
                 setShowCart(false);
                 refreshNotifications();
+                if (paymentResult.surveyToken) {
+                    setSurveyToken(paymentResult.surveyToken);
+                }
                 if (isStaffShop) {
                     setCheckoutSuccess(result.staffDiscountPercent
                         ? `Order placed with ${result.staffDiscountPercent}% staff discount applied.`
                         : 'Order placed successfully.');
-                } else if (isDashboard) {
+                } else if (isDashboard && !paymentResult.surveyToken) {
                     navigate('/dashboard/billing');
+                } else if (isDashboard) {
+                    setCheckoutSuccess('Payment complete. Please share your feedback below.');
                 }
                 return;
             }
@@ -199,12 +208,12 @@ export function ProductCatalog({ variant = 'public' }) {
                         position: 'relative',
                         boxShadow: '0 4px 20px rgba(43,92,230,0.4)',
                         color: '#fff',
-                        fontSize: isDashboard ? 13 : 26,
-                        fontWeight: 600,
-                        fontFamily: "'Inter', system-ui, sans-serif",
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                     }}
                 >
-                    {isDashboard ? 'Cart' : '🛒'}
+                    <span aria-hidden="true" style={{ fontSize: 26, lineHeight: 1 }}>🛒</span>
                     {cartCount > 0 && (
                         <span style={{
                             position: 'absolute',
@@ -341,7 +350,7 @@ export function ProductCatalog({ variant = 'public' }) {
             <div style={{ padding: isDashboard ? 0 : 0 }}>
                 <div style={{ maxWidth: 1200, margin: '0 auto' }}>
                     {checkoutSuccess && (
-                        <p style={{
+                        <div style={{
                             color: theme.success,
                             background: 'rgba(34, 197, 94, 0.1)',
                             border: `0.5px solid ${theme.success}`,
@@ -350,8 +359,13 @@ export function ProductCatalog({ variant = 'public' }) {
                             marginBottom: 16,
                             fontSize: 14,
                         }}>
-                            {checkoutSuccess}
-                        </p>
+                            <p style={{ margin: 0 }}>{checkoutSuccess}</p>
+                            {surveyToken && (
+                                <div style={{ marginTop: 16, color: theme.text }}>
+                                    <PurchaseSurveyForm token={surveyToken} compact onComplete={() => setSurveyToken(null)} />
+                                </div>
+                            )}
+                        </div>
                     )}
                     {!isDashboard && (
                         <div className="catalog-toolbar">
