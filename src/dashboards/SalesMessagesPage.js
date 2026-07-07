@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { PageHeader, Card, PrimaryButton, Alert } from '../components/ui';
 import { salesApi } from '../utils/apiClient';
@@ -43,14 +43,14 @@ export default function SalesMessagesPage() {
     const [queue, setQueue] = useState([]);
     const bottomRef = useRef(null);
 
-    const load = () => {
+    const load = useCallback(() => {
         salesApi.conversations().then(setConversations).catch((err) => setError(err.message));
         if (auth.role === 'SALES_AGENT') {
             salesApi.conversationQueue().then(setQueue).catch(() => setQueue([]));
         }
-    };
+    }, [auth.role]);
 
-    useEffect(() => { load(); }, []);
+    useEffect(() => { load(); }, [load]);
     useEffect(() => {
         if (deepLinkId) {
             openConversation(deepLinkId);

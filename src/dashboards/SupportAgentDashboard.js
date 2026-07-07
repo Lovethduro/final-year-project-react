@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, DataTable, StatusBadge, PrimaryButton, Alert, Select } from '../components/ui';
 import { WelcomeBanner, QuickActions, ActivityTimeline, StatusToggle, StarRating, MetricCard } from '../components/dashboard/DashboardWidgets';
@@ -110,13 +110,13 @@ export default function SupportAgentDashboard() {
     const [transferAgentId, setTransferAgentId] = useState('');
     const [timer, setTimer] = useState(0);
 
-    const load = () => {
+    const load = useCallback(() => {
         supportApi.overview().then(setOverview).catch((err) => setError(err.message));
-    };
+    }, []);
 
-    useEffect(() => { load(); }, []);
+    useEffect(() => { load(); }, [load]);
 
-    const ensureAgents = () => {
+    const ensureAgents = useCallback(() => {
         if (agentsLoaded) return;
         supportApi.agents()
             .then((data) => {
@@ -124,11 +124,11 @@ export default function SupportAgentDashboard() {
                 setAgentsLoaded(true);
             })
             .catch(() => setAgents([]));
-    };
+    }, [agentsLoaded]);
 
     useEffect(() => {
         if (transferringId != null) ensureAgents();
-    }, [transferringId]);
+    }, [transferringId, ensureAgents]);
 
     useEffect(() => {
         const base = overview?.agentStatus?.statusSeconds || 0;

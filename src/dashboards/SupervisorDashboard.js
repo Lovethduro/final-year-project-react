@@ -1,8 +1,6 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useCallback, useEffect, useState } from 'react';
 import { Card, DataTable, StatusBadge, Alert, Select } from '../components/ui';
 import { WelcomeBanner, QuickActions, DonutChart, LineChart, GaugeChart, HorizontalBarChart, StarRating, MetricCard } from '../components/dashboard/DashboardWidgets';
-import { useAuth } from '../hooks/useAuth';
 import { supervisorApi } from '../utils/apiClient';
 import { theme } from '../styles/theme';
 
@@ -27,7 +25,6 @@ function medalLabel(medal, rank) {
 }
 
 export default function SupervisorDashboard() {
-    const auth = useAuth();
     const [team, setTeam] = useState('all');
     const [overview, setOverview] = useState(null);
     const [feedback, setFeedback] = useState([]);
@@ -35,7 +32,7 @@ export default function SupervisorDashboard() {
     const [error, setError] = useState('');
     const [actionId, setActionId] = useState(null);
 
-    const load = () => {
+    const load = useCallback(() => {
         Promise.all([
             supervisorApi.overview(team),
             supervisorApi.feedback().catch(() => []),
@@ -45,9 +42,9 @@ export default function SupervisorDashboard() {
                 setFeedback(feedbackData || []);
             })
             .catch((err) => setError(err.message));
-    };
+    }, [team]);
 
-    useEffect(() => { load(); }, [team]);
+    useEffect(() => { load(); }, [load]);
 
     const stats = overview?.stats || {};
 
