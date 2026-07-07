@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { quoteApi, productApi } from '../utils/apiClient';
 import { saveQuotePortalSession } from '../utils/quotePortalStorage';
@@ -303,16 +303,7 @@ export function QuoteRequestSection() {
             .finally(() => setLoadingProducts(false));
     }, []);
 
-    useEffect(() => {
-        if (!activeType) return undefined;
-        const onKeyDown = (e) => {
-            if (e.key === 'Escape' && !loading) closeModal();
-        };
-        window.addEventListener('keydown', onKeyDown);
-        return () => window.removeEventListener('keydown', onKeyDown);
-    }, [activeType, loading]);
-
-    const closeModal = () => {
+    const closeModal = useCallback(() => {
         if (loading) return;
         setActiveType(null);
         setForm(EMPTY_FORM);
@@ -322,7 +313,16 @@ export function QuoteRequestSection() {
         setSuccess('');
         setBundle(null);
         setBundleError('');
-    };
+    }, [loading]);
+
+    useEffect(() => {
+        if (!activeType) return undefined;
+        const onKeyDown = (e) => {
+            if (e.key === 'Escape' && !loading) closeModal();
+        };
+        window.addEventListener('keydown', onKeyDown);
+        return () => window.removeEventListener('keydown', onKeyDown);
+    }, [activeType, loading, closeModal]);
 
     const suggestBundle = async () => {
         if (!activeType) return;

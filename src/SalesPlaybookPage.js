@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { PageHeader, Card, SearchInput, PrimaryButton, Alert, Select } from './components/ui';
 import { BackLink } from './components/BackLink';
 import { ChatInboxList, ChatInboxItem, ChatPanel, ChatPanelHeader, ChatPanelBody } from './components/ChatMessage';
@@ -90,16 +90,16 @@ export default function SalesPlaybookPage() {
     const [form, setForm] = useState(EMPTY_FORM);
     const [saving, setSaving] = useState(false);
 
-    const load = () => {
+    const load = useCallback(() => {
         setLoading(true);
         setError('');
         salesApi.playbookList(category || undefined, search || undefined)
             .then((data) => setEntries(data || []))
             .catch((err) => setError(err.message))
             .finally(() => setLoading(false));
-    };
+    }, [category, search]);
 
-    useEffect(() => { load(); }, [category, search]);
+    useEffect(() => { load(); }, [load]);
 
     const openEntry = async (id) => {
         setError('');

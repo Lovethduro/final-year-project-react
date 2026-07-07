@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PageHeader, Card, PrimaryButton, Alert, DataTable, StatusBadge, ConfirmDialog, ReviewNoteDialog } from '../components/ui';
 import { leaveApi } from '../utils/apiClient';
@@ -34,7 +34,7 @@ export default function LeavePage() {
     const [reviewDialog, setReviewDialog] = useState(null);
     const [cancelDialogId, setCancelDialogId] = useState(null);
 
-    const load = () => {
+    const load = useCallback(() => {
         if (isAdmin) {
             leaveApi.all().then(setAllRequests).catch(() => setAllRequests([]));
             leaveApi.pending().then(setPending).catch(() => setPending([]));
@@ -44,9 +44,9 @@ export default function LeavePage() {
                 leaveApi.pending().then(setPending).catch(() => setPending([]));
             }
         }
-    };
+    }, [isAdmin, isReviewer]);
 
-    useEffect(() => { load(); }, [isAdmin, isReviewer]);
+    useEffect(() => { load(); }, [load]);
 
     const submit = async (e) => {
         e.preventDefault();

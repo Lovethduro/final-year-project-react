@@ -59,7 +59,7 @@ export default function PaymentCallbackPage() {
         };
 
         verify();
-    }, [reference, provider, autoComplete]);
+    }, [reference, provider, autoComplete, isStaffUser]);
 
     return (
     <>

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { publicSupportApi, assetUrl } from './utils/apiClient';
 import { theme, cardStyle } from './styles/theme';
@@ -21,7 +21,7 @@ export default function SupportPortalPage() {
     const [sending, setSending] = useState(false);
     const bottomRef = useRef(null);
 
-    const load = async () => {
+    const load = useCallback(async () => {
         if (!token) return;
         setError('');
         try {
@@ -35,9 +35,9 @@ export default function SupportPortalPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [token]);
 
-    useEffect(() => { load(); }, [token]);
+    useEffect(() => { load(); }, [load]);
     useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
     const send = async (e) => {

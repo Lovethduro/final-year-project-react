@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { PageHeader, Card, DataTable, StatusBadge, SearchInput, FilterSelect, StatCard, PrimaryButton, Alert, Select } from './components/ui';
 import { useAuth } from './hooks/useAuth';
 import { adminApi, salesApi, supervisorApi } from './utils/apiClient';
@@ -41,7 +41,7 @@ export default function LeadsPage() {
     const [showForm, setShowForm] = useState(false);
     const [form, setForm] = useState({ name: '', email: '', phone: '', company: '', source: 'website' });
 
-    const load = () => {
+    const load = useCallback(() => {
         setLoading(true);
         setError('');
         const request = auth.role === 'SALES_AGENT'
@@ -57,9 +57,9 @@ export default function LeadsPage() {
                 setLeads([]);
             })
             .finally(() => setLoading(false));
-    };
+    }, [auth.role]);
 
-    useEffect(() => { load(); }, [auth.role]);
+    useEffect(() => { load(); }, [load]);
 
     const filtered = leads.filter((lead) => {
         const q = search.toLowerCase();

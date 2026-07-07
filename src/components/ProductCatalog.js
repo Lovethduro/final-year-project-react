@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { ProductCard } from './ProductCard';
 import { productApi, getSession, customerApi, paymentApi, userApi } from '../utils/apiClient';
 import { completePaymentIfNeeded, isSimulatedPayment } from '../utils/paymentUtils';
-import { mapProductForDisplay, maxCartQuantity } from '../utils/productUtils';
+import { maxCartQuantity } from '../utils/productUtils';
 import { addProductToCart, readCart, writeCart, CART_UPDATED_EVENT } from '../utils/cartUtils';
 import { refreshNotifications } from '../utils/notifications';
 import { PurchaseSurveyForm } from './PurchaseSurveyForm';

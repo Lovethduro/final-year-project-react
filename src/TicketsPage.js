@@ -128,14 +128,7 @@ export default function TicketsPage() {
         }
     }, [transferringId, transferMode, ensureAgents]);
 
-    useEffect(() => {
-        const ticketId = searchParams.get('ticket');
-        if (ticketId && isStaff) {
-            openTicket(ticketId);
-        }
-    }, [searchParams, isStaff]);
-
-    const openTicket = async (id) => {
+    const openTicket = useCallback(async (id) => {
         setError('');
         try {
             const requests = [
@@ -156,7 +149,14 @@ export default function TicketsPage() {
         } catch (err) {
             setError(err.message);
         }
-    };
+    }, [canMergeTickets, auth.role]);
+
+    useEffect(() => {
+        const ticketId = searchParams.get('ticket');
+        if (ticketId && isStaff) {
+            openTicket(ticketId);
+        }
+    }, [searchParams, isStaff, openTicket]);
 
     const handleTakeover = async () => {
         if (!selected) return;

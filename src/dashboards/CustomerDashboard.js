@@ -74,11 +74,6 @@ export default function CustomerDashboard() {
         }
     };
 
-    const openCreateTicket = () => {
-        setShowForm(true);
-        setTimeout(() => formRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
-    };
-
     const inputStyle = { width: '100%', background: 'rgba(255,255,255,0.05)', border: `0.5px solid ${theme.border}`, borderRadius: 8, padding: 10, color: theme.text, fontFamily: theme.fontBody, marginBottom: 12 };
 
     return (

@@ -1,5 +1,5 @@
 // src/EmailVerificationPage.jsx
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import logo from './images/CYFORCE 2-1.jpg';
 
@@ -100,7 +100,7 @@ function EmailVerificationPage() {
     const userEmail = localStorage.getItem('userEmail') || '';
     const token = searchParams.get('token');
 
-    const completeVerification = () => {
+    const completeVerification = useCallback(() => {
         localStorage.setItem('emailVerified', 'true');
         setIsVerified(true);
         setTimeout(() => {
@@ -111,9 +111,9 @@ function EmailVerificationPage() {
                 role: localStorage.getItem('userRole'),
             }));
         }, 2000);
-    };
+    }, [navigate]);
 
-    const verifyWithToken = async (verificationToken) => {
+    const verifyWithToken = useCallback(async (verificationToken) => {
         const response = await fetch(`${API_BASE}/verify-email?token=${encodeURIComponent(verificationToken)}`);
         const data = await response.json();
 
@@ -122,7 +122,7 @@ function EmailVerificationPage() {
         }
 
         completeVerification();
-    };
+    }, [completeVerification]);
 
     const checkVerificationStatus = async () => {
         if (!userEmail) {
@@ -161,7 +161,7 @@ function EmailVerificationPage() {
         };
 
         autoVerify();
-    }, [token]);
+    }, [token, verifyWithToken]);
 
     useEffect(() => {
         if (resendCooldown > 0) {

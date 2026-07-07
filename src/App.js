@@ -158,7 +158,7 @@ function useInView(threshold = 0.12) {
     );
     if (ref.current) obs.observe(ref.current);
     return () => obs.disconnect();
-  }, []);
+  }, [threshold]);
   return [ref, inView];
 }
 
@@ -463,7 +463,7 @@ function AuthModal({ mode, onClose }) {
             </div>
             {tab === "login" && (
                 <div style={{ textAlign: "right", marginTop: -8 }}>
-                  <a href="#" style={{ fontSize: 12, color: "#38BDF8", textDecoration: "none", fontFamily: "'Inter', system-ui, sans-serif" }}>Forgot password?</a>
+                  <Link to="/forgot-password" style={{ fontSize: 12, color: "#38BDF8", textDecoration: "none", fontFamily: "'Inter', system-ui, sans-serif" }}>Forgot password?</Link>
                 </div>
             )}
             <button style={{
@@ -1184,12 +1184,12 @@ function Footer() {
               © {new Date().getFullYear()} CyForce Technologies Ltd. All rights reserved.
             </div>
             <div style={{ display: "flex", gap: 20 }}>
-              <a href="#" style={{ fontSize: 12, color: "rgba(255,255,255,0.2)", textDecoration: "none", fontFamily: "'Inter', system-ui, sans-serif" }}>
+              <Link to="/privacy" style={{ fontSize: 12, color: "rgba(255,255,255,0.2)", textDecoration: "none", fontFamily: "'Inter', system-ui, sans-serif" }}>
                 Privacy Policy
-              </a>
-              <a href="#" style={{ fontSize: 12, color: "rgba(255,255,255,0.2)", textDecoration: "none", fontFamily: "'Inter', system-ui, sans-serif" }}>
+              </Link>
+              <Link to="/terms" style={{ fontSize: 12, color: "rgba(255,255,255,0.2)", textDecoration: "none", fontFamily: "'Inter', system-ui, sans-serif" }}>
                 Terms of Service
-              </a>
+              </Link>
             </div>
           </div>
         </div>

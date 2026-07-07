@@ -27,13 +27,14 @@ function useInView(threshold = 0.1) {
             { threshold }
         );
 
-        if (ref.current) {
-            observer.observe(ref.current);
+        const observed = ref.current;
+        if (observed) {
+            observer.observe(observed);
         }
 
         return () => {
-            if (ref.current) {
-                observer.unobserve(ref.current);
+            if (observed) {
+                observer.unobserve(observed);
             }
         };
     }, [threshold]);
@@ -235,6 +236,7 @@ function ServicesPage() {
             <section className="svc-banner">
                 <div className="svc-banner-bg" style={{ backgroundImage: `url(${ict})` }} />
                 <div className="svc-banner-overlay" />
+                <AnimatedParticles />
                 <div className="svc-banner-content">
                     <span className="svc-eyebrow">What We Do</span>
                     <h1>Our Services</h1>

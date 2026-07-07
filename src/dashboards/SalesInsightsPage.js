@@ -86,7 +86,7 @@ export default function SalesInsightsPage() {
 
     useEffect(() => { load(); }, [load]);
 
-    const stats = overview?.stats || {};
+    const stats = useMemo(() => overview?.stats || {}, [overview]);
     const insights = useMemo(
         () => buildInsights(stats, dealsComparison, profile),
         [stats, dealsComparison, profile],

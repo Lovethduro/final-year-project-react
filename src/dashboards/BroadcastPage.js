@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { PageHeader, Card, PrimaryButton, Alert, Select } from '../components/ui';
 import { supervisorApi, adminApi } from '../utils/apiClient';
 import { useAuth } from '../hooks/useAuth';
-import { theme, inputStyle } from '../styles/theme';
+import { inputStyle } from '../styles/theme';
 
 const AUDIENCE_OPTIONS = [
     { value: 'all', label: 'All Users' },
@@ -26,7 +26,6 @@ export default function BroadcastPage() {
         setError('');
         setSuccess('');
         try {
-            const api = auth.role === 'ADMIN' ? adminApi : supervisorApi;
             const result = auth.role === 'ADMIN'
                 ? await adminApi.sendAnnouncement(message.trim(), audience)
                 : await supervisorApi.broadcast(message.trim(), audience);
