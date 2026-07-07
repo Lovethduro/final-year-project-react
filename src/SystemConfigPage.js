@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { DashboardLayout } from './components/DashboardLayout';
 import { PageHeader, Card, PrimaryButton, Alert } from './components/ui';
 import { adminApi } from './utils/apiClient';
 import { inputStyle } from './styles/theme';
@@ -79,15 +78,15 @@ export default function SystemConfigPage() {
 
     if (loading) {
         return (
-            <DashboardLayout>
-                <PageHeader title="System Configuration" subtitle="Loading settings…" />
-            </DashboardLayout>
+            <>
+                            <PageHeader title="System Configuration" subtitle="Loading settings…" />
+            </>
         );
     }
 
     return (
-        <DashboardLayout>
-            <PageHeader title="System Configuration" subtitle="Global application settings and support contact details" />
+    <>
+                    <PageHeader title="System Configuration" subtitle="Global application settings and support contact details" />
 
             {error && <Alert type="error">{error}</Alert>}
             {saved && <Alert type="success">Configuration saved successfully.</Alert>}
@@ -158,6 +157,6 @@ export default function SystemConfigPage() {
                     </div>
                 </Card>
             </div>
-        </DashboardLayout>
+    </>
     );
 }

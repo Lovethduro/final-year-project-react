@@ -1,20 +1,22 @@
 import { useEffect, useState, useRef } from 'react';
-import { DashboardLayout } from '../components/DashboardLayout';
 import { PageHeader, Card, PrimaryButton, Alert } from '../components/ui';
 import { customerApi, paymentApi, getSession } from '../utils/apiClient';
 import { useAuth } from '../hooks/useAuth';
 import { theme, inputStyle as themeInputStyle } from '../styles/theme';
 import { refreshNotifications } from '../utils/notifications';
-import { completePaymentIfNeeded } from '../utils/paymentUtils';
+import { completePaymentIfNeeded, isSimulatedPayment } from '../utils/paymentUtils';
 import {
     AgentChatHeader,
     ChatMessageRow,
+    ChatExpiryNotice,
     ChatPanel,
     ChatPanelHeader,
     ChatPanelBody,
     ChatPanelFooter,
     ChatInboxList,
     ChatInboxItem,
+    isChatExpired,
+    formatChatExpiry,
 } from '../components/ChatMessage';
 import { StarRatingInput } from '../components/StarRatingInput';
 
@@ -118,14 +120,23 @@ export default function CustomerMessagesPage() {
                 ? await paymentApi.initPaystack({ amount: invoice.amount, description: invoice.description, invoiceId: invoice.id })
                 : await paymentApi.initFlutterwave({ amount: invoice.amount, description: invoice.description, invoiceId: invoice.id });
 
+            if (isSimulatedPayment(init)) {
+                setError(
+                    provider === 'flutterwave'
+                        ? 'Flutterwave is not configured on the server. Add FLUTTERWAVE_SECRET_KEY to application-local.properties and restart the backend.'
+                        : 'Paystack is not configured on the server. Add PAYSTACK_SECRET_KEY to application-local.properties and restart the backend.'
+                );
+                return;
+            }
+            if (init.authorizationUrl) {
+                window.location.href = init.authorizationUrl;
+                return;
+            }
             if (await completePaymentIfNeeded(init, paymentApi)) {
                 openConversation(active.id);
                 loadConversations();
                 refreshNotifications();
                 return;
-            }
-            if (init.authorizationUrl) {
-                window.location.href = init.authorizationUrl;
             }
         } catch (err) {
             setError(err.message);
@@ -135,11 +146,12 @@ export default function CustomerMessagesPage() {
     };
 
     const fieldStyle = { ...themeInputStyle, marginBottom: 0 };
-    const canSend = active && active.status !== 'closed' && active.status !== 'pending_rating';
+    const chatExpired = active?.expiresAt && isChatExpired(active.expiresAt);
+    const canSend = active && !chatExpired && active.status !== 'closed' && active.status !== 'pending_rating';
 
     return (
-        <DashboardLayout>
-            <PageHeader
+        <>
+                    <PageHeader
                 title="Message Sales Team"
                 subtitle="Discuss pricing with a sales agent. When you agree on a price, they will send an invoice you can pay here."
                 action={<PrimaryButton onClick={() => setShowNew(true)}>New Message</PrimaryButton>}
@@ -168,7 +180,7 @@ export default function CustomerMessagesPage() {
                                 active={active?.id === c.id}
                                 onClick={() => openConversation(c.id)}
                                 title={c.subject}
-                                subtitle={`${c.salesAgentName || 'Awaiting agent'} · ${c.status === 'pending_rating' ? 'rate experience' : c.status}`}
+                                subtitle={`${c.salesAgentName || 'Awaiting agent'} · ${c.status === 'pending_rating' ? 'rate experience' : c.status}${c.expiresAt ? ` · expires ${formatChatExpiry(c.expiresAt)}` : ''}`}
                             />
                         )) : <p style={{ color: theme.textDim, fontSize: 13, padding: '8px 14px' }}>No conversations yet.</p>}
                     </ChatInboxList>
@@ -185,8 +197,15 @@ export default function CustomerMessagesPage() {
                                     averageRating={active.salesAgentAverageRating}
                                     ratingCount={active.salesAgentRatingCount}
                                     meta={active.subject}
+                                    expiresAt={active.expiresAt}
                                 />
                             </ChatPanelHeader>
+
+                            {active.expiresAt && (
+                                <div style={{ padding: '0 20px 12px' }}>
+                                    <ChatExpiryNotice expiresAt={active.expiresAt} />
+                                </div>
+                            )}
 
                             <ChatPanelBody bottomRef={bottomRef}>
                                 {messages.length === 0 ? (
@@ -261,6 +280,6 @@ export default function CustomerMessagesPage() {
                     )}
                 </ChatPanel>
             </div>
-        </DashboardLayout>
+        </>
     );
 }

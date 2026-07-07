@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { DashboardLayout } from './components/DashboardLayout';
 import { PageHeader, Card, DataTable, StatusBadge, StatCard, Alert } from './components/ui';
 import { useAuth } from './hooks/useAuth';
 import { salesApi, supervisorApi, adminApi } from './utils/apiClient';
@@ -69,8 +68,8 @@ export default function SalesPage() {
     const pipelineValue = activeDeals.reduce((s, d) => s + d.rawValue, 0);
 
     return (
-        <DashboardLayout>
-            <PageHeader title="Sales Pipeline" subtitle="Monitor deals and revenue opportunities from your leads" />
+        <>
+                    <PageHeader title="Sales Pipeline" subtitle="Monitor deals and revenue opportunities from your leads" />
             {error && <Alert type="error">{error}</Alert>}
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16, marginBottom: 20 }}>
@@ -95,6 +94,6 @@ export default function SalesPage() {
                     />
                 )}
             </Card>
-        </DashboardLayout>
+        </>
     );
 }

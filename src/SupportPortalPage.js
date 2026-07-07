@@ -69,6 +69,7 @@ export default function SupportPortalPage() {
     const closed = ticket?.status === 'closed' || ticket?.status === 'resolved';
 
     return (
+    <>
         <div style={{ minHeight: '100vh', background: theme.bg, padding: '32px 16px' }}>
             <div style={{ maxWidth: 720, margin: '0 auto' }}>
                 <div style={{ textAlign: 'center', marginBottom: 20 }}>
@@ -124,14 +125,6 @@ export default function SupportPortalPage() {
                                                 isMine={mine}
                                                 showAvatar={!mine}
                                             />
-                                            <div style={{
-                                                fontSize: 10,
-                                                color: theme.textDim,
-                                                margin: mine ? '-8px 0 8px 0' : '-8px 0 8px 42px',
-                                                textAlign: mine ? 'right' : 'left',
-                                            }}>
-                                                {m.createdAt ? new Date(m.createdAt).toLocaleString() : ''}
-                                            </div>
                                         </div>
                                     );
                                 }) : (
@@ -172,5 +165,6 @@ export default function SupportPortalPage() {
                 )}
             </div>
         </div>
+    </>
     );
 }

@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { DashboardLayout } from './components/DashboardLayout';
 import { PageHeader, Card, Alert, PrimaryButton, DataTable, StatusBadge, Select } from './components/ui';
 import { productApi } from './utils/apiClient';
 import { resolveProductImage } from './utils/productUtils';
@@ -114,8 +113,8 @@ export default function ProductsManagementPage() {
     };
 
     return (
-        <DashboardLayout>
-            <PageHeader
+        <>
+                    <PageHeader
                 title="Product Catalog"
                 subtitle="Upload and manage products shown on the website and customer portal"
                 action={editingId ? <PrimaryButton onClick={resetForm}>+ New Product</PrimaryButton> : null}
@@ -205,6 +204,6 @@ export default function ProductsManagementPage() {
                     rows={products}
                 />
             </Card>
-        </DashboardLayout>
+        </>
     );
 }

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { DashboardLayout } from '../components/DashboardLayout';
 import { Card, DataTable, StatusBadge, Alert, Select } from '../components/ui';
 import { WelcomeBanner, QuickActions, DonutChart, LineChart, GaugeChart, HorizontalBarChart, StarRating, MetricCard } from '../components/dashboard/DashboardWidgets';
 import { useAuth } from '../hooks/useAuth';
@@ -96,8 +95,8 @@ export default function SupervisorDashboard() {
     }));
 
     return (
-        <DashboardLayout>
-            <WelcomeBanner
+        <>
+                    <WelcomeBanner
                 title={`Supervisor Dashboard`}
                 subtitle={`Team overview for ${formatDate()}`}
             >
@@ -193,7 +192,7 @@ export default function SupervisorDashboard() {
                                     <div style={{ fontSize: 13, color: theme.text, fontWeight: 600 }}>{agent.name}</div>
                                     <div style={{ fontSize: 11, color: theme.textDim }}>{agent.ticketsResolved} resolved · {agent.avgResponse}</div>
                                 </div>
-                                <span style={{ fontSize: 12, color: theme.warning }}>★ {agent.rating}</span>
+                                <span style={{ fontSize: 12, color: theme.warning }}>â˜… {agent.rating}</span>
                             </div>
                         ))}
                     </Card>
@@ -229,6 +228,6 @@ export default function SupervisorDashboard() {
             <Card title="Tickets by Status" style={{ marginTop: 24 }}>
                 <DonutChart slices={statusSlices} />
             </Card>
-        </DashboardLayout>
+        </>
     );
 }

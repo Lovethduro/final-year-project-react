@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { DashboardLayout } from '../components/DashboardLayout';
 import { Card, DataTable, StatusBadge, PrimaryButton, Alert, Select } from '../components/ui';
 import { HotDealsStrip } from '../components/HotDealsStrip';
 import { ProductCard } from '../components/ProductCard';
@@ -42,11 +41,13 @@ export default function CustomerDashboard() {
     const [error, setError] = useState('');
 
     const load = () => {
-        customerApi.stats().then(setStats).catch(() => {});
-        customerApi.tickets().then(setTickets).catch(() => setTickets([]));
-        customerApi.invoices().then(setInvoices).catch(() => setInvoices([]));
-        productApi.list().then(setProducts).catch(() => setProducts([]));
-        userApi.getProfile().then(setProfile).catch(() => {});
+        Promise.all([
+            customerApi.stats().then(setStats).catch(() => {}),
+            customerApi.tickets().then(setTickets).catch(() => setTickets([])),
+            customerApi.invoices().then(setInvoices).catch(() => setInvoices([])),
+            productApi.list().then(setProducts).catch(() => {}),
+            userApi.getProfile().then(setProfile).catch(() => {}),
+        ]);
     };
 
     useEffect(() => { load(); }, []);
@@ -81,8 +82,8 @@ export default function CustomerDashboard() {
     const inputStyle = { width: '100%', background: 'rgba(255,255,255,0.05)', border: `0.5px solid ${theme.border}`, borderRadius: 8, padding: 10, color: theme.text, fontFamily: theme.fontBody, marginBottom: 12 };
 
     return (
-        <DashboardLayout>
-            <WelcomeBanner
+        <>
+                    <WelcomeBanner
                 title={`Welcome back, ${auth.fullName || 'Customer'}`}
                 subtitle={[formatDate(), profile?.createdAt ? `Member since ${profile.createdAt}` : null].filter(Boolean).join(' · ')}
                 badge={profile?.active !== false ? 'Account Active' : 'Account Inactive'}
@@ -117,7 +118,7 @@ export default function CustomerDashboard() {
             ]} />
 
             <Card title="Hot Deals" style={{ marginBottom: 24 }}>
-                <HotDealsStrip compact maxItems={3} showTitle={false} emptyMessage="No hot deals right now. Watch your notifications for new offers." />
+                <HotDealsStrip compact maxItems={3} showTitle={false} products={products} emptyMessage="No hot deals right now. Watch your notifications for new offers." />
                 <Link to="/customer/hot-deals" style={{ display: 'inline-block', marginTop: 12, color: theme.accent, fontSize: 14 }}>
                     View all hot deals →
                 </Link>
@@ -205,6 +206,6 @@ export default function CustomerDashboard() {
                     </div>
                 </div>
             </div>
-        </DashboardLayout>
+        </>
     );
 }

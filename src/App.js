@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import sbImg from './images/s&b.jpg'
 import certi from './images/certificate.jpg'
 import crt from './images/ctr.jpg'
@@ -23,54 +23,62 @@ import ChangePasswordPage from './ChangePasswordPage';
 import TermsPage from './TermsPage';
 import PrivacyPage from './PrivacyPage';
 import ProtectedRoute from './components/ProtectedRoute';
-import AdminDashboard from './AdminDashboard';
-import CustomersPage from './CustomersPage';
-import TicketsPage from './TicketsPage';
-import SalesPage from './SalesPage';
-import LeadsPage from './LeadsPage';
-import AnalyticsPage from './AnalyticsPage';
-import FeedbackPage from './FeedbackPage';
-import PerformancePage from './PerformancePage';
-import StaffShopPage from './dashboards/StaffShopPage';
-import KnowledgeBasePage from './KnowledgeBasePage';
-import UserManagementPage from './UserManagementPage';
-import RolePermissionsPage from './RolePermissionsPage';
-import BillingPage from './BillingPage';
-import PaymentCallbackPage from './PaymentCallbackPage';
-import PurchaseSurveyPage from './PurchaseSurveyPage';
-import QuotePortalPage from './QuotePortalPage';
-import ComplianceReportsPage from './ComplianceReportsPage';
-import DataManagementPage from './DataManagementPage';
-import SecurityAuditPage from './SecurityAuditPage';
-import SystemConfigPage from './SystemConfigPage';
-import SystemHealthPage from './SystemHealthPage';
-import ProfilePage from './ProfilePage';
-import ProductsManagementPage from './ProductsManagementPage';
-import HotDealsManagementPage from './HotDealsManagementPage';
-import HotDealsPage from './HotDealsPage';
+import DashboardShell from './components/DashboardShell';
+import DashboardPageLoader from './components/DashboardPageLoader';
+import { ChunkErrorBoundary } from './components/ChunkErrorBoundary';
+import { clearChunkReloadFlag } from './utils/lazyWithRetry';
+import {
+    AdminDashboard,
+    CustomersPage,
+    TicketsPage,
+    SalesPage,
+    LeadsPage,
+    AnalyticsPage,
+    FeedbackPage,
+    PerformancePage,
+    StaffShopPage,
+    KnowledgeBasePage,
+    UserManagementPage,
+    RolePermissionsPage,
+    BillingPage,
+    ComplianceReportsPage,
+    DataManagementPage,
+    SecurityAuditPage,
+    SystemConfigPage,
+    SystemHealthPage,
+    ProfilePage,
+    ProductsManagementPage,
+    HotDealsManagementPage,
+    HotDealsPage,
+    CustomerDashboard,
+    CustomerProductsPage,
+    CustomerTicketsPage,
+    ContactSupportPage,
+    CustomerMessagesPage,
+    SalesPlaybookPage,
+    SalesMessagesPage,
+    ConversationMonitorPage,
+    CalendarPage,
+    LeavePage,
+    BroadcastPage,
+    ApprovalsPage,
+    SalesAgentDashboard,
+    SalesInsightsPage,
+    SupportAgentDashboard,
+    SupervisorDashboard,
+} from './lazyDashboardPages';
 import { HotDealsStrip } from './components/HotDealsStrip';
 import { QuoteRequestSection } from './components/QuoteRequestSection';
 import GoogleStarsBadge from './GoogleStarsBadge';
 import { contentApi, productApi } from './utils/apiClient';
-import CustomerDashboard from './dashboards/CustomerDashboard';
-import CustomerProductsPage from './dashboards/CustomerProductsPage';
-import CustomerTicketsPage from './dashboards/CustomerTicketsPage';
-import ContactSupportPage from './dashboards/ContactSupportPage';
+import PaymentCallbackPage from './PaymentCallbackPage';
+import PurchaseSurveyPage from './PurchaseSurveyPage';
+import QuotePortalPage from './QuotePortalPage';
 import PublicSupportPage from './PublicSupportPage';
 import SupportPortalPage from './SupportPortalPage';
 import PublicHelpPage from './PublicHelpPage';
-import CustomerMessagesPage from './dashboards/CustomerMessagesPage';
-import SalesPlaybookPage from './SalesPlaybookPage';
-import SalesMessagesPage from './dashboards/SalesMessagesPage';
-import ConversationMonitorPage from './dashboards/ConversationMonitorPage';
-import CalendarPage from './dashboards/CalendarPage';
-import LeavePage from './dashboards/LeavePage';
-import BroadcastPage from './dashboards/BroadcastPage';
-import ApprovalsPage from './dashboards/ApprovalsPage';
-import SalesAgentDashboard from './dashboards/SalesAgentDashboard';
-import SupportAgentDashboard from './dashboards/SupportAgentDashboard';
-import SupervisorDashboard from './dashboards/SupervisorDashboard';
 import { getSession } from './utils/apiClient';
+import { theme } from './styles/theme';
 import { getDashboardPath } from './utils/authFlow';
 
 function DashboardRedirect() {
@@ -507,10 +515,10 @@ function NavBar({ scrolled, onAuth }) {
       onClick={closeMenu}
       style={{
         ...navLinkStyle,
-        color: isActive(path) ? "#38BDF8" : "rgba(255,255,255,0.55)",
+        color: isActive(path) ? theme.accent : theme.textMuted,
       }}
-      onMouseEnter={e => { e.currentTarget.style.color = "#fff"; }}
-      onMouseLeave={e => { e.currentTarget.style.color = isActive(path) ? "#38BDF8" : "rgba(255,255,255,0.55)"; }}
+      onMouseEnter={e => { e.currentTarget.style.color = theme.text; }}
+      onMouseLeave={e => { e.currentTarget.style.color = isActive(path) ? theme.accent : theme.textMuted; }}
     >
       {label}
     </Link>
@@ -522,7 +530,7 @@ function NavBar({ scrolled, onAuth }) {
         padding: scrolled ? "12px clamp(16px, 4vw, 32px)" : "16px clamp(16px, 4vw, 40px)",
         background: scrolled ? "rgba(6,11,26,0.94)" : "transparent",
         backdropFilter: scrolled ? "blur(16px)" : "none",
-        borderBottom: scrolled ? "0.5px solid rgba(99,179,237,0.12)" : "none",
+        borderBottom: scrolled ? `0.5px solid ${theme.border}` : "none",
         transition: "all 0.3s ease",
       }}>
         <div className="cyforce-nav-top">
@@ -534,10 +542,10 @@ function NavBar({ scrolled, onAuth }) {
         >
           <img src={logo} alt="CyForce Technologies Logo" style={{ height: "40px", width: "auto", objectFit: "contain" }} />
           <div>
-            <div style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", fontWeight: 700, fontSize: "clamp(14px, 4vw, 16px)", color: "#fff", lineHeight: 1.1 }}>
-              CyForce <span style={{ color: "#38BDF8" }}>Technologies</span>
+            <div style={{ fontFamily: theme.fontHeading, fontWeight: 700, fontSize: "clamp(14px, 4vw, 16px)", color: theme.text, lineHeight: 1.1 }}>
+              CyForce <span style={{ color: theme.accent }}>Technologies</span>
             </div>
-            <div style={{ fontSize: "clamp(8px, 2vw, 9px)", letterSpacing: "0.13em", color: "rgba(255,255,255,0.3)", textTransform: "uppercase", fontFamily: "'Inter', system-ui, sans-serif" }}>
+            <div style={{ fontSize: "clamp(8px, 2vw, 9px)", letterSpacing: "0.13em", color: theme.textDim, textTransform: "uppercase", fontFamily: theme.fontBody }}>
               Smart Tech Solutions
             </div>
           </div>
@@ -551,7 +559,7 @@ function NavBar({ scrolled, onAuth }) {
             style={{
               background: "transparent",
               border: "none",
-              color: "#fff",
+              color: theme.text,
               fontSize: "24px",
               cursor: "pointer",
             }}
@@ -579,8 +587,8 @@ function NavBar({ scrolled, onAuth }) {
 
           <Link to="/login" onClick={closeMenu} style={{
             background: "transparent",
-            color: "rgba(255,255,255,0.7)",
-            border: "0.5px solid rgba(255,255,255,0.2)",
+            color: theme.textMuted,
+            border: `0.5px solid ${theme.border}`,
             borderRadius: 7,
             padding: "8px 18px",
             fontSize: "clamp(12px, 3vw, 13px)",
@@ -589,12 +597,12 @@ function NavBar({ scrolled, onAuth }) {
             transition: "all 0.2s",
           }}
                 onMouseEnter={e => {
-                  e.currentTarget.style.borderColor = "rgba(56,189,248,0.4)";
-                  e.currentTarget.style.color = "#fff";
+                  e.currentTarget.style.borderColor = theme.borderHover;
+                  e.currentTarget.style.color = theme.text;
                 }}
                 onMouseLeave={e => {
-                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)";
-                  e.currentTarget.style.color = "rgba(255,255,255,0.7)";
+                  e.currentTarget.style.borderColor = theme.border;
+                  e.currentTarget.style.color = theme.textMuted;
                 }}>
             Log In
           </Link>
@@ -631,7 +639,7 @@ function HeroSection() {
   const [vis, setVis] = useState(false);
   useEffect(() => { setTimeout(() => setVis(true), 80); }, []);
   return (
-      <section className="cyforce-hero" style={{ position: "relative", minHeight: "88vh", background: "#060B1A", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", paddingTop: 88, paddingBottom: 48 }}>
+      <section className="cyforce-hero" style={{ position: "relative", minHeight: "88vh", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", paddingTop: 88, paddingBottom: 48 }}>
         <div style={{
           position: "absolute", inset: 0,
           backgroundImage: "url(https://images.unsplash.com/photo-1509391366360-2e959784a276?w=1600&q=80&fit=crop)",
@@ -974,7 +982,7 @@ function Footer() {
               <h4 style={{
                 fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
                 fontSize: 14,
-                color: "#fff",
+                color: theme.text,
                 marginBottom: 20,
                 letterSpacing: "0.05em"
               }}>Quick Links</h4>
@@ -1051,7 +1059,7 @@ function Footer() {
               <h4 style={{
                 fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
                 fontSize: 14,
-                color: "#fff",
+                color: theme.text,
                 marginBottom: 20,
                 letterSpacing: "0.05em"
               }}>Our Services</h4>
@@ -1144,7 +1152,7 @@ function Footer() {
               <h4 style={{
                 fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
                 fontSize: 14,
-                color: "#fff",
+                color: theme.text,
                 marginBottom: 20,
                 letterSpacing: "0.05em"
               }}>Contact Us</h4>
@@ -1163,7 +1171,7 @@ function Footer() {
           </div>
 
           {/* Bottom Bar - Copyright */}
-          <div style={{
+          <div className="cyforce-footer-bar" style={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
@@ -1214,6 +1222,10 @@ function AppShell() {
     || location.pathname === '/reset-password';
   const [scrolled, setScrolled] = useState(false);
   const [auth, setAuth] = useState(null);
+
+  useEffect(() => {
+    clearChunkReloadFlag();
+  }, []);
 
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 40);
@@ -1492,6 +1504,11 @@ function AppShell() {
   }
   @media (max-width: 600px) {
     .cyforce-stat-item { border-right: none !important; }
+    .cyforce-footer-bar {
+      flex-direction: column !important;
+      align-items: center !important;
+      text-align: center !important;
+    }
   }
   
   @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
@@ -1549,6 +1566,13 @@ function AppShell() {
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
 
+            <Route element={
+                <ChunkErrorBoundary>
+                    <Suspense fallback={<DashboardPageLoader />}>
+                        <DashboardShell />
+                    </Suspense>
+                </ChunkErrorBoundary>
+            }>
             <Route path="/admin/dashboard" element={<ProtectedRoute roles={['ADMIN']}><AdminDashboard /></ProtectedRoute>} />
             <Route path="/supervisor/dashboard" element={<ProtectedRoute roles={['SUPERVISOR']}><SupervisorDashboard /></ProtectedRoute>} />
             <Route path="/customer/dashboard" element={<ProtectedRoute roles={['CUSTOMER']}><CustomerDashboard /></ProtectedRoute>} />
@@ -1565,6 +1589,7 @@ function AppShell() {
             <Route path="/dashboard/approvals" element={<ProtectedRoute roles={['ADMIN', 'SUPERVISOR']}><ApprovalsPage /></ProtectedRoute>} />
             <Route path="/sales/playbook" element={<ProtectedRoute roles={['SALES_AGENT', 'SUPERVISOR', 'ADMIN']}><SalesPlaybookPage /></ProtectedRoute>} />
             <Route path="/sales/dashboard" element={<ProtectedRoute roles={['SALES_AGENT']}><SalesAgentDashboard /></ProtectedRoute>} />
+            <Route path="/sales/insights" element={<ProtectedRoute roles={['SALES_AGENT']}><SalesInsightsPage /></ProtectedRoute>} />
             <Route path="/support/dashboard" element={<ProtectedRoute roles={['SUPPORT_AGENT']}><SupportAgentDashboard /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><DashboardRedirect /></ProtectedRoute>} />
             <Route path="/dashboard/customers" element={<ProtectedRoute roles={['ADMIN', 'SUPERVISOR', 'SALES_AGENT', 'SUPPORT_AGENT']}><CustomersPage /></ProtectedRoute>} />
@@ -1587,6 +1612,7 @@ function AppShell() {
             <Route path="/dashboard/products" element={<ProtectedRoute roles={['ADMIN']}><ProductsManagementPage /></ProtectedRoute>} />
             <Route path="/dashboard/hot-deals" element={<ProtectedRoute roles={['ADMIN', 'SUPERVISOR']}><HotDealsManagementPage /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+            </Route>
           </Routes>
 
           {!isDashboard && !hidePublicChrome && <Footer />}

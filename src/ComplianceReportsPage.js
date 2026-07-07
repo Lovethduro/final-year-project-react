@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { DashboardLayout } from './components/DashboardLayout';
 import { PageHeader, Card, DataTable, StatusBadge, PrimaryButton, GhostButton, Alert } from './components/ui';
 import { adminApi } from './utils/apiClient';
 
@@ -50,8 +49,8 @@ export default function ComplianceReportsPage() {
     }));
 
     return (
-        <DashboardLayout>
-            <PageHeader
+        <>
+                    <PageHeader
                 title="Compliance Reports"
                 subtitle="Generate and download regulatory and audit reports"
             />
@@ -104,6 +103,6 @@ export default function ComplianceReportsPage() {
                     rows={rows}
                 />
             </Card>
-        </DashboardLayout>
+        </>
     );
 }

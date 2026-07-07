@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react';
-import { DashboardLayout } from './components/DashboardLayout';
 import { PageHeader, Card, Alert, DataTable, StatusBadge, PrimaryButton } from './components/ui';
 import {
     MetricCard,
@@ -14,6 +13,15 @@ import { analyticsApi } from './utils/apiClient';
 import { theme } from './styles/theme';
 
 const CHART_COLORS = ['#38BDF8', '#6366F1', '#34D399', '#FBBF24', '#F87171', '#A78BFA', '#FB923C', '#2DD4BF'];
+
+function ChartLegendItem({ color, label }) {
+    return (
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, color: theme.textMuted }}>
+            <span style={{ width: 10, height: 10, borderRadius: 2, background: color, flexShrink: 0 }} />
+            {label}
+        </span>
+    );
+}
 
 function toDonutSlices(items) {
     return (items || []).map((item, index) => ({
@@ -78,8 +86,8 @@ export default function AnalyticsPage() {
     }));
 
     return (
-        <DashboardLayout>
-            <PageHeader
+        <>
+                    <PageHeader
                 title="Analytics"
                 subtitle="Charts and live CRM metrics for leads, support, acquisition, and team performance"
                 action={(
@@ -160,9 +168,9 @@ export default function AnalyticsPage() {
 
                         <Card title="Support activity — last 7 days">
                             <div style={{ display: 'flex', gap: 16, marginBottom: 12, flexWrap: 'wrap' }}>
-                                <span style={{ fontSize: 12, color: theme.textMuted }}><span style={{ color: theme.primary }}>■</span> Created</span>
-                                <span style={{ fontSize: 12, color: theme.textMuted }}><span style={{ color: theme.success }}>■</span> Resolved</span>
-                                <span style={{ fontSize: 12, color: theme.textMuted }}><span style={{ color: theme.warning }}>■</span> Open backlog</span>
+                                <ChartLegendItem color={theme.primary} label="Created" />
+                                <ChartLegendItem color={theme.success} label="Resolved" />
+                                <ChartLegendItem color={theme.warning} label="Open backlog" />
                             </div>
                             <LineChart data={ticketTrend} series={['total', 'resolved', 'open']} height={160} />
                         </Card>
@@ -290,6 +298,6 @@ export default function AnalyticsPage() {
                     </Card>
                 </>
             )}
-        </DashboardLayout>
+        </>
     );
 }

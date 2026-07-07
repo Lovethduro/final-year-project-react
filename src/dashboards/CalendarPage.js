@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react';
-import { DashboardLayout } from '../components/DashboardLayout';
 import { PageHeader, Card, PrimaryButton, Alert, Select } from '../components/ui';
 import { calendarApi } from '../utils/apiClient';
 import { useAuth } from '../hooks/useAuth';
@@ -51,7 +50,15 @@ function eventMonthKey(value) {
 
 function formatEventDate(value) {
     const d = parseApiDate(value);
-    return d ? d.toLocaleString() : '—';
+    if (!d) return '—';
+    return d.toLocaleString(undefined, {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+    });
 }
 
 function sortEvents(list) {
@@ -211,8 +218,8 @@ export default function CalendarPage() {
     };
 
     return (
-        <DashboardLayout>
-            <PageHeader
+        <>
+                    <PageHeader
                 title="Calendar"
                 subtitle="Events are saved to your account and sync when you sign in on any device"
             />
@@ -232,11 +239,10 @@ export default function CalendarPage() {
                                 key={ev.id}
                                 style={{
                                     padding: '12px 10px',
-                                    borderBottom: `0.5px solid ${theme.border}`,
-                                    borderRadius: active ? 8 : 0,
-                                    background: active ? 'rgba(43,92,230,0.08)' : 'transparent',
-                                    border: active ? `1px solid ${theme.primary}` : 'none',
                                     marginBottom: active ? 4 : 0,
+                                    borderRadius: 8,
+                                    background: active ? 'rgba(43,92,230,0.08)' : 'transparent',
+                                    border: active ? `1px solid ${theme.primary}` : `0.5px solid ${theme.border}`,
                                 }}
                             >
                                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'flex-start' }}>
@@ -262,9 +268,13 @@ export default function CalendarPage() {
                                         )}
                                     </div>
                                 </div>
-                                <div style={{ fontSize: 12, color: theme.textDim, marginTop: 4 }}>
-                                    {formatEventDate(ev.startAt)}
-                                    {ev.endAt ? ` → ${formatEventDate(ev.endAt)}` : ''}
+                                <div style={{ fontSize: 12, color: theme.textMuted, marginTop: 6, lineHeight: 1.55 }}>
+                                    <div><span style={{ color: theme.textDim }}>Starts: </span>{formatEventDate(ev.startAt)}</div>
+                                    {ev.endAt && (
+                                        <div style={{ marginTop: 2 }}>
+                                            <span style={{ color: theme.textDim }}>Ends: </span>{formatEventDate(ev.endAt)}
+                                        </div>
+                                    )}
                                 </div>
                                 {ev.createdByName && (
                                     <div style={{ fontSize: 11, color: theme.textMuted, marginTop: 4 }}>
@@ -284,8 +294,10 @@ export default function CalendarPage() {
                     <form onSubmit={saveEvent}>
                         <input required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Title" style={{ ...inputStyle, marginBottom: 10 }} />
                         <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Description" rows={2} style={{ ...inputStyle, marginBottom: 10 }} />
+                        <label style={{ display: 'block', fontSize: 12, color: theme.textDim, marginBottom: 6 }}>Start date & time</label>
                         <input required type="datetime-local" value={form.startAt} onChange={(e) => setForm({ ...form, startAt: e.target.value })} style={{ ...inputStyle, marginBottom: 10 }} />
-                        <input type="datetime-local" value={form.endAt} onChange={(e) => setForm({ ...form, endAt: e.target.value })} placeholder="End (optional)" style={{ ...inputStyle, marginBottom: 10 }} />
+                        <label style={{ display: 'block', fontSize: 12, color: theme.textDim, marginBottom: 6 }}>End date & time (optional)</label>
+                        <input type="datetime-local" value={form.endAt} onChange={(e) => setForm({ ...form, endAt: e.target.value })} style={{ ...inputStyle, marginBottom: 10 }} />
                         <Select
                             value={form.eventType}
                             onChange={(e) => setForm({ ...form, eventType: e.target.value, taggedUserIds: [], targetRoles: [] })}
@@ -371,6 +383,6 @@ export default function CalendarPage() {
                     </form>
                 </Card>
             </div>
-        </DashboardLayout>
+        </>
     );
 }

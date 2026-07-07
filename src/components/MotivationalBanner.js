@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import { contentApi, getSession } from '../utils/apiClient';
 import { theme } from '../styles/theme';
 
+const messageCache = new Map();
+
 export function MotivationalBanner({ role }) {
-    const [message, setMessage] = useState('');
+    const [message, setMessage] = useState(() => messageCache.get(role) || '');
     const session = getSession();
 
     useEffect(() => {
@@ -11,15 +13,25 @@ export function MotivationalBanner({ role }) {
             setMessage('');
             return;
         }
+        if (messageCache.has(role)) {
+            setMessage(messageCache.get(role));
+            return;
+        }
         contentApi.motivational(role)
             .then((data) => {
                 if (data?.enabled === false) {
+                    messageCache.set(role, '');
                     setMessage('');
                     return;
                 }
-                setMessage(data?.message || '');
+                const next = data?.message || '';
+                messageCache.set(role, next);
+                setMessage(next);
             })
-            .catch(() => setMessage(''));
+            .catch(() => {
+                messageCache.set(role, '');
+                setMessage('');
+            });
     }, [role, session.showMotivationalMessages]);
 
     if (!message) return null;

@@ -4,8 +4,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import logo from './images/CYFORCE 2-1.jpg';
 
 import { QRCodeSVG } from 'qrcode.react';
-import { API_BASE, getPostAuthPath, LOGIN_MFA_ENABLED } from './utils/authFlow';
-import { getSession } from './utils/apiClient';
+import { API_BASE, getPostAuthPath, LOGIN_MFA_ENABLED, storeAuthSession } from './utils/authFlow';
+import { getSession, userApi, getProfileImageUrl } from './utils/apiClient';
+import { BackLink } from './components/BackLink';
 
 // Animated Particle Background
 function ParticleBackground() {
@@ -191,6 +192,7 @@ function MFASetupPage() {
     const userId = session.userId;
     const userEmail = session.email || '';
     const isProfileSetup = !LOGIN_MFA_ENABLED;
+    const isReconfigure = session.mfaEnabled === true;
 
     const dismissSetup = () => navigate('/profile', { replace: true });
 
@@ -289,7 +291,7 @@ function MFASetupPage() {
             let response = await fetch(`${API_BASE}/mfa/setup/init`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId, method: selectedMethod }),
+                body: JSON.stringify({ userId, method: selectedMethod, reconfigure: isReconfigure || forceNew }),
             });
 
             let data = await response.json();
@@ -303,7 +305,7 @@ function MFASetupPage() {
                 response = await fetch(`${API_BASE}/mfa/setup/init`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId, method: selectedMethod }),
+                    body: JSON.stringify({ userId, method: selectedMethod, reconfigure: true }),
                 });
                 data = await response.json();
             }
@@ -369,8 +371,29 @@ function MFASetupPage() {
             }
 
             clearMfaSetupState();
-            const storage = session.rememberMe ? localStorage : sessionStorage;
-            storage.setItem('mfaEnabled', 'true');
+            try {
+                const profile = await userApi.getProfile();
+                storeAuthSession({
+                    userId: profile.userId || session.userId,
+                    email: profile.email || session.email,
+                    fullName: profile.fullName || session.fullName,
+                    phone: profile.phone || session.phone,
+                    role: profile.role || session.role,
+                    token: session.token,
+                    sessionId: session.sessionId,
+                    mfaEnabled: true,
+                    emailVerified: profile.emailVerified ?? session.emailVerified,
+                    mustChangePassword: profile.mustChangePassword ?? session.mustChangePassword,
+                    avatarUrl: getProfileImageUrl(profile) || session.avatarUrl,
+                    preferredPaymentMethod: profile.preferredPaymentMethod || session.preferredPaymentMethod,
+                    createdAt: profile.createdAt || session.memberSince,
+                    showMotivationalMessages: profile.showMotivationalMessages !== false,
+                    profileComplete: profile.profileComplete !== false,
+                }, session.rememberMe);
+            } catch {
+                const storage = session.rememberMe ? localStorage : sessionStorage;
+                storage.setItem('mfaEnabled', 'true');
+            }
             setStep('complete');
         } catch (verifyError) {
             setError(verifyError.message);
@@ -484,22 +507,7 @@ function MFASetupPage() {
                                     {isProfileSetup ? 'Done' : 'Continue to Dashboard'}
                                 </button>
                                 {!isProfileSetup && (
-                                <Link to="/login" style={{
-                                    width: "100%",
-                                    padding: "12px",
-                                    border: "1px solid rgba(51,65,85,1)",
-                                    borderRadius: "10px",
-                                    fontSize: "14px",
-                                    fontWeight: "500",
-                                    color: "rgba(255,255,255,0.7)",
-                                    textAlign: "center",
-                                    textDecoration: "none",
-                                    transition: "background 0.2s"
-                                }}
-                                      onMouseEnter={(e) => e.target.style.background = "rgba(51,65,85,0.5)"}
-                                      onMouseLeave={(e) => e.target.style.background = "transparent"}>
-                                    Back to Login
-                                </Link>
+                                <BackLink to="/login" label="Return to sign in" variant="auth" style={{ width: '100%', justifyContent: 'center' }} />
                                 )}
                             </div>
                         </div>
@@ -871,18 +879,12 @@ function MFASetupPage() {
                                     {isVerifying ? "Verifying..." : "Verify & Enable MFA"}
                                 </button>
 
-                                <button type="button" onClick={() => { setOtp(''); setStep(selectedMethod === "authenticator" ? "setup" : "select"); }} style={{
-                                    background: "none",
-                                    border: "none",
-                                    fontSize: "13px",
-                                    color: "rgba(255,255,255,0.4)",
-                                    cursor: "pointer",
-                                    transition: "color 0.2s"
-                                }}
-                                        onMouseEnter={(e) => e.currentTarget.style.color = "rgba(255,255,255,0.6)"}
-                                        onMouseLeave={(e) => e.currentTarget.style.color = "rgba(255,255,255,0.4)"}>
-                                    Back to Setup
-                                </button>
+                                <BackLink
+                                    variant="subtle"
+                                    label="Return to setup"
+                                    onClick={() => { setOtp(''); setStep(selectedMethod === "authenticator" ? "setup" : "select"); }}
+                                    style={{ color: 'rgba(255,255,255,0.55)' }}
+                                />
                                 {selectedMethod === "authenticator" && (
                                     <button type="button" onClick={handleStartOver} disabled={isLoading} style={{
                                         background: "none",
@@ -927,7 +929,7 @@ function MFASetupPage() {
                 }}>
                     <Link to="/privacy" style={{ color: "inherit", textDecoration: "none" }}>Privacy Policy</Link>
                     <Link to="/terms" style={{ color: "inherit", textDecoration: "none" }}>Terms of Service</Link>
-                    <Link to="/login" style={{ color: "inherit", textDecoration: "none" }}>Back to Login</Link>
+                    <Link to="/login" style={{ color: "inherit", textDecoration: "none" }}>Return to sign in</Link>
                 </div>
                 )}
             </div>

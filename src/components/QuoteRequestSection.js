@@ -61,6 +61,15 @@ function formatNaira(kobo) {
     return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', maximumFractionDigits: 0 }).format(kobo / 100);
 }
 
+function plainAiText(text) {
+    if (!text) return '';
+    return text
+        .replace(/\*\*([^*]+)\*\*/g, '$1')
+        .replace(/^[\s]*[-*]\s+/gm, '')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+}
+
 function buildPayload(quoteType, form) {
     const base = {
         quoteType,
@@ -281,6 +290,9 @@ export function QuoteRequestSection() {
     const [assignedAgent, setAssignedAgent] = useState('');
     const [resumeKey, setResumeKey] = useState(0);
     const [loading, setLoading] = useState(false);
+    const [bundle, setBundle] = useState(null);
+    const [bundleLoading, setBundleLoading] = useState(false);
+    const [bundleError, setBundleError] = useState('');
 
     const selected = QUOTE_OFFERINGS.find((opt) => opt.id === activeType);
 
@@ -308,6 +320,34 @@ export function QuoteRequestSection() {
         setPortalToken('');
         setAssignedAgent('');
         setSuccess('');
+        setBundle(null);
+        setBundleError('');
+    };
+
+    const suggestBundle = async () => {
+        if (!activeType) return;
+        setBundleLoading(true);
+        setBundleError('');
+        try {
+            const data = await quoteApi.suggestBundle(buildPayload(activeType, form));
+            setBundle(data);
+        } catch (err) {
+            setBundleError(err.message);
+            setBundle(null);
+        } finally {
+            setBundleLoading(false);
+        }
+    };
+
+    const applyBundle = () => {
+        if (!bundle?.items?.length) return;
+        const primary = bundle.items.find((item) => item.productId) || bundle.items[0];
+        if (!primary?.productId) return;
+        setForm((prev) => ({
+            ...prev,
+            productId: primary.productId,
+            quantity: String(primary.quantity || 1),
+        }));
     };
 
     const openModal = (type) => {
@@ -317,6 +357,8 @@ export function QuoteRequestSection() {
         setSuccess('');
         setPortalToken('');
         setAssignedAgent('');
+        setBundle(null);
+        setBundleError('');
     };
 
     const handleSubmit = async (e) => {
@@ -446,6 +488,74 @@ export function QuoteRequestSection() {
                                 <ContactFields form={form} setForm={setForm} />
                                 <p style={{ ...labelStyle, marginBottom: 14, marginTop: 4, color: 'rgba(255,255,255,0.45)' }}>Request details</p>
                                 <TypeSpecificFields quoteType={activeType} form={form} setForm={setForm} products={products} loadingProducts={loadingProducts} />
+                                <div style={{ marginBottom: 16, padding: 14, borderRadius: 10, border: '0.5px solid rgba(167,139,250,0.25)', background: 'rgba(167,139,250,0.06)' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: bundle ? 12 : 0 }}>
+                                        <div>
+                                            <div style={{ fontSize: 13, fontWeight: 600, color: '#C4B5FD' }}>Bundle assistant</div>
+                                            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', marginTop: 2 }}>
+                                                Get a suggested product bundle based on your request
+                                            </div>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={suggestBundle}
+                                            disabled={bundleLoading}
+                                            style={{
+                                                fontSize: 12,
+                                                padding: '8px 14px',
+                                                borderRadius: 8,
+                                                border: 'none',
+                                                background: 'linear-gradient(135deg, #7C3AED, #2B5CE6)',
+                                                color: '#fff',
+                                                cursor: bundleLoading ? 'not-allowed' : 'pointer',
+                                                opacity: bundleLoading ? 0.7 : 1,
+                                            }}
+                                        >
+                                            {bundleLoading ? 'Thinking…' : 'Suggest bundle'}
+                                        </button>
+                                    </div>
+                                    {bundleError && <p style={{ color: '#F87171', fontSize: 12, margin: '0 0 8px' }}>{bundleError}</p>}
+                                    {bundle && (
+                                        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.75)', lineHeight: 1.55 }}>
+                                            {bundle.summary && <p style={{ margin: '0 0 10px', lineHeight: 1.55 }}>{plainAiText(bundle.summary)}</p>}
+                                            {bundle.installNote && (
+                                                <p style={{ margin: '0 0 10px', color: 'rgba(255,255,255,0.5)', fontSize: 11 }}>{bundle.installNote}</p>
+                                            )}
+                                            <ul style={{ margin: '0 0 10px', paddingLeft: 18 }}>
+                                                {(bundle.items || []).map((item) => (
+                                                    <li key={item.productId || item.name} style={{ marginBottom: 4 }}>
+                                                        {item.quantity}× {item.name}
+                                                        {item.lineTotal ? ` — ${item.lineTotal}` : ''}
+                                                        {item.reason ? <span style={{ color: 'rgba(255,255,255,0.4)' }}> ({item.reason})</span> : null}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                            {bundle.estimatedTotal && (
+                                                <div style={{ fontWeight: 600, color: '#34D399', marginBottom: 10 }}>
+                                                    Est. total: {bundle.estimatedTotal}
+                                                    {!bundle.aiEnabled && <span style={{ fontWeight: 400, color: 'rgba(255,255,255,0.4)', marginLeft: 8 }}>catalog-based</span>}
+                                                </div>
+                                            )}
+                                            {activeType !== 'installation_only' && bundle.items?.some((i) => i.productId) && (
+                                                <button
+                                                    type="button"
+                                                    onClick={applyBundle}
+                                                    style={{
+                                                        fontSize: 11,
+                                                        padding: '6px 12px',
+                                                        borderRadius: 6,
+                                                        border: '0.5px solid rgba(167,139,250,0.35)',
+                                                        background: 'transparent',
+                                                        color: '#C4B5FD',
+                                                        cursor: 'pointer',
+                                                    }}
+                                                >
+                                                    Apply primary product to form
+                                                </button>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
                                 {error && <p style={{ color: '#F87171', fontSize: 13, margin: '0 0 12px' }}>{error}</p>}
                                 <button type="submit" disabled={loading || (loadingProducts && activeType !== 'installation_only')} className="quote-submit-btn">
                                     {loading ? 'Sending…' : 'Submit Quote Request'}

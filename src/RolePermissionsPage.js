@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { DashboardLayout } from './components/DashboardLayout';
 import { PageHeader, Card, PrimaryButton, Alert } from './components/ui';
 import { ROLE_ACCESS, SYSTEM_ROLES } from './config/roleAccess';
 import { theme } from './styles/theme';
@@ -11,8 +10,8 @@ export default function RolePermissionsPage() {
     const access = ROLE_ACCESS[selectedRoleId];
 
     return (
-        <DashboardLayout>
-            <PageHeader
+        <>
+                    <PageHeader
                 title="Roles Overview"
                 subtitle="Reference guide for what each role can access. Assign roles in User Management."
                 action={(
@@ -103,6 +102,6 @@ export default function RolePermissionsPage() {
                     </Card>
                 </div>
             </div>
-        </DashboardLayout>
+        </>
     );
 }

@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react';
-import { DashboardLayout } from './components/DashboardLayout';
 import { PageHeader, Card, DataTable, StatusBadge, StatCard, PrimaryButton, Alert, FilterSelect } from './components/ui';
 import { LineChart, StarRating } from './components/dashboard/DashboardWidgets';
 import { feedbackApi } from './utils/apiClient';
@@ -65,8 +64,8 @@ export default function FeedbackPage() {
     );
 
     return (
-        <DashboardLayout>
-            <PageHeader
+        <>
+                    <PageHeader
                 title="Feedback & Customer Satisfaction"
                 subtitle="Monitor customer feedback and satisfaction metrics"
                 action={headerActions}
@@ -100,7 +99,7 @@ export default function FeedbackPage() {
                 />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(280px, 1fr)', gap: 20, marginBottom: 20 }}>
+            <div className="cyforce-split-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(280px, 1fr)', gap: 20, marginBottom: 20 }}>
                 <Card title="Satisfaction Trend (6 Months)">
                     {loading ? (
                         <p style={{ color: theme.textDim, fontSize: 13 }}>Loading trend…</p>
@@ -222,6 +221,6 @@ export default function FeedbackPage() {
                     </div>
                 </div>
             )}
-        </DashboardLayout>
+        </>
     );
 }

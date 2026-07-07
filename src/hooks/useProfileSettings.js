@@ -146,12 +146,12 @@ export function useProfileSettings() {
         }
     };
 
-    const handleDisableMfa = async (password) => {
+    const handleDisableMfa = async (payload) => {
         setDisablingMfa(true);
         setMfaError('');
         setMfaSuccess('');
         try {
-            await userApi.disableMfa(password);
+            await userApi.disableMfa(payload);
             const updated = await userApi.getProfile();
             setProfile(updated);
             syncSessionFromProfile(updated, getSession());
@@ -162,6 +162,17 @@ export function useProfileSettings() {
             return false;
         } finally {
             setDisablingMfa(false);
+        }
+    };
+
+    const prepareDisableMfa = async () => {
+        setMfaError('');
+        try {
+            await userApi.prepareDisableMfa();
+            return true;
+        } catch (err) {
+            setMfaError(err.message);
+            return false;
         }
     };
 
@@ -182,6 +193,7 @@ export function useProfileSettings() {
         handlePasswordChange,
         handleMotivationalToggle,
         handleDisableMfa,
+        prepareDisableMfa,
         disablingMfa,
         mfaError,
         mfaSuccess,

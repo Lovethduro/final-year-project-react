@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { DashboardLayout } from '../components/DashboardLayout';
 import { PageHeader, Card, Alert } from '../components/ui';
 import { salesApi } from '../utils/apiClient';
 import { useAuth } from '../hooks/useAuth';
@@ -60,8 +59,8 @@ export default function ConversationMonitorPage() {
     ].filter(Boolean).join(' · ') : '';
 
     return (
-        <DashboardLayout>
-            <PageHeader
+        <>
+                    <PageHeader
                 title="Customer Conversations"
                 subtitle="Read-only oversight of sales chats between customers and sales agents"
             />
@@ -147,6 +146,6 @@ export default function ConversationMonitorPage() {
                     )}
                 </ChatPanel>
             </div>
-        </DashboardLayout>
+        </>
     );
 }

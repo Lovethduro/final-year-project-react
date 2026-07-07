@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { DashboardLayout } from '../components/DashboardLayout';
 import { PageHeader, Card, DataTable, StatusBadge, PrimaryButton, Alert, Select } from '../components/ui';
+import { BackLink } from '../components/BackLink';
 import { useAuth } from '../hooks/useAuth';
 import { customerApi, assetUrl } from '../utils/apiClient';
 import { theme } from '../styles/theme';
@@ -94,8 +94,8 @@ export default function CustomerTicketsPage() {
     const inputStyle = { width: '100%', background: 'rgba(255,255,255,0.05)', border: `0.5px solid ${theme.border}`, borderRadius: 8, padding: 10, color: theme.text, fontFamily: theme.fontBody, marginBottom: 12 };
 
     return (
-        <DashboardLayout>
-            <PageHeader
+        <>
+                    <PageHeader
                 title="My Support Tickets"
                 subtitle="Only your tickets are shown here"
                 action={(
@@ -147,7 +147,7 @@ export default function CustomerTicketsPage() {
                 </Card>
             )}
 
-            <div style={{ display: 'grid', gridTemplateColumns: selected ? '1fr 1fr' : '1fr', gap: 20 }}>
+            <div className="cyforce-split-grid" style={{ display: 'grid', gridTemplateColumns: selected ? '1fr 1fr' : '1fr', gap: 20 }}>
                 <Card title="Your Tickets">
                     <DataTable
                         columns={[
@@ -206,9 +206,6 @@ export default function CustomerTicketsPage() {
                                         isMine={mine}
                                         showAvatar={!mine}
                                     />
-                                    <div style={{ fontSize: 10, color: theme.textDim, margin: mine ? '-8px 0 8px 0' : '-8px 0 8px 42px', textAlign: mine ? 'right' : 'left' }}>
-                                        {m.createdAt ? new Date(m.createdAt).toLocaleString() : ''}
-                                    </div>
                                 </div>
                             ); }) : <p style={{ color: theme.textDim, fontSize: 13 }}>No messages yet.</p>}
                         </div>
@@ -229,10 +226,14 @@ export default function CustomerTicketsPage() {
                         {ticketRated && (
                             <p style={{ fontSize: 13, color: theme.success, marginTop: 12 }}>Thank you for your feedback!</p>
                         )}
-                        <button type="button" onClick={() => { setSelected(null); setEstimatedResponse(null); }} style={{ marginTop: 12, background: 'transparent', border: 'none', color: theme.textDim, cursor: 'pointer', fontSize: 12 }}>← Back to list</button>
+                        <BackLink
+                            label="Return to ticket list"
+                            onClick={() => { setSelected(null); setEstimatedResponse(null); }}
+                            style={{ marginTop: 12 }}
+                        />
                     </Card>
                 )}
             </div>
-        </DashboardLayout>
+        </>
     );
 }

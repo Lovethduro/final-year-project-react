@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { DashboardLayout } from './components/DashboardLayout';
 import { Alert, DataTable, Select } from './components/ui';
 import { DonutChart, MetricCard, StarRating } from './components/dashboard/DashboardWidgets';
 import { adminApi } from './utils/apiClient';
@@ -60,6 +59,7 @@ function formatRelativeTime(iso) {
 
 function Panel({ title, action, children, style }) {
     return (
+        <>
         <section style={{ ...dashboardCardStyle, padding: '16px 18px', ...style }}>
             {(title || action) && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginBottom: 14 }}>
@@ -73,6 +73,7 @@ function Panel({ title, action, children, style }) {
             )}
             {children}
         </section>
+        </>
     );
 }
 
@@ -174,24 +175,28 @@ export default function AdminDashboard() {
     const [actionId, setActionId] = useState(null);
     const [announcementSending, setAnnouncementSending] = useState(false);
     const [announcementSuccess, setAnnouncementSuccess] = useState('');
+    const overviewRef = useRef(null);
 
     const load = useCallback(() => {
-        setLoading(true);
-        Promise.all([
-            adminApi.overview(),
-            adminApi.feedback().catch(() => []),
-        ])
-            .then(([overviewData, feedbackData]) => {
+        const hasOverview = overviewRef.current != null;
+        if (!hasOverview) setLoading(true);
+        adminApi.overview()
+            .then((overviewData) => {
+                overviewRef.current = overviewData;
                 setOverview(overviewData);
-                setFeedback(feedbackData || []);
+                setError('');
             })
             .catch((err) => setError(err.message))
             .finally(() => setLoading(false));
+
+        adminApi.feedback()
+            .then((feedbackData) => setFeedback(feedbackData || []))
+            .catch(() => setFeedback([]));
     }, []);
 
     useEffect(() => {
         load();
-        const refreshId = setInterval(load, 60000);
+        const refreshId = setInterval(load, 300000);
         return () => clearInterval(refreshId);
     }, [load]);
 
@@ -234,8 +239,8 @@ export default function AdminDashboard() {
     const dateLabel = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
     return (
-        <DashboardLayout>
-            <header style={{ marginBottom: 20 }}>
+    <>
+                    <header style={{ marginBottom: 20 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
                     <div>
                         <p style={{ margin: '0 0 4px', fontSize: 12, color: theme.textDim, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
@@ -474,6 +479,6 @@ export default function AdminDashboard() {
                     </div>
                 </Panel>
             )}
-        </DashboardLayout>
+    </>
     );
 }

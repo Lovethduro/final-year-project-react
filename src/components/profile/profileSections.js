@@ -4,6 +4,7 @@ import { inputStyle } from '../../styles/theme';
 import { theme, formatRoleLabel } from '../../styles/theme';
 import { assetUrl } from '../../utils/apiClient';
 import { AgentStarBadge } from '../StarRatingInput';
+import { SecurePasswordInput, AutofillTrapFields } from '../SecurePasswordInput';
 import { useState } from 'react';
 
 export const labelStyle = { display: 'block', fontSize: 12, color: theme.textDim, marginBottom: 6 };
@@ -81,35 +82,36 @@ export function PreferencesCard({ form, onMotivationalToggle, staff = false }) {
 export function PasswordCard({ passwordForm, setPasswordForm, passwordSaving, passwordSuccess, onSubmit }) {
     return (
         <Card title="Change Password">
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14, position: 'relative' }}>
+                <AutofillTrapFields />
                 <div>
                     <label style={labelStyle}>Current password</label>
-                    <input
-                        type="password"
+                    <SecurePasswordInput
                         value={passwordForm.currentPassword}
                         onChange={(e) => setPasswordForm((p) => ({ ...p, currentPassword: e.target.value }))}
                         style={inputStyle}
-                        autoComplete="current-password"
+                        autoComplete="off"
+                        name="cyforce-profile-current-password"
                     />
                 </div>
                 <div>
                     <label style={labelStyle}>New password</label>
-                    <input
-                        type="password"
+                    <SecurePasswordInput
                         value={passwordForm.newPassword}
                         onChange={(e) => setPasswordForm((p) => ({ ...p, newPassword: e.target.value }))}
                         style={inputStyle}
                         autoComplete="new-password"
+                        name="cyforce-profile-new-password"
                     />
                 </div>
                 <div>
                     <label style={labelStyle}>Confirm new password</label>
-                    <input
-                        type="password"
+                    <SecurePasswordInput
                         value={passwordForm.confirmPassword}
                         onChange={(e) => setPasswordForm((p) => ({ ...p, confirmPassword: e.target.value }))}
                         style={inputStyle}
                         autoComplete="new-password"
+                        name="cyforce-profile-confirm-password"
                     />
                 </div>
                 {passwordSuccess && <Alert type="success">{passwordSuccess}</Alert>}
@@ -123,36 +125,75 @@ export function PasswordCard({ passwordForm, setPasswordForm, passwordSaving, pa
 
 function SecurityRow({ label, value, valueColor }) {
     return (
-        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16 }}>
-            <span>{label}</span>
-            <strong style={{ color: valueColor || theme.text, textAlign: 'right' }}>{value}</strong>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, fontSize: 14 }}>
+            <span style={{ color: theme.textMuted }}>{label}</span>
+            <strong style={{ color: valueColor || theme.text, textAlign: 'right', fontWeight: 600 }}>{value}</strong>
         </div>
     );
 }
 
-export function MfaSettingsCard({ profile, onDisableMfa, disablingMfa, mfaError, mfaSuccess }) {
+export function isOAuthAccount(profile) {
+    const provider = (profile?.authProvider || 'LOCAL').toUpperCase();
+    return provider !== 'LOCAL';
+}
+
+export function MfaSettingsCard({ profile, onDisableMfa, onPrepareDisableMfa, disablingMfa, mfaError, mfaSuccess }) {
     const [password, setPassword] = useState('');
+    const [mfaCode, setMfaCode] = useState('');
     const [showDisable, setShowDisable] = useState(false);
+    const [codeSent, setCodeSent] = useState(false);
+    const [sendingCode, setSendingCode] = useState(false);
+
+    const oauthAccount = isOAuthAccount(profile);
+    const emailMfa = (profile?.mfaMethod || '').toLowerCase() === 'email';
+
+    const openDisable = async () => {
+        setShowDisable(true);
+        setPassword('');
+        setMfaCode('');
+        setCodeSent(false);
+        if (oauthAccount && emailMfa && onPrepareDisableMfa) {
+            setSendingCode(true);
+            const ok = await onPrepareDisableMfa();
+            setSendingCode(false);
+            if (ok) setCodeSent(true);
+        }
+    };
 
     const handleDisable = async (e) => {
         e.preventDefault();
-        const ok = await onDisableMfa(password);
+        const payload = oauthAccount
+            ? { code: mfaCode.replace(/\D/g, '') }
+            : { password };
+        const ok = await onDisableMfa(payload);
         if (ok) {
             setPassword('');
+            setMfaCode('');
             setShowDisable(false);
+            setCodeSent(false);
         }
+    };
+
+    const resendCode = async () => {
+        if (!onPrepareDisableMfa) return;
+        setSendingCode(true);
+        const ok = await onPrepareDisableMfa();
+        setSendingCode(false);
+        if (ok) setCodeSent(true);
     };
 
     return (
         <Card title="Two-Factor Authentication (MFA)">
             <div style={{ fontSize: 14, color: theme.textMuted, marginBottom: 14, lineHeight: 1.55 }}>
-                Add an extra layer of security to your account with an authenticator app or email codes.
+                When enabled, you will be asked for your chosen method each time you sign in. Disable here to remove that step.
             </div>
-            <SecurityRow
-                label="Status"
-                value={profile?.mfaEnabled ? `Enabled (${profile?.mfaMethod || 'active'})` : 'Disabled'}
-                valueColor={profile?.mfaEnabled ? theme.success : theme.warning}
-            />
+            <div style={{ marginBottom: 4 }}>
+                <SecurityRow
+                    label="Status"
+                    value={profile?.mfaEnabled ? `Enabled (${profile?.mfaMethod || 'active'})` : 'Disabled'}
+                    valueColor={profile?.mfaEnabled ? theme.success : theme.warning}
+                />
+            </div>
             {mfaError && <Alert type="error">{mfaError}</Alert>}
             {mfaSuccess && <Alert type="success">{mfaSuccess}</Alert>}
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 16 }}>
@@ -177,7 +218,7 @@ export function MfaSettingsCard({ profile, onDisableMfa, disablingMfa, mfaError,
                         </Link>
                         <button
                             type="button"
-                            onClick={() => setShowDisable((open) => !open)}
+                            onClick={() => (showDisable ? setShowDisable(false) : openDisable())}
                             style={{
                                 padding: '8px 14px',
                                 borderRadius: 8,
@@ -194,16 +235,62 @@ export function MfaSettingsCard({ profile, onDisableMfa, disablingMfa, mfaError,
                 )}
             </div>
             {showDisable && profile?.mfaEnabled && (
-                <form onSubmit={handleDisable} style={{ marginTop: 16 }}>
-                    <label style={labelStyle}>Confirm your password to disable MFA</label>
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        style={inputStyle}
-                        autoComplete="current-password"
-                        required
-                    />
+                <form onSubmit={handleDisable} autoComplete="off" style={{ marginTop: 16, position: 'relative' }}>
+                    <AutofillTrapFields />
+                    {oauthAccount ? (
+                        <>
+                            <label style={labelStyle}>
+                                {emailMfa
+                                    ? 'Enter the verification code sent to your email'
+                                    : 'Enter the 6-digit code from your authenticator app'}
+                            </label>
+                            <input
+                                type="text"
+                                inputMode="numeric"
+                                autoComplete="one-time-code"
+                                value={mfaCode}
+                                onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                style={inputStyle}
+                                placeholder="000000"
+                                required
+                                minLength={6}
+                                maxLength={6}
+                            />
+                            {emailMfa && (
+                                <button
+                                    type="button"
+                                    onClick={resendCode}
+                                    disabled={sendingCode}
+                                    style={{
+                                        marginTop: 8,
+                                        background: 'none',
+                                        border: 'none',
+                                        color: theme.accent,
+                                        fontSize: 12,
+                                        cursor: sendingCode ? 'not-allowed' : 'pointer',
+                                        padding: 0,
+                                    }}
+                                >
+                                    {sendingCode ? 'Sending…' : codeSent ? 'Resend code' : 'Send code'}
+                                </button>
+                            )}
+                            <p style={{ fontSize: 11, color: theme.textDim, marginTop: 10, lineHeight: 1.45 }}>
+                                You signed in with {profile.authProvider === 'MICROSOFT' ? 'Microsoft' : profile.authProvider === 'GOOGLE' ? 'Google' : profile.authProvider}, so we verify with MFA instead of a password.
+                            </p>
+                        </>
+                    ) : (
+                        <>
+                            <label style={labelStyle}>Confirm your password to disable MFA</label>
+                            <SecurePasswordInput
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                style={inputStyle}
+                                autoComplete="off"
+                                name="cyforce-mfa-disable-password"
+                                required
+                            />
+                        </>
+                    )}
                     <div style={{ display: 'flex', gap: 8 }}>
                         <PrimaryButton type="submit" disabled={disablingMfa}>
                             {disablingMfa ? 'Disabling…' : 'Confirm disable'}

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { DashboardLayout } from './components/DashboardLayout';
 import {
     PageHeader,
     Card,
@@ -38,11 +37,13 @@ function CustomerAvatar({ customer }) {
     const imageUrl = assetUrl(customer.avatarUrl);
     if (imageUrl) {
         return (
+            <>
             <img
                 src={imageUrl}
                 alt=""
                 style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
             />
+            </>
         );
     }
     return <AvatarInitials name={customer.name} size={40} fontSize={13} />;
@@ -162,8 +163,8 @@ export default function CustomersPage() {
     );
 
     return (
-        <DashboardLayout>
-            <PageHeader
+    <>
+                    <PageHeader
                 title="Customer Management"
                 subtitle="Manage and view all customer information"
                 action={headerActions}
@@ -352,6 +353,6 @@ export default function CustomersPage() {
                     </div>
                 </div>
             )}
-        </DashboardLayout>
+    </>
     );
 }

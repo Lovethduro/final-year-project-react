@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { DashboardLayout } from '../components/DashboardLayout';
 import { Card, DataTable, StatusBadge, PrimaryButton, Alert, Select } from '../components/ui';
 import { WelcomeBanner, QuickActions, ActivityTimeline, StatusToggle, StarRating, MetricCard } from '../components/dashboard/DashboardWidgets';
 import { useAuth } from '../hooks/useAuth';
 import { supportApi } from '../utils/apiClient';
 import { theme } from '../styles/theme';
+import { greetingTitle, formatDashboardDateTime } from '../utils/greeting';
 
 const STATUS_OPTIONS = [
     { value: 'available', label: 'Available' },
@@ -13,10 +13,6 @@ const STATUS_OPTIONS = [
     { value: 'away', label: 'Away' },
     { value: 'on_break', label: 'On Break' },
 ];
-
-function formatDate() {
-    return new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-}
 
 function formatTimer(seconds) {
     const h = Math.floor(seconds / 3600);
@@ -58,6 +54,7 @@ function TransferActions({ ticketId, transferringId, transferMode, transferNote,
     const active = transferringId === ticketId;
     if (!active) {
         return (
+            <>
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 8 }}>
                 <Link to={`/dashboard/tickets?ticket=${ticketId}`} style={{ fontSize: 12, padding: '6px 14px', borderRadius: 8, background: theme.primary, color: '#fff', textDecoration: 'none' }}>Quick Reply</Link>
                 <button type="button" onClick={() => onStartAgent(ticketId)} style={{ fontSize: 12, padding: '6px 14px', borderRadius: 8, border: `0.5px solid ${theme.border}`, background: 'transparent', color: theme.text, cursor: 'pointer' }}>
@@ -67,6 +64,7 @@ function TransferActions({ ticketId, transferringId, transferMode, transferNote,
                     Transfer to Sales
                 </button>
             </div>
+            </>
         );
     }
 
@@ -103,6 +101,7 @@ export default function SupportAgentDashboard() {
     const auth = useAuth();
     const [overview, setOverview] = useState(null);
     const [agents, setAgents] = useState([]);
+    const [agentsLoaded, setAgentsLoaded] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [transferringId, setTransferringId] = useState(null);
@@ -116,9 +115,20 @@ export default function SupportAgentDashboard() {
     };
 
     useEffect(() => { load(); }, []);
+
+    const ensureAgents = () => {
+        if (agentsLoaded) return;
+        supportApi.agents()
+            .then((data) => {
+                setAgents(data);
+                setAgentsLoaded(true);
+            })
+            .catch(() => setAgents([]));
+    };
+
     useEffect(() => {
-        supportApi.agents().then(setAgents).catch(() => setAgents([]));
-    }, []);
+        if (transferringId != null) ensureAgents();
+    }, [transferringId]);
 
     useEffect(() => {
         const base = overview?.agentStatus?.statusSeconds || 0;
@@ -179,10 +189,10 @@ export default function SupportAgentDashboard() {
     };
 
     return (
-        <DashboardLayout>
-            <WelcomeBanner
-                title={`Hello, ${firstName(auth.fullName)}! 👋`}
-                subtitle={formatDate()}
+    <>
+                    <WelcomeBanner
+                title={greetingTitle(firstName(auth.fullName))}
+                subtitle={formatDashboardDateTime()}
                 badge={`${(agentStatus.status || 'available').replace('_', ' ')} · ${formatTimer(timer)}`}
             >
                 <div style={{ textAlign: 'right' }}>
@@ -257,7 +267,7 @@ export default function SupportAgentDashboard() {
                 </Card>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(280px, 320px)', gap: 20 }}>
+            <div className="cyforce-split-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(280px, 320px)', gap: 20 }}>
                 <div>
                     <div id="active-tickets">
                         <Card
@@ -378,6 +388,6 @@ export default function SupportAgentDashboard() {
                     </Card>
                 </div>
             </div>
-        </DashboardLayout>
+    </>
     );
 }

@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { DashboardLayout } from '../components/DashboardLayout';
 import { PageHeader, Card, PrimaryButton, Alert } from '../components/ui';
 import { salesApi } from '../utils/apiClient';
 import { useAuth } from '../hooks/useAuth';
@@ -8,6 +7,7 @@ import { theme, inputStyle as themeInputStyle } from '../styles/theme';
 import {
     AgentChatHeader,
     ChatMessageRow,
+    ChatExpiryNotice,
     ChatPanel,
     ChatPanelHeader,
     ChatPanelToolbar,
@@ -15,6 +15,8 @@ import {
     ChatPanelFooter,
     ChatInboxList,
     ChatInboxItem,
+    isChatExpired,
+    formatChatExpiry,
 } from '../components/ChatMessage';
 
 function formatNaira(kobo) {
@@ -138,7 +140,8 @@ export default function SalesMessagesPage() {
     const canManageDeal = auth.role === 'SALES_AGENT';
     const showQueue = auth.role === 'SALES_AGENT';
     const isSupervisorView = auth.role === 'SUPERVISOR';
-    const canReply = active && (
+    const chatExpired = active?.expiresAt && isChatExpired(active.expiresAt);
+    const canReply = active && !chatExpired && (
         auth.role === 'SALES_AGENT'
             ? active.status !== 'closed' && active.status !== 'unassigned'
             : isSupervisorView
@@ -154,8 +157,8 @@ export default function SalesMessagesPage() {
     ].filter(Boolean).join(' · ') : '';
 
     return (
-        <DashboardLayout>
-            <PageHeader
+        <>
+                    <PageHeader
                 title={auth.isSupervisor ? 'Escalated Sales Conversations' : 'Customer Messages'}
                 subtitle={auth.isSupervisor
                     ? 'Review negotiations forwarded by sales agents'
@@ -164,7 +167,7 @@ export default function SalesMessagesPage() {
             {error && <Alert type="error">{error}</Alert>}
             {success && <Alert type="success">{success}</Alert>}
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(240px, 280px) 1fr', gap: 16, alignItems: 'stretch' }}>
+            <div className="cyforce-split-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(240px, 280px) 1fr', gap: 16, alignItems: 'stretch' }}>
                 <Card title="Inbox" style={{ marginBottom: 0, display: 'flex', flexDirection: 'column' }}>
                     {showQueue && (
                         <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
@@ -212,7 +215,7 @@ export default function SalesMessagesPage() {
                                     active={active?.id === c.id}
                                     onClick={() => openConversation(c.id)}
                                     title={c.customerName}
-                                    subtitle={`${c.isGuest ? 'Quote · ' : ''}${c.subject} · ${c.status}`}
+                                    subtitle={`${c.isGuest ? 'Quote · ' : ''}${c.subject} · ${c.status}${c.expiresAt ? ` · expires ${formatChatExpiry(c.expiresAt)}` : ''}`}
                                 />
                             )) : <p style={{ color: theme.textDim, fontSize: 13, padding: '8px 14px' }}>No customer messages.</p>
                         )}
@@ -228,8 +231,15 @@ export default function SalesMessagesPage() {
                                     imageUrl={null}
                                     roleLabel={active.isGuest ? 'Quote prospect' : 'Customer'}
                                     meta={metaParts || active.subject}
+                                    expiresAt={active.expiresAt}
                                 />
                             </ChatPanelHeader>
+
+                            {active.expiresAt && (
+                                <div style={{ padding: '0 20px 12px' }}>
+                                    <ChatExpiryNotice expiresAt={active.expiresAt} />
+                                </div>
+                            )}
 
                             {active.isGuest && canReply && (
                                 <div style={{
@@ -351,6 +361,6 @@ export default function SalesMessagesPage() {
                     )}
                 </ChatPanel>
             </div>
-        </DashboardLayout>
+        </>
     );
 }

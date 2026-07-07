@@ -255,6 +255,7 @@ export function ContactSupportContent({ publicMode = false }) {
                     .contact-support-layout { grid-template-columns: 1fr !important; }
                 }
             `}</style>
+            {!publicMode && (
             <div style={{ marginBottom: 28 }}>
                 <h1 style={{
                     fontFamily: theme.fontHeading,
@@ -269,6 +270,7 @@ export function ContactSupportContent({ publicMode = false }) {
                     Get help from our support team. We typically respond within 24 hours.
                 </p>
             </div>
+            )}
 
             {error && <Alert type="error">{error}</Alert>}
             {success && <Alert type="success">{success}</Alert>}

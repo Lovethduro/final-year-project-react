@@ -4,6 +4,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import logo from './images/CYFORCE 2-1.jpg';
 import { API_BASE, getPostAuthPath, isOAuthLoginMethod, loadRememberedLogin, saveRememberedLogin, storeAuthSession } from './utils/authFlow';
 import { authApi } from './utils/apiClient';
+import { BackLink } from './components/BackLink';
 
 // Animated Particle Background
 function ParticleBackground() {
@@ -284,7 +285,7 @@ function LoginPage() {
             position: "relative",
             overflow: "hidden",
             fontFamily: "'DM Sans', sans-serif",
-            paddingTop: "80px",  // Add this line
+            paddingTop: "80px",
             paddingBottom: "40px"
         }}>
             {/* Background Effects */}
@@ -318,6 +319,8 @@ function LoginPage() {
 
             <ParticleBackground />
 
+            <BackLink to="/" label="Return to home" variant="auth" floating />
+
             {/* Main Card */}
             <div style={{
                 position: "relative",
@@ -335,7 +338,7 @@ function LoginPage() {
                     overflow: "hidden"
                 }}>
                     {/* Header */}
-                    <div style={{ padding: "32px 32px 24px 32px", textAlign: "center" }}>
+                    <div className="cyforce-auth-card-header" style={{ padding: "32px 32px 24px 32px", textAlign: "center" }}>
                         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
                             <img
                                 src={logo}
@@ -363,7 +366,7 @@ function LoginPage() {
                     </div>
 
                     {/* Form */}
-                    <div style={{ padding: "0 32px 32px 32px" }}>
+                    <div className="cyforce-auth-card-body" style={{ padding: "0 32px 32px 32px" }}>
                         {loginStep === 'mfa' ? (
                             <form onSubmit={handleMfaVerify} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
                                 <div style={{ textAlign: 'center', marginBottom: 8 }}>
@@ -412,11 +415,12 @@ function LoginPage() {
                                         Resend code
                                     </button>
                                 )}
-                                <button type="button" onClick={() => { setLoginStep('credentials'); setMfaChallenge(null); setMfaCode(''); setError(''); }} style={{
-                                    background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: 13, cursor: 'pointer',
-                                }}>
-                                    ← Back to login
-                                </button>
+                                <BackLink
+                                    variant="subtle"
+                                    label="Return to sign in"
+                                    onClick={() => { setLoginStep('credentials'); setMfaChallenge(null); setMfaCode(''); setError(''); }}
+                                    style={{ color: 'rgba(255,255,255,0.55)' }}
+                                />
                             </form>
                         ) : (
                         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
@@ -695,7 +699,7 @@ function LoginPage() {
                         </div>
 
                         {/* SSO Login */}
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                        <div className="cyforce-auth-oauth-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
                             <button
                                 type="button"
                                 onClick={() => handleSSOLogin("google")}

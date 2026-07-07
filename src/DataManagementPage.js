@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react';
-import { DashboardLayout } from './components/DashboardLayout';
 import { PageHeader, Card, StatCard, PrimaryButton, GhostButton, Alert } from './components/ui';
 import { adminApi } from './utils/apiClient';
 import { theme, inputStyle } from './styles/theme';
@@ -74,8 +73,8 @@ export default function DataManagementPage() {
     };
 
     return (
-        <DashboardLayout>
-            <PageHeader title="Data Management" subtitle="Backups, exports, and retention policies" />
+        <>
+                    <PageHeader title="Data Management" subtitle="Backups, exports, and retention policies" />
             {error && <Alert type="error">{error}</Alert>}
             {success && <Alert type="success">{success}</Alert>}
 
@@ -84,9 +83,9 @@ export default function DataManagementPage() {
             ) : (
                 <>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 20 }}>
-                        <StatCard title="Database Size" value={overview?.databaseSize ?? '—'} icon="🗄️" status="info" />
-                        <StatCard title="Last Backup" value={overview?.lastBackupAgo ?? 'Never'} icon="💾" status="success" />
-                        <StatCard title="Retention" value={`${overview?.retentionDays ?? retentionDays} days`} icon="📅" status="info" />
+                        <StatCard title="Database Size" value={overview?.databaseSize ?? '—'} icon="ðŸ—„ï¸" status="info" />
+                        <StatCard title="Last Backup" value={overview?.lastBackupAgo ?? 'Never'} icon="ðŸ’¾" status="success" />
+                        <StatCard title="Retention" value={`${overview?.retentionDays ?? retentionDays} days`} icon="ðŸ“…" status="info" />
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20, marginBottom: 20 }}>
@@ -143,6 +142,6 @@ export default function DataManagementPage() {
                     </Card>
                 </>
             )}
-        </DashboardLayout>
+        </>
     );
 }

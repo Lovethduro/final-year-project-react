@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import logo from '../images/CYFORCE 2-1.jpg';
 import { theme, formatRoleLabel } from '../styles/theme';
 import { useAuth } from '../hooks/useAuth';
+import { useIsMobile } from '../hooks/useMediaQuery';
 import { NotificationBell } from './NotificationBell';
 import { UserMenu } from './UserMenu';
 import { MotivationalBanner } from './MotivationalBanner';
@@ -48,6 +49,7 @@ const NAV_SECTIONS = [
         roles: ['ADMIN', 'SUPERVISOR', 'SALES_AGENT', 'SUPPORT_AGENT'],
         items: [
             { path: '/dashboard/analytics', label: 'Analytics', icon: 'analytics', roles: ['ADMIN', 'SUPERVISOR'] },
+            { path: '/sales/insights', label: 'Sales Insights', icon: 'analytics', roles: ['SALES_AGENT'] },
             { path: '/dashboard/feedback', label: 'Feedback & CSAT', icon: 'feedback', roles: ['ADMIN', 'SUPERVISOR'] },
             { path: '/dashboard/performance', label: 'Performance', icon: 'performance', roles: ['ADMIN', 'SUPERVISOR'] },
             { path: '/dashboard/knowledge-base', label: 'Knowledge Base', icon: 'knowledge', roles: ['ADMIN', 'SUPERVISOR', 'SUPPORT_AGENT', 'CUSTOMER'] },
@@ -82,8 +84,19 @@ function roleCanAccess(role, allowedRoles) {
 export function DashboardLayout({ children }) {
     const location = useLocation();
     const auth = useAuth();
-    const [sidebarOpen, setSidebarOpen] = useState(true);
+    const isMobile = useIsMobile(900);
+    const [sidebarOpen, setSidebarOpen] = useState(() => (
+        typeof window !== 'undefined' ? window.innerWidth >= 900 : true
+    ));
     const [profileImage, setProfileImage] = useState(auth.avatarUrl || null);
+
+    useEffect(() => {
+        if (isMobile) setSidebarOpen(false);
+    }, [isMobile]);
+
+    useEffect(() => {
+        if (isMobile) setSidebarOpen(false);
+    }, [location.pathname, isMobile]);
 
     useEffect(() => {
         if (auth.avatarUrl) {
@@ -102,18 +115,28 @@ export function DashboardLayout({ children }) {
 
     return (
         <div style={{ minHeight: '100vh', background: theme.bg, fontFamily: theme.fontBody, display: 'flex' }}>
-            <aside style={{
-                width: sidebarOpen ? 240 : 0,
-                minWidth: sidebarOpen ? 240 : 0,
+            {isMobile && sidebarOpen && (
+                <button
+                    type="button"
+                    className="cyforce-dashboard-backdrop"
+                    aria-label="Close navigation menu"
+                    onClick={() => setSidebarOpen(false)}
+                />
+            )}
+            <aside
+                className="cyforce-dashboard-sidebar"
+                style={{
+                width: isMobile ? 240 : (sidebarOpen ? 240 : 0),
+                minWidth: isMobile ? 240 : (sidebarOpen ? 240 : 0),
                 background: theme.bgDark,
                 borderRight: `1px solid ${theme.border}`,
-                transition: 'all 0.2s ease',
                 overflow: 'hidden',
                 position: 'fixed',
                 top: 0,
                 left: 0,
                 bottom: 0,
                 zIndex: 300,
+                transform: isMobile && !sidebarOpen ? 'translateX(-100%)' : 'translateX(0)',
             }}>
                 <div style={{ padding: '20px 16px', borderBottom: `1px solid ${theme.border}` }}>
                     <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
@@ -126,12 +149,17 @@ export function DashboardLayout({ children }) {
                 </div>
 
                 <nav style={{ padding: '12px 8px', overflowY: 'auto', height: 'calc(100vh - 76px)' }}>
-                    {NAV_SECTIONS.filter((section) => roleCanAccess(auth.role, section.roles)).map((section) => (
+                    {NAV_SECTIONS
+                        .filter((section) => roleCanAccess(auth.role, section.roles))
+                        .map((section) => {
+                            const items = section.items.filter((item) => roleCanAccess(auth.role, item.roles));
+                            if (!items.length) return null;
+                            return (
                         <div key={section.title} style={{ marginBottom: 16 }}>
                             <div style={{ fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: theme.textDim, padding: '0 12px', marginBottom: 4, fontWeight: 600 }}>
                                 {section.title}
                             </div>
-                            {section.items.filter((item) => roleCanAccess(auth.role, item.roles)).map((item) => {
+                            {items.map((item) => {
                                 const active = location.pathname === item.path;
                                 return (
                                     <Link
@@ -161,12 +189,18 @@ export function DashboardLayout({ children }) {
                                 );
                             })}
                         </div>
-                    ))}
+                            );
+                        })}
                 </nav>
             </aside>
 
-            <div style={{ flex: 1, marginLeft: sidebarOpen ? 240 : 0, transition: 'margin-left 0.2s ease', minWidth: 0 }}>
-                <header style={{
+            <div
+                className="cyforce-dashboard-content"
+                style={{ marginLeft: isMobile ? 0 : (sidebarOpen ? 240 : 0) }}
+            >
+                <header
+                    className="cyforce-dashboard-header"
+                    style={{
                     position: 'sticky',
                     top: 0,
                     zIndex: 200,
@@ -204,7 +238,7 @@ export function DashboardLayout({ children }) {
                             </svg>
                         </button>
                         {currentPage && (
-                            <span style={{ fontSize: 14, fontWeight: 500, color: theme.text }}>{currentPage.label}</span>
+                            <span className="cyforce-dashboard-page-title" style={{ fontSize: 14, fontWeight: 500, color: theme.text }}>{currentPage.label}</span>
                         )}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -213,7 +247,7 @@ export function DashboardLayout({ children }) {
                     </div>
                 </header>
 
-                <main style={{ padding: '24px', maxWidth: 1400, margin: '0 auto' }}>
+                <main className="cyforce-dashboard-main" style={{ padding: '24px', maxWidth: 1400, margin: '0 auto' }}>
                     <MotivationalBanner role={auth.role} />
                     {children}
                 </main>

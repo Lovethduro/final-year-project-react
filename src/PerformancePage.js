@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { DashboardLayout } from './components/DashboardLayout';
 import { PageHeader, Card, DataTable, StatusBadge, Alert } from './components/ui';
 import { HorizontalBarChart, StarRating } from './components/dashboard/DashboardWidgets';
 import { analyticsApi } from './utils/apiClient';
@@ -24,8 +23,8 @@ export default function PerformancePage() {
     }));
 
     return (
-        <DashboardLayout>
-            <PageHeader
+        <>
+                    <PageHeader
                 title="Agent Performance"
                 subtitle="Live leaderboard from tickets and leads"
             />
@@ -76,6 +75,6 @@ export default function PerformancePage() {
                     </Card>
                 </>
             )}
-        </DashboardLayout>
+        </>
     );
 }

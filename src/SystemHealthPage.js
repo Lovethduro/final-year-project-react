@@ -1,4 +1,3 @@
-import { DashboardLayout } from './components/DashboardLayout';
 import { PageHeader, Card, StatusBadge, StatCard } from './components/ui';
 
 const services = [
@@ -10,12 +9,12 @@ const services = [
 
 export default function SystemHealthPage() {
     return (
-        <DashboardLayout>
-            <PageHeader title="System Health" subtitle="Service status and infrastructure monitoring" />
+        <>
+                    <PageHeader title="System Health" subtitle="Service status and infrastructure monitoring" />
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16, marginBottom: 20 }}>
-                <StatCard title="Services Online" value={`${services.filter((s) => s.status === 'online').length}/${services.length}`} icon="💚" status="success" />
-                <StatCard title="Avg Uptime" value="99.7%" icon="📈" status="info" />
-                <StatCard title="Alerts" value="0" icon="⚠️" status="success" />
+                <StatCard title="Services Online" value={`${services.filter((s) => s.status === 'online').length}/${services.length}`} icon="ðŸ’š" status="success" />
+                <StatCard title="Avg Uptime" value="99.7%" icon="ðŸ“ˆ" status="info" />
+                <StatCard title="Alerts" value="0" icon="âš ï¸" status="success" />
             </div>
             <Card title="Service Status">
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -32,6 +31,6 @@ export default function SystemHealthPage() {
                     ))}
                 </div>
             </Card>
-        </DashboardLayout>
+        </>
     );
 }

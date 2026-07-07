@@ -1,4 +1,3 @@
-import { DashboardLayout } from '../DashboardLayout';
 import { PageHeader, Card, PrimaryButton } from '../ui';
 import { inputStyle } from '../../styles/theme';
 import { formatRoleLabel } from '../../styles/theme';
@@ -36,7 +35,7 @@ export default function StaffProfileView({ role }) {
         profile, form, error, success, saving, uploading,
         passwordForm, setPasswordForm, passwordSaving, passwordSuccess,
         handleChange, handleImageUpload, handleSave, handlePasswordChange, handleMotivationalToggle,
-        handleDisableMfa, disablingMfa, mfaError, mfaSuccess,
+        handleDisableMfa, prepareDisableMfa, disablingMfa, mfaError, mfaSuccess,
         profileImage,
     } = settings;
 
@@ -47,8 +46,8 @@ export default function StaffProfileView({ role }) {
     });
 
     return (
-        <DashboardLayout>
-            <PageHeader
+        <>
+                    <PageHeader
                 title={`${formatRoleLabel(role)} Profile`}
                 subtitle={STAFF_SUBTITLE[role] || 'Staff account settings and security'}
             />
@@ -90,6 +89,7 @@ export default function StaffProfileView({ role }) {
                 <MfaSettingsCard
                     profile={profile}
                     onDisableMfa={handleDisableMfa}
+                    onPrepareDisableMfa={prepareDisableMfa}
                     disablingMfa={disablingMfa}
                     mfaError={mfaError}
                     mfaSuccess={mfaSuccess}
@@ -111,6 +111,6 @@ export default function StaffProfileView({ role }) {
                     onSubmit={handlePasswordChange}
                 />
             </div>
-        </DashboardLayout>
+        </>
     );
 }

@@ -1,26 +1,36 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { DashboardLayout } from './components/DashboardLayout';
 import { PageHeader, Card, SearchInput, StatusBadge, PrimaryButton, Alert, Select } from './components/ui';
+import { BackLink } from './components/BackLink';
 import { adminApi, knowledgeBaseApi } from './utils/apiClient';
 import { useAuth } from './hooks/useAuth';
 import { theme } from './styles/theme';
 
-function ArticleList({ articles, onSelect, loading }) {
+function ArticleList({ articles, onSelect, loading, publicMode = false }) {
     if (loading) {
-        return <p style={{ color: theme.textDim, fontSize: 14 }}>Loading articles…</p>;
+        return <p style={{ color: publicMode ? 'rgba(255,255,255,0.5)' : theme.textDim, fontSize: 15 }}>Loading articles…</p>;
     }
     if (!articles.length) {
-        return <p style={{ color: theme.textDim, fontSize: 14 }}>No articles found.</p>;
+        return <p style={{ color: publicMode ? 'rgba(255,255,255,0.5)' : theme.textDim, fontSize: 15 }}>No articles found.</p>;
     }
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: publicMode ? 0 : 10 }}>
             {articles.map((article) => (
                 <button
                     key={article.id}
                     type="button"
                     onClick={() => onSelect(article.id)}
-                    style={{
+                    style={publicMode ? {
+                        display: 'block',
+                        width: '100%',
+                        padding: '18px 0',
+                        background: 'transparent',
+                        border: 'none',
+                        borderBottom: '0.5px solid rgba(99,179,237,0.12)',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        fontFamily: "'DM Sans', sans-serif",
+                    } : {
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
@@ -35,10 +45,22 @@ function ArticleList({ articles, onSelect, loading }) {
                     }}
                 >
                     <div>
-                        <div style={{ color: theme.text, fontWeight: 500, marginBottom: 4 }}>{article.title}</div>
-                        <div style={{ fontSize: 12, color: theme.textDim }}>{article.category} · {article.views} views</div>
+                        <div style={{
+                            color: publicMode ? '#fff' : theme.text,
+                            fontWeight: publicMode ? 600 : 500,
+                            marginBottom: 4,
+                            fontSize: publicMode ? 16 : 14,
+                            fontFamily: publicMode ? "'Syne', sans-serif" : theme.fontBody,
+                        }}>
+                            {article.title}
+                        </div>
+                        <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)' }}>
+                            {article.category} · {article.views} views
+                        </div>
                     </div>
-                    <StatusBadge status={article.status === 'published' ? 'success' : 'pending'} label={article.status} />
+                    {!publicMode && (
+                        <StatusBadge status={article.status === 'published' ? 'success' : 'pending'} label={article.status} />
+                    )}
                 </button>
             ))}
         </div>
@@ -85,11 +107,10 @@ export function KnowledgeBaseContent({ publicMode = false }) {
             .catch((err) => setError(err.message));
     }, [isAdmin]);
 
-    useEffect(() => { loadArticles(''); }, [loadArticles]);
     useEffect(() => { loadManageArticles(); }, [loadManageArticles]);
 
     useEffect(() => {
-        const timer = setTimeout(() => loadArticles(search), 250);
+        const timer = setTimeout(() => loadArticles(search), search === '' ? 0 : 250);
         return () => clearTimeout(timer);
     }, [search, loadArticles]);
 
@@ -186,18 +207,70 @@ export function KnowledgeBaseContent({ publicMode = false }) {
         }
     };
 
+    if (publicMode) {
+        return (
+            <>
+                {error && <Alert type="error">{error}</Alert>}
+
+                {!selected ? (
+                    <>
+                        <div style={{ marginBottom: 28, maxWidth: 420 }}>
+                            <SearchInput value={search} onChange={setSearch} placeholder="Search articles..." />
+                        </div>
+                        <ArticleList articles={articles} onSelect={openArticle} loading={loading} publicMode />
+                    </>
+                ) : (
+                    <>
+                        <BackLink
+                            label="Return to articles"
+                            onClick={() => setSelected(null)}
+                            variant="auth"
+                            style={{ marginBottom: 24 }}
+                        />
+                        <h2 style={{
+                            fontFamily: "'Syne', sans-serif",
+                            fontSize: '24px',
+                            color: '#38BDF8',
+                            marginBottom: '12px',
+                        }}>
+                            {selected.title}
+                        </h2>
+                        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', marginBottom: 20 }}>
+                            {selected.category} · {selected.views} views
+                        </p>
+                        <div style={{
+                            fontSize: '15px',
+                            color: 'rgba(255,255,255,0.6)',
+                            lineHeight: 1.7,
+                            whiteSpace: 'pre-wrap',
+                        }}>
+                            {selected.content || 'No content available.'}
+                        </div>
+                    </>
+                )}
+
+                <p style={{
+                    marginTop: 36,
+                    paddingTop: 24,
+                    borderTop: '0.5px solid rgba(99,179,237,0.12)',
+                    textAlign: 'center',
+                    fontSize: 14,
+                    color: 'rgba(255,255,255,0.5)',
+                }}>
+                    Still need help?{' '}
+                    <Link to="/support" style={{ color: '#38BDF8', textDecoration: 'none', fontWeight: 500 }}>
+                        Contact support
+                    </Link>
+                </p>
+            </>
+        );
+    }
+
     return (
         <>
-            {publicMode && (
-                <div style={{ marginBottom: 16 }}>
-                    <Link to="/support" style={{ color: theme.accent, fontSize: 13, textDecoration: 'none' }}>
-                        ← Contact Support
-                    </Link>
-                </div>
-            )}
             <PageHeader
                 title="Help Center"
-                subtitle={publicMode ? 'Browse answers before opening a support ticket' : 'Articles and documentation for customers and support teams'}
+                subtitle="Articles and documentation for customers and support teams"
             />
             {error && <Alert type="error">{error}</Alert>}
             {success && <Alert type="success">{success}</Alert>}
@@ -205,7 +278,7 @@ export function KnowledgeBaseContent({ publicMode = false }) {
             {isAdmin && (
                 <Card title="Knowledge Base Management" style={{ marginBottom: 20 }}>
                     <form onSubmit={saveArticle}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 220px', gap: 12, marginBottom: 12 }}>
+                        <div className="cyforce-kb-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 220px', gap: 12, marginBottom: 12 }}>
                             <input
                                 value={form.title}
                                 onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
@@ -378,13 +451,11 @@ export function KnowledgeBaseContent({ publicMode = false }) {
                     <div style={{ color: theme.text, fontSize: 14, lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
                         {selected.content || 'No content available.'}
                     </div>
-                    <button
-                        type="button"
+                    <BackLink
+                        label="Return to articles"
                         onClick={() => setSelected(null)}
-                        style={{ marginTop: 16, background: 'transparent', border: 'none', color: theme.textDim, cursor: 'pointer', fontSize: 12 }}
-                    >
-                        ← Back to articles
-                    </button>
+                        style={{ marginTop: 16 }}
+                    />
                 </Card>
             )}
         </>
@@ -393,8 +464,8 @@ export function KnowledgeBaseContent({ publicMode = false }) {
 
 export default function KnowledgeBasePage() {
     return (
-        <DashboardLayout>
-            <KnowledgeBaseContent />
-        </DashboardLayout>
+    <>
+                    <KnowledgeBaseContent />
+    </>
     );
 }

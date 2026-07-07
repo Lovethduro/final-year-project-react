@@ -1,4 +1,3 @@
-import { DashboardLayout } from '../DashboardLayout';
 import { PageHeader, Card, PrimaryButton, Select } from '../ui';
 import { inputStyle } from '../../styles/theme';
 import { formatPaymentMethod, referralApi } from '../../utils/apiClient';
@@ -22,7 +21,7 @@ export default function CustomerProfileView() {
         profile, form, error, success, saving, uploading,
         passwordForm, setPasswordForm, passwordSaving, passwordSuccess,
         handleChange, handleImageUpload, handleSave, handlePasswordChange, handleMotivationalToggle,
-        handleDisableMfa, disablingMfa, mfaError, mfaSuccess,
+        handleDisableMfa, prepareDisableMfa, disablingMfa, mfaError, mfaSuccess,
         profileImage,
     } = settings;
 
@@ -31,8 +30,8 @@ export default function CustomerProfileView() {
     }, []);
 
     return (
-        <DashboardLayout>
-            <PageHeader
+        <>
+                    <PageHeader
                 title="My Account"
                 subtitle="Manage your contact details, billing preferences, and security settings"
             />
@@ -106,6 +105,7 @@ export default function CustomerProfileView() {
                 <MfaSettingsCard
                     profile={profile}
                     onDisableMfa={handleDisableMfa}
+                    onPrepareDisableMfa={prepareDisableMfa}
                     disablingMfa={disablingMfa}
                     mfaError={mfaError}
                     mfaSuccess={mfaSuccess}
@@ -119,6 +119,6 @@ export default function CustomerProfileView() {
                     onSubmit={handlePasswordChange}
                 />
             </div>
-        </DashboardLayout>
+        </>
     );
 }

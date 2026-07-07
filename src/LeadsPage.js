@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { DashboardLayout } from './components/DashboardLayout';
 import { PageHeader, Card, DataTable, StatusBadge, SearchInput, FilterSelect, StatCard, PrimaryButton, Alert, Select } from './components/ui';
 import { useAuth } from './hooks/useAuth';
 import { adminApi, salesApi, supervisorApi } from './utils/apiClient';
@@ -107,8 +106,8 @@ export default function LeadsPage() {
     };
 
     return (
-        <DashboardLayout>
-            <PageHeader
+        <>
+                    <PageHeader
                 title="Leads"
                 subtitle="Track prospects through your sales pipeline"
                 action={['ADMIN', 'SUPERVISOR', 'SALES_AGENT'].includes(auth.role) ? (
@@ -197,6 +196,6 @@ export default function LeadsPage() {
                     />
                 )}
             </Card>
-        </DashboardLayout>
+        </>
     );
 }

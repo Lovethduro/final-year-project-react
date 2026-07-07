@@ -10,15 +10,8 @@ function PrivacyPage() {
     }, []);
 
     return (
-        <div style={{
-            minHeight: "100vh",
-            width: "100%",
-            background: "#060B1A",
-            fontFamily: "'DM Sans', sans-serif",
-            paddingTop: "100px",
-            paddingBottom: "60px"
-        }}>
-            <div style={{ maxWidth: "1000px", margin: "0 auto", padding: "0 20px" }}>
+        <div className="cyforce-public-page">
+            <div className="cyforce-public-page-inner">
                 <LegalBackLink />
 
                 {/* Header */}
@@ -26,13 +19,7 @@ function PrivacyPage() {
                     <Link to="/" style={{ textDecoration: "none" }}>
                         <img src={logo} alt="CyForce Technologies" style={{ height: "60px", width: "auto", marginBottom: "20px" }} />
                     </Link>
-                    <h1 style={{
-                        fontFamily: "'Syne', sans-serif",
-                        fontSize: "42px",
-                        fontWeight: "800",
-                        color: "#fff",
-                        marginBottom: "16px"
-                    }}>
+                    <h1 className="cyforce-public-hero-title">
                         Privacy Policy
                     </h1>
                     <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.5)" }}>
@@ -41,13 +28,7 @@ function PrivacyPage() {
                 </div>
 
                 {/* Content Card */}
-                <div style={{
-                    background: "#0D1830",
-                    borderRadius: "20px",
-                    border: "0.5px solid rgba(99,179,237,0.1)",
-                    padding: "40px",
-                    marginBottom: "30px"
-                }}>
+                <div className="cyforce-public-card" style={{ marginBottom: "30px" }}>
                     <div style={{ marginBottom: "30px" }}>
                         <h2 style={{
                             fontFamily: "'Syne', sans-serif",

@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import logo from './images/CYFORCE 2-1.jpg';
 import { authApi } from './utils/apiClient';
+import { BackLink } from './components/BackLink';
 
 const inputStyle = {
     width: '100%',
@@ -55,6 +55,7 @@ export default function ForgotPasswordPage() {
     };
 
     return (
+    <>
         <div style={{
             minHeight: '100vh', background: '#0F172A', display: 'flex', alignItems: 'center',
             justifyContent: 'center', fontFamily: "'DM Sans', sans-serif", padding: 16,
@@ -119,11 +120,12 @@ export default function ForgotPasswordPage() {
                         </button>
                     </form>
 
-                    <p style={{ textAlign: 'center', marginTop: 20, fontSize: 13 }}>
-                        <Link to="/login" style={{ color: '#2DD4BF', textDecoration: 'none' }}>Back to sign in</Link>
+                    <p style={{ textAlign: 'center', marginTop: 20 }}>
+                        <BackLink to="/login" label="Return to sign in" variant="subtle" centered style={{ color: '#2DD4BF' }} />
                     </p>
                 </div>
             </div>
         </div>
+    </>
     );
 }

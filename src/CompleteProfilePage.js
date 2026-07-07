@@ -80,6 +80,7 @@ export default function CompleteProfilePage() {
     };
 
     return (
+    <>
         <div style={{
             minHeight: '100vh',
             background: '#0F172A',
@@ -226,5 +227,6 @@ export default function CompleteProfilePage() {
                 </div>
             </div>
         </div>
+    </>
     );
 }

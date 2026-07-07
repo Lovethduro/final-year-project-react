@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { DashboardLayout } from '../components/DashboardLayout';
 import { PageHeader, Card, PrimaryButton, Alert, DataTable, StatusBadge, ConfirmDialog, ReviewNoteDialog } from '../components/ui';
 import { leaveApi } from '../utils/apiClient';
 import { useAuth } from '../hooks/useAuth';
@@ -104,6 +103,7 @@ export default function LeavePage() {
         if (r.status !== 'pending') return null;
         if (onlySupervisor && r.userRole !== 'SUPERVISOR') return null;
         return (
+            <>
             <div style={{ display: 'flex', gap: 8 }}>
                 <button
                     type="button"
@@ -122,12 +122,13 @@ export default function LeavePage() {
                     Reject
                 </button>
             </div>
+            </>
         );
     };
 
     return (
-        <DashboardLayout>
-            <PageHeader
+    <>
+                    <PageHeader
                 title="Leave"
                 subtitle={
                     isAdmin
@@ -294,6 +295,6 @@ export default function LeavePage() {
                 onConfirm={confirmCancel}
                 onCancel={() => setCancelDialogId(null)}
             />
-        </DashboardLayout>
+    </>
     );
 }

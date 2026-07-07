@@ -83,6 +83,7 @@ function AIChatbot() {
             <button
                 type="button"
                 aria-label="Open chat assistant"
+                className="cyforce-ai-chat-fab"
                 onClick={() => setIsOpen(!isOpen)}
                 style={{
                     position: "fixed",
@@ -109,7 +110,9 @@ function AIChatbot() {
             </button>
 
             {isOpen && (
-                <div style={{
+                <div
+                    className="cyforce-ai-chat-panel"
+                    style={{
                     position: "fixed",
                     bottom: "90px",
                     right: "20px",

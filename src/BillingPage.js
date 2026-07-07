@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
-import { DashboardLayout } from './components/DashboardLayout';
 import { PageHeader, Card, DataTable, StatusBadge, StatCard, PrimaryButton, Alert, Select } from './components/ui';
 import { customerApi, paymentApi, userApi, getSession } from './utils/apiClient';
 import { storeAuthSession } from './utils/authFlow';
 import { refreshNotifications } from './utils/notifications';
-import { completePaymentIfNeeded } from './utils/paymentUtils';
+import { completePaymentIfNeeded, isSimulatedPayment } from './utils/paymentUtils';
 import { theme } from './styles/theme';
 
 function formatAmount(kobo) {
@@ -67,6 +66,18 @@ export default function BillingPage() {
                 ? await paymentApi.initPaystack({ amount: invoice.amount, description: invoice.description, invoiceId: invoice.id })
                 : await paymentApi.initFlutterwave({ amount: invoice.amount, description: invoice.description, invoiceId: invoice.id });
 
+            if (isSimulatedPayment(init)) {
+                setError(
+                    provider === 'flutterwave'
+                        ? 'Flutterwave is not configured on the server. Add FLUTTERWAVE_SECRET_KEY to application-local.properties and restart the backend.'
+                        : 'Paystack is not configured on the server. Add PAYSTACK_SECRET_KEY to application-local.properties and restart the backend.'
+                );
+                return;
+            }
+            if (init.authorizationUrl) {
+                window.location.href = init.authorizationUrl;
+                return;
+            }
             if (await completePaymentIfNeeded(init, paymentApi)) {
                 load();
                 userApi.getProfile().then((updated) => {
@@ -88,9 +99,6 @@ export default function BillingPage() {
                 refreshNotifications();
                 return;
             }
-            if (init.authorizationUrl) {
-                window.location.href = init.authorizationUrl;
-            }
         } catch (err) {
             setError(err.message);
         } finally {
@@ -102,17 +110,17 @@ export default function BillingPage() {
     const transactions = overview?.transactions || [];
 
     return (
-        <DashboardLayout>
-            <PageHeader
+        <>
+                    <PageHeader
                 title={isStaff ? 'Purchases & Payments' : 'Billing & Subscriptions'}
                 subtitle={isStaff ? 'View your staff store purchases and payment history' : 'Manage invoices and pay with Paystack or Flutterwave'}
             />
             {error && <Alert type="error">{error}</Alert>}
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16, marginBottom: 20 }}>
-                <StatCard title={isStaff ? 'Total Spent' : 'Monthly Revenue'} value={formatAmount(overview?.monthlyRevenue)} icon="💰" status="success" />
-                <StatCard title={isStaff ? 'Successful Payments' : 'Paid Invoices'} value={overview?.activePlans ?? 0} icon="📋" status="info" />
-                {!isStaff && <StatCard title="Pending" value={overview?.pendingInvoices ?? 0} icon="⏳" status="warning" />}
+                <StatCard title={isStaff ? 'Total Spent' : 'Monthly Revenue'} value={formatAmount(overview?.monthlyRevenue)} icon="ðŸ’°" status="success" />
+                <StatCard title={isStaff ? 'Successful Payments' : 'Paid Invoices'} value={overview?.activePlans ?? 0} icon="ðŸ“‹" status="info" />
+                {!isStaff && <StatCard title="Pending" value={overview?.pendingInvoices ?? 0} icon="â³" status="warning" />}
             </div>
 
             <div style={{ display: 'flex', gap: 12, marginBottom: 16, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -162,6 +170,6 @@ export default function BillingPage() {
                     />
                 </Card>
             )}
-        </DashboardLayout>
+        </>
     );
 }

@@ -1,17 +1,38 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import logo from './images/CYFORCE 2-1.jpg';
+import { LegalBackLink } from './components/LegalBackLink';
 import { ContactSupportContent } from './components/ContactSupportContent';
-import { theme } from './styles/theme';
 
 export default function PublicSupportPage() {
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
     return (
-        <div style={{ minHeight: '100vh', background: theme.bg, padding: '32px 16px' }}>
-            <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-                <div style={{ marginBottom: 20 }}>
-                    <Link to="/" style={{ color: theme.accent, fontSize: 13, textDecoration: 'none' }}>
-                        ← CyForce Technologies
+        <div className="cyforce-public-page">
+            <div className="cyforce-public-page-inner" style={{ maxWidth: 1100 }}>
+                <LegalBackLink to="/" label="Return to home" />
+
+                <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+                    <Link to="/" style={{ textDecoration: 'none' }}>
+                        <img
+                            src={logo}
+                            alt="CyForce Technologies"
+                            style={{ height: '60px', width: 'auto', marginBottom: '20px' }}
+                        />
                     </Link>
+                    <h1 className="cyforce-public-hero-title">
+                        Contact Support
+                    </h1>
+                    <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.5)' }}>
+                        Submit a ticket and our team will respond as soon as possible
+                    </p>
                 </div>
-                <ContactSupportContent publicMode />
+
+                <div className="cyforce-public-card">
+                    <ContactSupportContent publicMode />
+                </div>
             </div>
         </div>
     );

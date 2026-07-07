@@ -1,6 +1,6 @@
 export const API_BASE = `${process.env.REACT_APP_API_URL || 'http://localhost:8080'}/api/auth`;
 
-/** Set to true to require MFA setup and verification after login. */
+/** When true, all users must set up MFA before using the app (optional org policy). Login MFA is per-user when mfaEnabled. */
 export const LOGIN_MFA_ENABLED = false;
 
 export const SESSION_KEYS = [

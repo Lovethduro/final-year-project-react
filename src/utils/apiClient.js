@@ -60,8 +60,67 @@ export function clearSession({ keepRememberedLogin = false } = {}) {
     }
 }
 
+const GET_CACHE_MS = 120_000;
+const GET_STALE_MS = 600_000;
+const getResponseCache = new Map();
+const inflightRefresh = new Set();
+
+function storeCacheEntry(cacheKey, data) {
+    getResponseCache.set(cacheKey, { data, at: Date.now() });
+}
+
+async function refreshCacheEntry(path, options, cacheKey) {
+    if (inflightRefresh.has(cacheKey)) return;
+    inflightRefresh.add(cacheKey);
+    try {
+        const data = await request(path, { ...options, noCache: true, _skipStale: true });
+        storeCacheEntry(cacheKey, data);
+    } catch {
+        // Stale-while-revalidate: keep serving cached data if background refresh fails.
+    } finally {
+        inflightRefresh.delete(cacheKey);
+    }
+}
+
+function requestCacheKey(method, path, userId) {
+    return `${method}:${userId || 'anon'}:${path}`;
+}
+
+function invalidateGetCache(path) {
+    const base = path.split('?')[0];
+    const parts = base.split('/').filter(Boolean);
+    const areaPrefix = parts.length >= 2 ? `/${parts[0]}/${parts[1]}` : base;
+    for (const key of [...getResponseCache.keys()]) {
+        if (key.includes(base) || key.includes(areaPrefix)) {
+            getResponseCache.delete(key);
+        }
+    }
+}
+
+export function clearApiCache() {
+    getResponseCache.clear();
+}
+
 async function request(path, options = {}) {
     const session = getSession();
+    const method = (options.method || 'GET').toUpperCase();
+    const cacheMs = options.noCache ? 0 : (options.cacheMs ?? (method === 'GET' ? GET_CACHE_MS : 0));
+    const cacheKey = requestCacheKey(method, path, session.userId);
+
+    if (method === 'GET' && cacheMs > 0 && !options._skipStale) {
+        const hit = getResponseCache.get(cacheKey);
+        if (hit) {
+            const age = Date.now() - hit.at;
+            if (age < cacheMs) {
+                return hit.data;
+            }
+            if (age < GET_STALE_MS) {
+                refreshCacheEntry(path, options, cacheKey);
+                return hit.data;
+            }
+        }
+    }
+
     const headers = {
         'Content-Type': 'application/json',
         ...(options.headers || {}),
@@ -89,6 +148,12 @@ async function request(path, options = {}) {
 
     if (!response.ok) {
         throw new Error(data?.error || data?.message || 'Request failed');
+    }
+
+    if (method === 'GET' && cacheMs > 0) {
+        storeCacheEntry(cacheKey, data);
+    } else if (method !== 'GET') {
+        invalidateGetCache(path);
     }
 
     return data;
@@ -125,11 +190,11 @@ async function downloadFile(path, filename) {
 }
 
 export const api = {
-    get: (path) => request(path),
-    post: (path, body) => request(path, { method: 'POST', body: JSON.stringify(body) }),
-    put: (path, body) => request(path, { method: 'PUT', body: JSON.stringify(body) }),
-    patch: (path, body) => request(path, { method: 'PATCH', body: JSON.stringify(body) }),
-    delete: (path) => request(path, { method: 'DELETE' }),
+    get: (path, options) => request(path, options),
+    post: (path, body, options) => request(path, { ...options, method: 'POST', body: JSON.stringify(body) }),
+    put: (path, body, options) => request(path, { ...options, method: 'PUT', body: JSON.stringify(body) }),
+    patch: (path, body, options) => request(path, { ...options, method: 'PATCH', body: JSON.stringify(body) }),
+    delete: (path, options) => request(path, { ...options, method: 'DELETE' }),
 };
 
 export const notificationApi = {
@@ -143,6 +208,7 @@ export const notificationApi = {
 
 export const quoteApi = {
     request: (body) => api.post('/api/quotes/request', body),
+    suggestBundle: (body) => api.post('/api/quotes/suggest-bundle', body),
     getPortal: (token) => api.get(`/api/quotes/portal/${token}`),
     sendPortalMessage: (token, message) => api.post(`/api/quotes/portal/${token}/messages`, { message }),
 };
@@ -167,17 +233,17 @@ export const knowledgeBaseApi = {
 };
 
 export const adminApi = {
-    overview: () => api.get('/api/admin/dashboard/stats'),
-    feedback: () => api.get('/api/admin/feedback'),
-    users: () => api.get('/api/admin/users'),
+    overview: () => api.get('/api/admin/dashboard/stats', { cacheMs: 180_000 }),
+    feedback: () => api.get('/api/admin/feedback', { cacheMs: 300_000 }),
+    users: () => api.get('/api/admin/users', { cacheMs: 120_000 }),
     createUser: (body) => api.post('/api/admin/users', body),
     updateUser: (id, body) => api.put(`/api/admin/users/${id}`, body),
     deleteUser: (id) => api.delete(`/api/admin/users/${id}`),
-    tickets: () => api.get('/api/admin/tickets'),
-    leads: () => api.get('/api/admin/leads'),
-    auditLogs: () => api.get('/api/admin/audit-logs'),
-    securityAudit: () => api.get('/api/admin/security-audit'),
-    sessions: () => api.get('/api/admin/sessions'),
+    tickets: () => api.get('/api/admin/tickets', { cacheMs: 90_000 }),
+    leads: () => api.get('/api/admin/leads', { cacheMs: 90_000 }),
+    auditLogs: () => api.get('/api/admin/audit-logs', { cacheMs: 120_000 }),
+    securityAudit: () => api.get('/api/admin/security-audit', { cacheMs: 120_000 }),
+    sessions: () => api.get('/api/admin/sessions', { cacheMs: 120_000 }),
     securityAuditReport: (format = 'csv') => downloadFile(
         `/api/admin/security-audit/report?format=${encodeURIComponent(format)}`,
         `security-audit-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.${format}`
@@ -230,7 +296,7 @@ export const supportApi = {
     overview: () => api.get('/api/support/dashboard/overview'),
     stats: () => api.get('/api/support/dashboard/stats'),
     updateAgentStatus: (status) => api.put('/api/support/agent/status', { status }),
-    macros: () => api.get('/api/support/macros'),
+    macros: () => api.get('/api/support/macros', { cacheMs: 600_000 }),
     myTickets: () => api.get('/api/support/tickets'),
     allOpen: () => api.get('/api/support/tickets/all'),
     getTicket: (id) => api.get(`/api/support/tickets/${id}`),
@@ -244,6 +310,9 @@ export const supportApi = {
     transferToSales: (id, note) => api.post(`/api/support/tickets/${id}/transfer-to-sales`, { note }),
     agents: () => api.get('/api/support/agents'),
     transferToAgent: (id, agentId, note) => api.post(`/api/support/tickets/${id}/transfer-to-agent`, { agentId, note }),
+    copilotSummarize: (id) => api.post(`/api/support/tickets/${id}/copilot/summarize`, {}),
+    copilotSuggestReply: (id) => api.post(`/api/support/tickets/${id}/copilot/suggest-reply`, {}),
+    copilotAnalyze: (id) => api.post(`/api/support/tickets/${id}/copilot/analyze`, {}),
 };
 
 export const salesApi = {
@@ -371,7 +440,8 @@ export const userApi = {
     },
     listUsers: () => api.get('/api/users'),
     updateUserStatus: (userId, active) => api.patch(`/api/users/${userId}/status`, { active }),
-    disableMfa: (password) => api.post('/api/users/me/mfa/disable', { password }),
+    disableMfa: (payload) => api.post('/api/users/me/mfa/disable', payload),
+    prepareDisableMfa: () => api.post('/api/users/me/mfa/disable/prepare', {}),
 };
 
 export const dashboardApi = {
@@ -384,7 +454,7 @@ export const contentApi = {
     createHotDeal: (fields, imageFile) => uploadRequest('/api/content/hot-deals', buildProductFormData(fields, imageFile)),
     updateHotDeal: (id, fields, imageFile) => uploadRequest(`/api/content/hot-deals/${id}`, buildProductFormData(fields, imageFile), 'PUT'),
     deleteHotDeal: (id) => api.delete(`/api/content/hot-deals/${id}`),
-    motivational: (role) => api.get(`/api/content/motivational${role ? `?role=${encodeURIComponent(role)}` : ''}`),
+    motivational: (role) => api.get(`/api/content/motivational${role ? `?role=${encodeURIComponent(role)}` : ''}`, { cacheMs: 600_000 }),
     allMotivational: () => api.get('/api/content/motivational/all'),
     createMotivational: (body) => api.post('/api/content/motivational', body),
 };
@@ -430,7 +500,7 @@ function buildProductFormData(fields, imageFile) {
 }
 
 export const productApi = {
-    list: () => api.get('/api/products'),
+    list: () => api.get('/api/products', { cacheMs: 300_000 }),
     adminList: () => api.get('/api/admin/products'),
     create: (fields, imageFile) => uploadRequest('/api/admin/products', buildProductFormData(fields, imageFile)),
     update: (id, fields, imageFile) => uploadRequest(`/api/admin/products/${id}`, buildProductFormData(fields, imageFile), 'PUT'),

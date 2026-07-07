@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react';
-import { DashboardLayout } from './components/DashboardLayout';
 import { PageHeader, Card, DataTable, StatusBadge, SearchInput, Alert, PrimaryButton, GhostButton } from './components/ui';
 import { adminApi } from './utils/apiClient';
 
@@ -99,7 +98,8 @@ export default function SecurityAuditPage() {
 
     useEffect(() => {
         loadEvents();
-        loadSessions();
+        const timer = setTimeout(loadSessions, 300);
+        return () => clearTimeout(timer);
     }, [loadEvents, loadSessions]);
 
     const handleDownloadReport = async (format) => {
@@ -120,8 +120,8 @@ export default function SecurityAuditPage() {
     const downloading = Boolean(downloadingFormat);
 
     return (
-        <DashboardLayout>
-            <PageHeader
+        <>
+                    <PageHeader
                 title="Security Audit"
                 subtitle="Monitor login attempts, security events, and suspicious activity"
                 action={(
@@ -199,6 +199,6 @@ export default function SecurityAuditPage() {
                     />
                 )}
             </Card>
-        </DashboardLayout>
+        </>
     );
 }

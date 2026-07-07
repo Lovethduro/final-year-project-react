@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { DashboardLayout } from '../components/DashboardLayout';
 import { PageHeader, Card, PrimaryButton, Alert, Select } from '../components/ui';
 import { supervisorApi, adminApi } from '../utils/apiClient';
 import { useAuth } from '../hooks/useAuth';
@@ -41,8 +40,8 @@ export default function BroadcastPage() {
     };
 
     return (
-        <DashboardLayout>
-            <PageHeader title="Broadcast Message" subtitle="Send an announcement to your team or customers" />
+        <>
+                    <PageHeader title="Broadcast Message" subtitle="Send an announcement to your team or customers" />
             {error && <Alert type="error">{error}</Alert>}
             {success && <Alert type="success">{success}</Alert>}
             <Card>
@@ -61,6 +60,6 @@ export default function BroadcastPage() {
                     <PrimaryButton type="submit" disabled={sending}>{sending ? 'Sending…' : 'Send broadcast'}</PrimaryButton>
                 </form>
             </Card>
-        </DashboardLayout>
+        </>
     );
 }

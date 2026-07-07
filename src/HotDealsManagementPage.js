@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { DashboardLayout } from './components/DashboardLayout';
 import { PageHeader, Card, Alert, PrimaryButton, DataTable, StatusBadge, ConfirmDialog, Select } from './components/ui';
 import { assetUrl, contentApi, productApi } from './utils/apiClient';
 import { useAuth } from './hooks/useAuth';
@@ -211,8 +210,8 @@ export default function HotDealsManagementPage() {
     const inputStyle = { width: '100%', background: 'rgba(255,255,255,0.05)', border: `0.5px solid ${theme.border}`, borderRadius: 8, padding: 10, color: theme.text, fontFamily: theme.fontBody, marginBottom: 12 };
 
     return (
-        <DashboardLayout>
-            <PageHeader
+        <>
+                    <PageHeader
                 title="Hot Deals"
                 subtitle="Schedule each deal with a start and end time. While live, the linked product uses the deal price and reverts automatically when the deal ends."
                 action={editingId ? <PrimaryButton onClick={resetForm}>+ New Deal</PrimaryButton> : null}
@@ -334,6 +333,6 @@ export default function HotDealsManagementPage() {
                 loading={deleting}
                 danger
             />
-        </DashboardLayout>
+        </>
     );
 }

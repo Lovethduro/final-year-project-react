@@ -64,6 +64,7 @@ export const ROLE_ACCESS = {
             { module: 'Customers', access: 'View customer records' },
             { module: 'Customer Messages', access: 'Chat with customers' },
             { module: 'Sales Playbook', access: 'View sales guidance' },
+            { module: 'Sales Insights', access: 'Personal pipeline, team rank, and performance highlights' },
             { module: 'Calendar & Leave', access: 'Personal schedule and leave' },
             { module: 'Staff Store & Billing', access: 'Staff purchasing and billing views' },
         ],

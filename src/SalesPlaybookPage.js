@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { DashboardLayout } from './components/DashboardLayout';
 import { PageHeader, Card, SearchInput, PrimaryButton, Alert, Select } from './components/ui';
+import { BackLink } from './components/BackLink';
 import { ChatInboxList, ChatInboxItem, ChatPanel, ChatPanelHeader, ChatPanelBody } from './components/ChatMessage';
 import { useAuth } from './hooks/useAuth';
 import { salesApi } from './utils/apiClient';
@@ -38,6 +37,7 @@ function CategoryBadge({ category }) {
         general: theme.textDim,
     };
     return (
+        <>
         <span style={{
             fontSize: 10,
             fontWeight: 600,
@@ -47,6 +47,7 @@ function CategoryBadge({ category }) {
         }}>
             {CATEGORY_LABELS[category] || category}
         </span>
+        </>
     );
 }
 
@@ -181,16 +182,14 @@ export default function SalesPlaybookPage() {
     });
 
     return (
-        <DashboardLayout>
-            <PageHeader
+    <>
+                    <PageHeader
                 title="Sales Playbook"
                 subtitle="Product guides, discount rules, and talk tracks for customer enquiries"
                 action={(
                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                         {!auth.isAdmin && (
-                            <Link to="/sales/messages" style={{ fontSize: 13, color: theme.accent, textDecoration: 'none', alignSelf: 'center' }}>
-                                Back to messages
-                            </Link>
+                            <BackLink to="/sales/messages" label="Return to messages" />
                         )}
                         {canManage && <PrimaryButton onClick={startCreate}>Add guide</PrimaryButton>}
                     </div>
@@ -263,7 +262,7 @@ export default function SalesPlaybookPage() {
                 </Card>
             )}
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(260px, 300px) 1fr', gap: 16, alignItems: 'stretch' }}>
+            <div className="cyforce-split-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(260px, 300px) 1fr', gap: 16, alignItems: 'stretch' }}>
                 <Card title="Guides" style={{ marginBottom: 0 }}>
                     <div style={{ marginBottom: 12 }}>
                         <SearchInput value={search} onChange={setSearch} placeholder="Search playbook…" />
@@ -293,7 +292,7 @@ export default function SalesPlaybookPage() {
                                     key={entry.id}
                                     active={active?.id === entry.id}
                                     onClick={() => openEntry(entry.id)}
-                                    title={`${entry.pinned ? '★ ' : ''}${entry.title}`}
+                                    title={`${entry.pinned ? '⭐ ' : ''}${entry.title}`}
                                     subtitle={[CATEGORY_LABELS[entry.category], entry.productCategory, entry.summary].filter(Boolean).join(' · ')}
                                 />
                             )) : (
@@ -350,6 +349,6 @@ export default function SalesPlaybookPage() {
                     )}
                 </ChatPanel>
             </div>
-        </DashboardLayout>
+    </>
     );
 }

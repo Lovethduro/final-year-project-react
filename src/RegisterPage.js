@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import logo from './images/CYFORCE 2-1.jpg';
 import { API_BASE, getPostAuthPath, storeAuthSession } from './utils/authFlow';
 import { COUNTRY_CODES } from './constants/countryCodes';
+import { BackLink } from './components/BackLink';
 
 // Animated Particle Background
 function ParticleBackground() {
@@ -440,6 +441,8 @@ function RegisterPage() {
 
             <ParticleBackground />
 
+            <BackLink to="/" label="Return to home" variant="auth" floating />
+
             {/* Main Card */}
             <div style={{
                 position: "relative",
@@ -457,7 +460,7 @@ function RegisterPage() {
                     overflow: "hidden"
                 }}>
                     {/* Header */}
-                    <div style={{ padding: "32px 32px 24px 32px", textAlign: "center" }}>
+                    <div className="cyforce-auth-card-header" style={{ padding: "32px 32px 24px 32px", textAlign: "center" }}>
                         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
                             <img
                                 src={logo}
@@ -1110,7 +1113,7 @@ function RegisterPage() {
                         </div>
 
                         {/* SSO Buttons */}
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                        <div className="cyforce-auth-oauth-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
                             <button
                                 type="button"
                                 onClick={() => handleSSORegister("google")}

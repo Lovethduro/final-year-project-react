@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ProductCard } from './ProductCard';
 import { productApi, getSession, customerApi, paymentApi, userApi } from '../utils/apiClient';
-import { completePaymentIfNeeded } from '../utils/paymentUtils';
+import { completePaymentIfNeeded, isSimulatedPayment } from '../utils/paymentUtils';
 import { mapProductForDisplay, maxCartQuantity } from '../utils/productUtils';
 import { addProductToCart, readCart, writeCart, CART_UPDATED_EVENT } from '../utils/cartUtils';
 import { refreshNotifications } from '../utils/notifications';
@@ -145,28 +145,38 @@ export function ProductCatalog({ variant = 'public' }) {
 
             const result = await customerApi.checkout(items, paymentProvider);
 
+            if (isSimulatedPayment(result)) {
+                setCheckoutError(
+                    paymentProvider === 'flutterwave'
+                        ? 'Flutterwave is not configured on the server. Add FLUTTERWAVE_SECRET_KEY to application-local.properties and restart the backend.'
+                        : 'Paystack is not configured on the server. Add PAYSTACK_SECRET_KEY to application-local.properties and restart the backend.'
+                );
+                return;
+            }
+
+            if (result.authorizationUrl) {
+                window.location.href = result.authorizationUrl;
+                return;
+            }
+
             const paymentResult = await completePaymentIfNeeded(result, paymentApi);
             if (paymentResult) {
                 clearCart();
                 setShowCart(false);
                 refreshNotifications();
-                if (paymentResult.surveyToken) {
+                if (!isStaffShop && paymentResult.surveyToken) {
                     setSurveyToken(paymentResult.surveyToken);
                 }
                 if (isStaffShop) {
                     setCheckoutSuccess(result.staffDiscountPercent
                         ? `Order placed with ${result.staffDiscountPercent}% staff discount applied.`
                         : 'Order placed successfully.');
+                    navigate('/dashboard/billing');
                 } else if (isDashboard && !paymentResult.surveyToken) {
                     navigate('/dashboard/billing');
                 } else if (isDashboard) {
                     setCheckoutSuccess('Payment complete. Please share your feedback below.');
                 }
-                return;
-            }
-
-            if (result.authorizationUrl) {
-                window.location.href = result.authorizationUrl;
                 return;
             }
 
@@ -360,7 +370,7 @@ export function ProductCatalog({ variant = 'public' }) {
                             fontSize: 14,
                         }}>
                             <p style={{ margin: 0 }}>{checkoutSuccess}</p>
-                            {surveyToken && (
+                            {surveyToken && !isStaffShop && (
                                 <div style={{ marginTop: 16, color: theme.text }}>
                                     <PurchaseSurveyForm token={surveyToken} compact onComplete={() => setSurveyToken(null)} />
                                 </div>

@@ -6,6 +6,7 @@ export default function PurchaseSurveyPage() {
     const { token } = useParams();
 
     return (
+    <>
         <div style={{ minHeight: '100vh', background: theme.bg, padding: '40px 20px' }}>
             <div style={{ maxWidth: 560, margin: '0 auto', ...cardStyle, padding: 28 }}>
                 <div style={{ textAlign: 'center', marginBottom: 24 }}>
@@ -18,5 +19,6 @@ export default function PurchaseSurveyPage() {
                 </div>
             </div>
         </div>
+    </>
     );
 }

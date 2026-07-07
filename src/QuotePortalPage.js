@@ -6,6 +6,7 @@ export default function QuotePortalPage() {
     const { token } = useParams();
 
     return (
+    <>
         <div style={{ minHeight: '100vh', background: theme.bg, padding: '32px 16px' }}>
             <div style={{ maxWidth: 720, margin: '0 auto' }}>
                 <div style={{ textAlign: 'center', marginBottom: 20 }}>
@@ -33,5 +34,6 @@ export default function QuotePortalPage() {
                 </p>
             </div>
         </div>
+    </>
     );
 }

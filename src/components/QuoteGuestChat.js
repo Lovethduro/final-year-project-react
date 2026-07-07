@@ -9,6 +9,8 @@ import {
     ChatPanelBody,
     ChatPanelFooter,
     AgentChatHeader,
+    ChatExpiryNotice,
+    isChatExpired,
 } from './ChatMessage';
 
 const POLL_MS = 12000;
@@ -91,6 +93,7 @@ export function QuoteGuestChat({ token, compact = false, onInvalidToken }) {
     };
 
     const closed = conversation?.status === 'closed';
+    const expired = conversation?.expiresAt && isChatExpired(conversation.expiresAt);
     const minHeight = compact ? 320 : 400;
 
     if (loading && !conversation && !error) {
@@ -121,8 +124,15 @@ export function QuoteGuestChat({ token, compact = false, onInvalidToken }) {
                         imageUrl={null}
                         roleLabel="Your sales agent"
                         meta={conversation.subject}
+                        expiresAt={conversation.expiresAt}
                     />
                 </ChatPanelHeader>
+
+                {conversation.expiresAt && (
+                    <div style={{ padding: '0 20px 12px' }}>
+                        <ChatExpiryNotice expiresAt={conversation.expiresAt} />
+                    </div>
+                )}
 
                 <ChatPanelBody bottomRef={bottomRef}>
                     {messages.length === 0 ? (
@@ -142,7 +152,7 @@ export function QuoteGuestChat({ token, compact = false, onInvalidToken }) {
                     })}
                 </ChatPanelBody>
 
-                {!closed ? (
+                {!closed && !expired ? (
                     <ChatPanelFooter>
                         <form onSubmit={send} style={{ display: 'flex', gap: 10 }}>
                             <input
@@ -180,7 +190,9 @@ export function QuoteGuestChat({ token, compact = false, onInvalidToken }) {
                         textAlign: 'center',
                     }}
                     >
-                        This conversation is closed. Email sales if you need further help.
+                        {expired
+                            ? 'This chat has expired. Contact sales if you still need help.'
+                            : 'This conversation is closed. Email sales if you need further help.'}
                     </div>
                 )}
             </ChatPanel>

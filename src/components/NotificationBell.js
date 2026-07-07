@@ -1,7 +1,9 @@
 import { useEffect, useState, useRef } from 'react';
-import { notificationApi } from '../utils/apiClient';
+import { notificationApi, getSession } from '../utils/apiClient';
 import { PurchaseSurveyForm } from './PurchaseSurveyForm';
 import { theme } from '../styles/theme';
+
+const STAFF_ROLES = ['ADMIN', 'SUPERVISOR', 'SALES_AGENT', 'SUPPORT_AGENT'];
 
 function BellIcon() {
     return (
@@ -18,26 +20,42 @@ export function NotificationBell() {
     const [unread, setUnread] = useState(0);
     const [expandedSurveyId, setExpandedSurveyId] = useState(null);
     const panelRef = useRef(null);
+    const isStaffUser = STAFF_ROLES.includes(getSession().role);
 
-    const load = () => {
-        notificationApi.list()
-            .then(setNotifications)
-            .catch(() => setNotifications([]));
+    const loadUnread = () => {
         notificationApi.unreadCount()
             .then((r) => setUnread(r.count || 0))
             .catch(() => setUnread(0));
     };
 
+    const loadList = () => {
+        notificationApi.list()
+            .then(setNotifications)
+            .catch(() => setNotifications([]));
+    };
+
+    const load = () => {
+        loadUnread();
+        if (open) loadList();
+    };
+
     useEffect(() => {
-        load();
-        const interval = setInterval(load, 30000);
-        const onRefresh = () => load();
+        loadUnread();
+        const interval = setInterval(loadUnread, 60000);
+        const onRefresh = () => {
+            loadUnread();
+            loadList();
+        };
         window.addEventListener('cyforce:notifications-refresh', onRefresh);
         return () => {
             clearInterval(interval);
             window.removeEventListener('cyforce:notifications-refresh', onRefresh);
         };
     }, []);
+
+    useEffect(() => {
+        if (open) loadList();
+    }, [open]);
     useEffect(() => {
         const onClick = (e) => {
             if (panelRef.current && !panelRef.current.contains(e.target)) setOpen(false);
@@ -48,24 +66,28 @@ export function NotificationBell() {
 
     const markRead = async (id) => {
         await notificationApi.markRead(id);
-        load();
+        loadUnread();
+        loadList();
     };
 
     const markAllRead = async () => {
         await notificationApi.markAllRead();
-        load();
+        loadUnread();
+        loadList();
     };
 
     const remove = async (id) => {
         await notificationApi.delete(id);
-        load();
+        loadUnread();
+        loadList();
     };
 
     const removeAll = async () => {
         if (!notifications.length) return;
         await notificationApi.deleteAll();
         setExpandedSurveyId(null);
-        load();
+        loadUnread();
+        loadList();
     };
 
     const typeColor = (type) => {
@@ -151,7 +173,7 @@ export function NotificationBell() {
                                         {n.title}
                                     </div>
                                     <div style={{ fontSize: 12, color: theme.textMuted, lineHeight: 1.4 }}>{n.message}</div>
-                                    {n.surveyToken && (
+                                    {n.surveyToken && !isStaffUser && (
                                         <div style={{ marginTop: 10 }}>
                                             {expandedSurveyId === n.id ? (
                                                 <PurchaseSurveyForm

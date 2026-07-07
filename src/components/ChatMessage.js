@@ -1,6 +1,9 @@
 import { assetUrl } from '../utils/apiClient';
 import { theme } from '../styles/theme';
 import { AgentStarBadge } from './StarRatingInput';
+import { formatChatDateTime, formatChatExpiry, isChatExpired } from '../utils/chatTime';
+
+export { formatChatDateTime, formatChatExpiry, isChatExpired } from '../utils/chatTime';
 
 export function ChatAvatar({ name, imageUrl, size = 36 }) {
     const initial = (name || '?').trim().charAt(0).toUpperCase() || '?';
@@ -28,7 +31,29 @@ export function ChatAvatar({ name, imageUrl, size = 36 }) {
     );
 }
 
-export function ChatMessageRow({ message, isMine, showAvatar = true }) {
+export function ChatExpiryNotice({ expiresAt, style }) {
+    const label = formatChatExpiry(expiresAt);
+    if (!label) return null;
+    const expired = isChatExpired(expiresAt);
+    return (
+        <div style={{
+            padding: '8px 12px',
+            borderRadius: 8,
+            fontSize: 12,
+            lineHeight: 1.45,
+            color: expired ? theme.error : theme.textMuted,
+            background: expired ? 'rgba(239,68,68,0.08)' : 'rgba(251,191,36,0.08)',
+            border: `0.5px solid ${expired ? `${theme.error}44` : `${theme.warning}44`}`,
+            ...style,
+        }}>
+            {expired
+                ? 'This chat has expired. Start a new conversation if you still need help.'
+                : `Chat expires ${label}`}
+        </div>
+    );
+}
+
+export function ChatMessageRow({ message, isMine, showAvatar = true, showTimestamp = true }) {
     const isSystem = message.messageType === 'system';
     const isInvoice = message.messageType === 'invoice';
     const isEmail = message.messageType === 'email';
@@ -46,6 +71,11 @@ export function ChatMessageRow({ message, isMine, showAvatar = true }) {
                 }}>
                     {message.message}
                 </span>
+                {showTimestamp && message.createdAt && (
+                    <div style={{ fontSize: 10, color: theme.textDim, marginTop: 6 }}>
+                        {formatChatDateTime(message.createdAt)}
+                    </div>
+                )}
             </div>
         );
     }
@@ -75,12 +105,22 @@ export function ChatMessageRow({ message, isMine, showAvatar = true }) {
                     </div>
                 )}
                 <div style={{ fontSize: 14, color: theme.text, lineHeight: 1.5 }}>{message.message ?? message.body ?? ''}</div>
+                {showTimestamp && message.createdAt && (
+                    <div style={{
+                        fontSize: 10,
+                        color: theme.textDim,
+                        marginTop: 6,
+                        textAlign: isMine ? 'right' : 'left',
+                    }}>
+                        {formatChatDateTime(message.createdAt)}
+                    </div>
+                )}
             </div>
         </div>
     );
 }
 
-export function AgentChatHeader({ name, imageUrl, roleLabel = 'Agent', averageRating, ratingCount, meta }) {
+export function AgentChatHeader({ name, imageUrl, roleLabel = 'Agent', averageRating, ratingCount, meta, expiresAt }) {
     return (
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <ChatAvatar name={name} imageUrl={imageUrl} size={40} />
@@ -94,6 +134,11 @@ export function AgentChatHeader({ name, imageUrl, roleLabel = 'Agent', averageRa
                 <div style={{ fontSize: 12, color: theme.textDim, marginTop: 2 }}>
                     {meta || (name ? roleLabel : `A ${roleLabel.toLowerCase()} will join shortly`)}
                 </div>
+                {expiresAt && (
+                    <div style={{ fontSize: 11, color: isChatExpired(expiresAt) ? theme.error : theme.warning, marginTop: 6 }}>
+                        {isChatExpired(expiresAt) ? 'Chat expired' : `Expires ${formatChatExpiry(expiresAt)}`}
+                    </div>
+                )}
             </div>
         </div>
     );

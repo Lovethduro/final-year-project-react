@@ -32,13 +32,13 @@ export function AvatarInitials({ name, size = 32, fontSize }) {
 
 export function PageHeader({ title, subtitle, action }) {
     return (
-        <div style={{ marginBottom: 24 }}>
+        <div className="cyforce-page-header" style={{ marginBottom: 24 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
-                <div>
+                <div style={{ minWidth: 0, flex: '1 1 200px' }}>
                     <h1 style={{ fontFamily: theme.fontHeading, fontSize: 24, fontWeight: 600, color: theme.text, margin: '0 0 6px' }}>{title}</h1>
                     {subtitle && <p style={{ fontSize: 14, color: theme.textMuted, fontFamily: theme.fontBody, margin: 0 }}>{subtitle}</p>}
                 </div>
-                {action}
+                {action && <div className="cyforce-page-header-action">{action}</div>}
             </div>
             <div style={{ height: 1, background: theme.border, marginTop: 20 }} />
         </div>
@@ -103,31 +103,33 @@ export function StatusBadge({ status, label }) {
 
 export function Card({ title, children, style }) {
     return (
-        <div style={{ ...dashboardCardStyle, ...style }}>
+        <div style={{ ...dashboardCardStyle, color: theme.text, ...style }}>
             {title && <h2 style={{ fontSize: 14, fontWeight: 600, color: theme.text, margin: '0 0 16px', fontFamily: theme.fontHeading }}>{title}</h2>}
             {children}
         </div>
     );
 }
 
-export function DataTable({ columns, rows, emptyMessage = 'No data found' }) {
+export function DataTable({ columns, rows, emptyMessage = 'No data found', onRowClick, activeRowId }) {
     if (!rows.length) {
         return <p style={{ color: theme.textMuted, fontFamily: theme.fontBody }}>{emptyMessage}</p>;
     }
 
+    const compact = Boolean(onRowClick);
+
     return (
-        <div style={{ overflowX: 'auto' }}>
+        <div className="cyforce-table-wrap" style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: theme.fontBody }}>
                 <thead>
                     <tr>
                         {columns.map((col) => (
                             <th key={col.key} style={{
                                 textAlign: 'left',
-                                padding: '12px 14px',
+                                padding: compact ? '8px 10px' : '12px 14px',
                                 fontSize: 11,
                                 letterSpacing: '0.08em',
                                 textTransform: 'uppercase',
-                                color: theme.textDim,
+                                color: theme.textMuted,
                                 borderBottom: `0.5px solid ${theme.border}`,
                             }}>
                                 {col.label}
@@ -136,20 +138,30 @@ export function DataTable({ columns, rows, emptyMessage = 'No data found' }) {
                     </tr>
                 </thead>
                 <tbody>
-                    {rows.map((row, idx) => (
-                        <tr key={row.id || idx}>
-                            {columns.map((col) => (
-                                <td key={col.key} style={{
-                                    padding: '14px',
-                                    fontSize: 14,
-                                    color: 'rgba(255,255,255,0.85)',
-                                    borderBottom: `0.5px solid ${theme.border}`,
-                                }}>
-                                    {col.render ? col.render(row) : row[col.key]}
-                                </td>
-                            ))}
-                        </tr>
-                    ))}
+                    {rows.map((row, idx) => {
+                        const isActive = activeRowId && row.id === activeRowId;
+                        return (
+                            <tr
+                                key={row.id || idx}
+                                onClick={onRowClick ? () => onRowClick(row) : undefined}
+                                style={{
+                                    cursor: onRowClick ? 'pointer' : undefined,
+                                    background: isActive ? 'rgba(43,92,230,0.12)' : undefined,
+                                }}
+                            >
+                                {columns.map((col) => (
+                                    <td key={col.key} style={{
+                                        padding: compact ? '10px' : '14px',
+                                        fontSize: compact ? 13 : 14,
+                                        color: 'rgba(255,255,255,0.85)',
+                                        borderBottom: `0.5px solid ${theme.border}`,
+                                    }}>
+                                        {col.render ? col.render(row) : row[col.key]}
+                                    </td>
+                                ))}
+                            </tr>
+                        );
+                    })}
                 </tbody>
             </table>
         </div>
@@ -159,6 +171,7 @@ export function DataTable({ columns, rows, emptyMessage = 'No data found' }) {
 export function SearchInput({ value, onChange, placeholder = 'Search...' }) {
     return (
         <input
+            className="cyforce-search-input"
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}

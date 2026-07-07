@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { DashboardLayout } from './components/DashboardLayout';
 import { PageHeader, Card, DataTable, StatusBadge, SearchInput, FilterSelect, PrimaryButton, Alert, Select } from './components/ui';
 import { adminApi, userApi } from './utils/apiClient';
 import { useAuth } from './hooks/useAuth';
@@ -117,8 +116,8 @@ export default function UserManagementPage() {
     };
 
     return (
-        <DashboardLayout>
-            <PageHeader
+        <>
+                    <PageHeader
                 title="User Management"
                 subtitle={auth.isAdmin
                     ? <>Assign roles here. See the <Link to="/dashboard/roles" style={{ color: '#38BDF8' }}>Roles Overview</Link> for what each role can access.</>
@@ -256,6 +255,6 @@ export default function UserManagementPage() {
                     />
                 )}
             </Card>
-        </DashboardLayout>
+        </>
     );
 }

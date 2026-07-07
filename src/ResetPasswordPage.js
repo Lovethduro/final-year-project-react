@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import logo from './images/CYFORCE 2-1.jpg';
 import { authApi } from './utils/apiClient';
+import { PasswordInput } from './components/SecurePasswordInput';
 
 const inputStyle = {
     width: '100%',
@@ -53,6 +54,7 @@ export default function ResetPasswordPage() {
     };
 
     return (
+    <>
         <div style={{
             minHeight: '100vh', background: '#0F172A', display: 'flex', alignItems: 'center',
             justifyContent: 'center', fontFamily: "'DM Sans', sans-serif", padding: 16,
@@ -75,28 +77,28 @@ export default function ResetPasswordPage() {
                             <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 6 }}>
                                 New password
                             </label>
-                            <input
-                                type="password"
+                            <PasswordInput
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
                                 minLength={8}
                                 style={inputStyle}
                                 placeholder="At least 8 characters"
+                                autoComplete="new-password"
                             />
                         </div>
                         <div>
                             <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 6 }}>
                                 Confirm password
                             </label>
-                            <input
-                                type="password"
+                            <PasswordInput
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 required
                                 minLength={8}
                                 style={inputStyle}
                                 placeholder="Re-enter password"
+                                autoComplete="new-password"
                             />
                         </div>
 
@@ -131,5 +133,6 @@ export default function ResetPasswordPage() {
                 </div>
             </div>
         </div>
+    </>
     );
 }

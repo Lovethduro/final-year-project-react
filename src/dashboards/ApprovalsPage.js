@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { DashboardLayout } from '../components/DashboardLayout';
 import { PageHeader, Card, DataTable, Alert, ReviewNoteDialog } from '../components/ui';
 import { supervisorApi } from '../utils/apiClient';
 import { useAuth } from '../hooks/useAuth';
@@ -51,8 +50,8 @@ export default function ApprovalsPage() {
     };
 
     return (
-        <DashboardLayout>
-            <PageHeader title="Approvals & Requests" subtitle="Review leave, lead assignments, and other pending items" />
+        <>
+                    <PageHeader title="Approvals & Requests" subtitle="Review leave, lead assignments, and other pending items" />
             {error && <Alert type="error">{error}</Alert>}
             {success && <Alert type="success">{success}</Alert>}
             <Card>
@@ -94,6 +93,6 @@ export default function ApprovalsPage() {
                 onConfirm={submitReview}
                 onCancel={() => setReviewDialog(null)}
             />
-        </DashboardLayout>
+        </>
     );
 }

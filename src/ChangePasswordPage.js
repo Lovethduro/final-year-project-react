@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import logo from './images/CYFORCE 2-1.jpg';
 import { authApi, getSession } from './utils/apiClient';
 import { getPostAuthPath, storeAuthSession } from './utils/authFlow';
+import { SecurePasswordInput, AutofillTrapFields } from './components/SecurePasswordInput';
 
 const inputStyle = {
     width: '100%',
@@ -68,6 +69,7 @@ export default function ChangePasswordPage() {
     };
 
     return (
+    <>
         <div style={{
             minHeight: '100vh', background: '#0F172A', display: 'flex', alignItems: 'center',
             justifyContent: 'center', fontFamily: "'DM Sans', sans-serif", padding: 16,
@@ -89,46 +91,47 @@ export default function ChangePasswordPage() {
                         </p>
                     </div>
 
-                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    <form onSubmit={handleSubmit} autoComplete="off" style={{ display: 'flex', flexDirection: 'column', gap: 16, position: 'relative' }}>
+                        <AutofillTrapFields />
                         <div>
                             <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 6 }}>
                                 {forced ? 'Temporary password' : 'Current password'}
                             </label>
-                            <input
-                                type="password"
+                            <SecurePasswordInput
                                 value={currentPassword}
                                 onChange={(e) => setCurrentPassword(e.target.value)}
                                 required
                                 style={inputStyle}
-                                autoComplete="current-password"
+                                autoComplete="off"
+                                name="cyforce-current-password"
                             />
                         </div>
                         <div>
                             <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 6 }}>
                                 New password
                             </label>
-                            <input
-                                type="password"
+                            <SecurePasswordInput
                                 value={newPassword}
                                 onChange={(e) => setNewPassword(e.target.value)}
                                 required
                                 minLength={8}
                                 style={inputStyle}
                                 autoComplete="new-password"
+                                name="cyforce-new-password"
                             />
                         </div>
                         <div>
                             <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 6 }}>
                                 Confirm new password
                             </label>
-                            <input
-                                type="password"
+                            <SecurePasswordInput
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 required
                                 minLength={8}
                                 style={inputStyle}
                                 autoComplete="new-password"
+                                name="cyforce-confirm-password"
                             />
                         </div>
 
@@ -159,5 +162,6 @@ export default function ChangePasswordPage() {
                 </div>
             </div>
         </div>
+    </>
     );
 }
