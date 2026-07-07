@@ -65,22 +65,25 @@ export default function ProductsManagementPage() {
         try {
             const payload = {
                 ...form,
+                stockQuantity: String(form.stockQuantity ?? '0'),
                 inStock: String(form.inStock),
                 featured: String(form.featured),
                 active: String(form.active),
             };
+            let saved;
             if (editingId) {
-                await productApi.update(editingId, payload, imageFile);
+                saved = await productApi.update(editingId, payload, imageFile);
+                setProducts((prev) => prev.map((p) => (p.id === saved.id ? saved : p)));
                 setSuccess('Product updated successfully.');
             } else {
                 if (!imageFile) {
                     throw new Error('Please upload a product image.');
                 }
-                await productApi.create(payload, imageFile);
+                saved = await productApi.create(payload, imageFile);
+                setProducts((prev) => [saved, ...prev.filter((p) => p.id !== saved.id)]);
                 setSuccess('Product created successfully.');
             }
             resetForm();
-            load();
         } catch (err) {
             setError(err.message);
         } finally {
@@ -191,7 +194,7 @@ export default function ProductsManagementPage() {
                                 )}
                             </div>
                         )},
-                        { key: 'stockQuantity', label: 'Qty', render: (r) => (r.stockQuantity > 0 ? r.stockQuantity : '—') },
+                        { key: 'stockQuantity', label: 'Qty', render: (r) => (Number(r.stockQuantity) > 0 ? Number(r.stockQuantity) : '—') },
                         { key: 'inStock', label: 'Stock', render: (r) => <StatusBadge status={r.inStock ? 'success' : 'warning'} label={r.inStock ? 'Available' : 'Sold out'} /> },
                         { key: 'active', label: 'Status', render: (r) => <StatusBadge status={r.active ? 'success' : 'warning'} label={r.active ? 'Live' : 'Hidden'} /> },
                         { key: 'actions', label: '', render: (r) => (

@@ -21,12 +21,13 @@ export function useAuth() {
 
 function buildAuthState() {
     const session = getSession();
-    const role = (session.role || 'CUSTOMER').toUpperCase();
+    const isAuthenticated = Boolean(session.userId && session.token);
+    const role = isAuthenticated ? (session.role || 'CUSTOMER').toUpperCase() : '';
 
     return {
         ...session,
         role,
-        isAuthenticated: Boolean(session.userId && session.token),
+        isAuthenticated,
         isAdmin: role === 'ADMIN',
         isSupervisor: role === 'SUPERVISOR',
         isStaff: ['ADMIN', 'SUPERVISOR', 'SALES_AGENT', 'SUPPORT_AGENT'].includes(role),

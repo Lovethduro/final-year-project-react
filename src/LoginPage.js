@@ -1,9 +1,9 @@
 // src/LoginPage.jsx
 import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import logo from './images/CYFORCE 2-1.jpg';
 import { API_BASE, getPostAuthPath, isOAuthLoginMethod, loadRememberedLogin, saveRememberedLogin, storeAuthSession } from './utils/authFlow';
-import { authApi } from './utils/apiClient';
+import { authApi, getSession } from './utils/apiClient';
 import { BackLink } from './components/BackLink';
 
 // Animated Particle Background
@@ -273,6 +273,11 @@ function LoginPage() {
             setIsLoading(false);
         }
     };
+
+    const session = getSession();
+    if (session.userId && session.token) {
+        return <Navigate to={getPostAuthPath(session)} replace />;
+    }
 
     return (
         <div style={{

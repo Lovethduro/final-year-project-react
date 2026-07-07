@@ -2,6 +2,10 @@ import { Navigate } from 'react-router-dom';
 import { getSession } from '../utils/apiClient';
 import { getDashboardPath, LOGIN_MFA_ENABLED } from '../utils/authFlow';
 
+function hasValidSession(session) {
+    return Boolean(session.userId && session.token);
+}
+
 export default function ProtectedRoute({
     children,
     roles,
@@ -11,7 +15,7 @@ export default function ProtectedRoute({
 }) {
     const session = getSession();
 
-    if (!session.userId || !session.token) {
+    if (!hasValidSession(session)) {
         return <Navigate to="/login" replace />;
     }
 

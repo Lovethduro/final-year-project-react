@@ -1593,7 +1593,7 @@ function AppShell() {
             <Route path="/support/dashboard" element={<ProtectedRoute roles={['SUPPORT_AGENT']}><SupportAgentDashboard /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><DashboardRedirect /></ProtectedRoute>} />
             <Route path="/dashboard/customers" element={<ProtectedRoute roles={['ADMIN', 'SUPERVISOR', 'SALES_AGENT', 'SUPPORT_AGENT']}><CustomersPage /></ProtectedRoute>} />
-            <Route path="/dashboard/tickets" element={<ProtectedRoute><TicketsPage /></ProtectedRoute>} />
+            <Route path="/dashboard/tickets" element={<ProtectedRoute roles={['ADMIN', 'SUPERVISOR', 'SUPPORT_AGENT']}><TicketsPage /></ProtectedRoute>} />
             <Route path="/dashboard/sales" element={<ProtectedRoute roles={['ADMIN', 'SUPERVISOR', 'SALES_AGENT']}><SalesPage /></ProtectedRoute>} />
             <Route path="/dashboard/leads" element={<ProtectedRoute roles={['ADMIN', 'SUPERVISOR', 'SALES_AGENT']}><LeadsPage /></ProtectedRoute>} />
             <Route path="/dashboard/analytics" element={<ProtectedRoute roles={['ADMIN', 'SUPERVISOR']}><AnalyticsPage /></ProtectedRoute>} />

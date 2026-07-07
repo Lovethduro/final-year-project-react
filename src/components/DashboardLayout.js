@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, Navigate, useLocation } from 'react-router-dom';
 import logo from '../images/CYFORCE 2-1.jpg';
 import { theme, formatRoleLabel } from '../styles/theme';
 import { useAuth } from '../hooks/useAuth';
@@ -112,6 +112,10 @@ export function DashboardLayout({ children }) {
     const currentPage = NAV_SECTIONS
         .flatMap((s) => s.items)
         .find((item) => item.path === location.pathname);
+
+    if (!auth.isAuthenticated) {
+        return <Navigate to="/login" replace />;
+    }
 
     return (
         <div style={{ minHeight: '100vh', background: theme.bg, fontFamily: theme.fontBody, display: 'flex' }}>

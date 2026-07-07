@@ -483,7 +483,13 @@ async function uploadRequest(path, formData, method = 'POST') {
         throw new Error(data?.error || data?.message || 'Request failed');
     }
 
+    invalidateGetCache(path);
     return data;
+}
+
+function invalidateProductCaches() {
+    invalidateGetCache('/api/admin/products');
+    invalidateGetCache('/api/products');
 }
 
 function buildProductFormData(fields, imageFile) {
@@ -501,8 +507,20 @@ function buildProductFormData(fields, imageFile) {
 
 export const productApi = {
     list: () => api.get('/api/products', { cacheMs: 300_000 }),
-    adminList: () => api.get('/api/admin/products'),
-    create: (fields, imageFile) => uploadRequest('/api/admin/products', buildProductFormData(fields, imageFile)),
-    update: (id, fields, imageFile) => uploadRequest(`/api/admin/products/${id}`, buildProductFormData(fields, imageFile), 'PUT'),
-    delete: (id) => api.delete(`/api/admin/products/${id}`),
+    adminList: () => api.get('/api/admin/products', { noCache: true }),
+    create: async (fields, imageFile) => {
+        const data = await uploadRequest('/api/admin/products', buildProductFormData(fields, imageFile));
+        invalidateProductCaches();
+        return data;
+    },
+    update: async (id, fields, imageFile) => {
+        const data = await uploadRequest(`/api/admin/products/${id}`, buildProductFormData(fields, imageFile), 'PUT');
+        invalidateProductCaches();
+        return data;
+    },
+    delete: async (id) => {
+        const data = await api.delete(`/api/admin/products/${id}`);
+        invalidateProductCaches();
+        return data;
+    },
 };
