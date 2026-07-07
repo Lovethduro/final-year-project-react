@@ -11,11 +11,6 @@ function AIChatbot() {
     const [isTyping, setIsTyping] = useState(false);
     const messagesEndRef = useRef(null);
 
-    const groq = new Groq({
-        apiKey: process.env.REACT_APP_GROQ_API_KEY,
-        dangerouslyAllowBrowser: true,
-    });
-
     useEffect(() => {
         if (messagesEndRef.current) {
             messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
@@ -40,6 +35,10 @@ function AIChatbot() {
         }
 
         try {
+            const groq = new Groq({
+                apiKey: process.env.REACT_APP_GROQ_API_KEY,
+                dangerouslyAllowBrowser: true,
+            });
             const chatCompletion = await groq.chat.completions.create({
                 messages: [
                     {
