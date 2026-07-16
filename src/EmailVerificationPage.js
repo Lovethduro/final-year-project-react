@@ -1,3 +1,4 @@
+import { theme } from './styles/theme';
 // src/EmailVerificationPage.jsx
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
@@ -30,7 +31,7 @@ function ParticleBackground() {
                     speedX: (Math.random() - 0.5) * 0.5,
                     speedY: (Math.random() - 0.5) * 0.3,
                     opacity: Math.random() * 0.3 + 0.1,
-                    color: `rgba(56, 189, 248, ${Math.random() * 0.2 + 0.05})`
+                    color: `rgba(0, 45, 114, ${Math.random() * 0.2 + 0.05})`
                 });
             }
         };
@@ -280,7 +281,7 @@ function EmailVerificationPage() {
                 }}>
                     <div style={{
                         backdropFilter: "blur(12px)",
-                        background: "rgba(255,255,255,0.05)",
+                        background: "rgba(15,23,42,0.04)",
                         border: "1px solid rgba(255,255,255,0.1)",
                         borderRadius: "20px",
                         boxShadow: "0 25px 50px rgba(0,0,0,0.3)",
@@ -306,13 +307,13 @@ function EmailVerificationPage() {
                                     <span style={{ fontSize: "32px" }}>✓</span>
                                 </div>
                             </div>
-                            <h1 style={{ fontSize: "24px", fontWeight: "bold", color: "#fff", marginBottom: "12px" }}>
+                            <h1 style={{ fontSize: "24px", fontWeight: "bold", color: "#0F172A", marginBottom: "12px" }}>
                                 Email Verified!
                             </h1>
-                            <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.5)", marginBottom: "8px" }}>
+                            <p style={{ fontSize: "14px", color: "rgba(15,23,42,0.55)", marginBottom: "8px" }}>
                                 Your email has been successfully verified.
                             </p>
-                            <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.4)", marginBottom: "24px" }}>
+                            <p style={{ fontSize: "12px", color: "rgba(15,23,42,0.45)", marginBottom: "24px" }}>
                                 Redirecting you to your dashboard...
                             </p>
                             <div style={{ display: "flex", justifyContent: "center" }}>
@@ -320,7 +321,7 @@ function EmailVerificationPage() {
                                     width: "20px",
                                     height: "20px",
                                     border: "2px solid rgba(45,212,191,0.3)",
-                                    borderTopColor: "#2DD4BF",
+                                    borderTopColor: "#1A4A9E",
                                     borderRadius: "50%",
                                     animation: "spin 1s linear infinite"
                                 }} />
@@ -385,7 +386,7 @@ function EmailVerificationPage() {
             }}>
                 <div style={{
                     backdropFilter: "blur(12px)",
-                    background: "rgba(255,255,255,0.05)",
+                    background: "rgba(15,23,42,0.04)",
                     border: "1px solid rgba(255,255,255,0.1)",
                     borderRadius: "20px",
                     boxShadow: "0 25px 50px rgba(0,0,0,0.3)",
@@ -400,23 +401,23 @@ function EmailVerificationPage() {
                                     height: "55px",
                                     width: "auto",
                                     objectFit: "contain",
-                                    filter: "drop-shadow(0 0 8px rgba(56,189,248,0.4))"
+                                    filter: "drop-shadow(0 0 8px rgba(0,45,114,0.4))"
                                 }}
                             />
                             <div style={{ textAlign: "center" }}>
-                                <span style={{ fontSize: "20px", fontWeight: "bold", letterSpacing: "1px", color: "#fff" }}>CyForce</span>
-                                <div style={{ fontSize: "10px", fontWeight: "500", letterSpacing: "0.2em", color: "#2DD4BF", textTransform: "uppercase" }}>
+                                <span style={{ fontSize: "20px", fontWeight: "bold", letterSpacing: "1px", color: "#0F172A" }}>CyForce</span>
+                                <div style={{ fontSize: "10px", fontWeight: "500", letterSpacing: "0.2em", color: "#1A4A9E", textTransform: "uppercase" }}>
                                     Technologies
                                 </div>
                             </div>
                         </div>
-                        <h1 style={{ fontSize: "24px", fontWeight: "bold", color: "#fff", marginTop: "24px", marginBottom: "8px" }}>
+                        <h1 style={{ fontSize: "24px", fontWeight: "bold", color: "#0F172A", marginTop: "24px", marginBottom: "8px" }}>
                             Verify Your Email
                         </h1>
-                        <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.5)" }}>
+                        <p style={{ fontSize: "14px", color: "rgba(15,23,42,0.55)" }}>
                             We sent a verification email to
                         </p>
-                        <p style={{ fontSize: "14px", fontWeight: "500", color: "#fff", marginTop: "4px" }}>
+                        <p style={{ fontSize: "14px", fontWeight: "500", color: "#0F172A", marginTop: "4px" }}>
                             {userEmail || 'your email address'}
                         </p>
                     </div>
@@ -456,9 +457,9 @@ function EmailVerificationPage() {
                                             justifyContent: "center",
                                             flexShrink: 0
                                         }}>
-                                            <span style={{ fontSize: "12px", fontWeight: "bold", color: "#2DD4BF" }}>1</span>
+                                            <span style={{ fontSize: "12px", fontWeight: "bold", color: "#1A4A9E" }}>1</span>
                                         </div>
-                                        <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)", lineHeight: "1.5" }}>
+                                        <p style={{ fontSize: "12px", color: "rgba(15,23,42,0.55)", lineHeight: "1.5" }}>
                                             Check your inbox for an email from CyForce Technologies
                                         </p>
                                     </div>
@@ -480,9 +481,9 @@ function EmailVerificationPage() {
                                             justifyContent: "center",
                                             flexShrink: 0
                                         }}>
-                                            <span style={{ fontSize: "12px", fontWeight: "bold", color: "#2DD4BF" }}>2</span>
+                                            <span style={{ fontSize: "12px", fontWeight: "bold", color: "#1A4A9E" }}>2</span>
                                         </div>
-                                        <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)", lineHeight: "1.5" }}>
+                                        <p style={{ fontSize: "12px", color: "rgba(15,23,42,0.55)", lineHeight: "1.5" }}>
                                             Click the verification link in the email
                                         </p>
                                     </div>
@@ -504,9 +505,9 @@ function EmailVerificationPage() {
                                             justifyContent: "center",
                                             flexShrink: 0
                                         }}>
-                                            <span style={{ fontSize: "12px", fontWeight: "bold", color: "#2DD4BF" }}>3</span>
+                                            <span style={{ fontSize: "12px", fontWeight: "bold", color: "#1A4A9E" }}>3</span>
                                         </div>
-                                        <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)", lineHeight: "1.5" }}>
+                                        <p style={{ fontSize: "12px", color: "rgba(15,23,42,0.55)", lineHeight: "1.5" }}>
                                             Return here and click "I've Verified My Email"
                                         </p>
                                     </div>
@@ -523,7 +524,7 @@ function EmailVerificationPage() {
                                     border: "1px solid rgba(45,212,191,0.3)",
                                     borderRadius: "10px"
                                 }}>
-                                    <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#2DD4BF", flexShrink: 0 }} />
+                                    <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#1A4A9E", flexShrink: 0 }} />
                                     <p style={{ fontSize: "12px", color: "#5EEAD4" }}>{resendMessage}</p>
                                 </div>
                             )}
@@ -548,12 +549,12 @@ function EmailVerificationPage() {
                                     justifyContent: "center",
                                     alignItems: "center",
                                     padding: "10px 16px",
-                                    background: "linear-gradient(135deg, #2563EB, #2DD4BF)",
+                                    background: "linear-gradient(135deg, #002D72, #1A4A9E)",
                                     border: "none",
                                     borderRadius: "10px",
                                     fontSize: "14px",
                                     fontWeight: "600",
-                                    color: "#fff",
+                                    color: "#0F172A",
                                     cursor: isVerifying ? "not-allowed" : "pointer",
                                     transition: "all 0.2s",
                                     opacity: isVerifying ? 0.7 : 1
@@ -589,7 +590,7 @@ function EmailVerificationPage() {
                             </button>
 
                             <div style={{ textAlign: "center" }}>
-                                <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)", marginBottom: "8px" }}>
+                                <p style={{ fontSize: "11px", color: "rgba(15,23,42,0.55)", marginBottom: "8px" }}>
                                     Didn't receive the email?
                                 </p>
                                 <button
@@ -602,7 +603,7 @@ function EmailVerificationPage() {
                                         alignItems: "center",
                                         fontSize: "13px",
                                         fontWeight: "500",
-                                        color: canResend ? "#2DD4BF" : "rgba(255,255,255,0.3)",
+                                        color: canResend ? "#1A4A9E" : "rgba(255,255,255,0.3)",
                                         cursor: canResend ? "pointer" : "not-allowed",
                                         transition: "color 0.2s"
                                     }}
@@ -610,7 +611,7 @@ function EmailVerificationPage() {
                                         if (canResend) e.currentTarget.style.color = "#14b8a6";
                                     }}
                                     onMouseLeave={(e) => {
-                                        if (canResend) e.currentTarget.style.color = "#2DD4BF";
+                                        if (canResend) e.currentTarget.style.color = "#1A4A9E";
                                     }}
                                 >
                                     <span style={{ marginRight: "6px" }}>↻</span>
@@ -626,8 +627,8 @@ function EmailVerificationPage() {
                                 border: "1px solid rgba(37,99,235,0.2)",
                                 borderRadius: "10px"
                             }}>
-                                <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)", lineHeight: "1.4" }}>
-                                    <strong style={{ color: "rgba(255,255,255,0.7)" }}>Note:</strong> Check your spam or
+                                <p style={{ fontSize: "11px", color: "rgba(15,23,42,0.55)", lineHeight: "1.4" }}>
+                                    <strong style={{ color: theme.textMuted }}>Note:</strong> Check your spam or
                                     junk folder if you don't see the email within a few minutes.
                                 </p>
                             </div>
@@ -637,12 +638,12 @@ function EmailVerificationPage() {
                     <div style={{
                         padding: "16px 32px",
                         background: "rgba(15,23,42,0.3)",
-                        borderTop: "1px solid rgba(255,255,255,0.05)",
+                        borderTop: "1px solid rgba(15,23,42,0.04)",
                         textAlign: "center"
                     }}>
-                        <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>
+                        <p style={{ fontSize: "12px", color: "rgba(15,23,42,0.55)" }}>
                             Wrong email?{" "}
-                            <Link to="/register" style={{ color: "#2DD4BF", textDecoration: "none", fontWeight: "500" }}>
+                            <Link to="/register" style={{ color: "#1A4A9E", textDecoration: "none", fontWeight: "500" }}>
                                 Create a new account
                             </Link>
                         </p>
@@ -656,7 +657,7 @@ function EmailVerificationPage() {
                     justifyContent: "center",
                     gap: "24px",
                     fontSize: "11px",
-                    color: "rgba(255,255,255,0.4)"
+                    color: "rgba(15,23,42,0.45)"
                 }}>
                     <Link to="/privacy" style={{ color: "inherit", textDecoration: "none" }}>Privacy Policy</Link>
                     <Link to="/terms" style={{ color: "inherit", textDecoration: "none" }}>Terms of Service</Link>

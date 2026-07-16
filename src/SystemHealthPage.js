@@ -21,12 +21,12 @@ export default function SystemHealthPage() {
                     {services.map((service) => (
                         <div key={service.name} style={{
                             display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: 12, alignItems: 'center',
-                            padding: 14, background: 'rgba(255,255,255,0.03)', borderRadius: 10,
+                            padding: 14, background: 'rgba(15,23,42,0.03)', borderRadius: 10,
                         }}>
-                            <span style={{ color: '#fff', fontWeight: 500 }}>{service.name}</span>
+                            <span style={{ color: '#0F172A', fontWeight: 500 }}>{service.name}</span>
                             <StatusBadge status={service.status} label={service.status} />
-                            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13 }}>{service.uptime}</span>
-                            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13 }}>{service.latency}</span>
+                            <span style={{ color: 'rgba(15,23,42,0.55)', fontSize: 13 }}>{service.uptime}</span>
+                            <span style={{ color: 'rgba(15,23,42,0.55)', fontSize: 13 }}>{service.latency}</span>
                         </div>
                     ))}
                 </div>

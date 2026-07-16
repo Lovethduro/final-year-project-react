@@ -37,9 +37,9 @@ function buildInsights(stats, dealsComparison, profile) {
     }
 
     if ((stats.conversionRate ?? 0) >= 25) {
-        lines.push(`Strong conversion rate at ${stats.conversionRate}% — keep nurturing qualified leads.`);
+        lines.push(`Strong conversion rate at ${stats.conversionRate}% - keep nurturing qualified leads.`);
     } else if ((stats.totalLeads ?? 0) > 0 && (stats.conversionRate ?? 0) < 10) {
-        lines.push('Conversion is below 10% — review follow-ups on open leads in your pipeline.');
+        lines.push('Conversion is below 10% - review follow-ups on open leads in your pipeline.');
     }
 
     if ((stats.pipelineValueKobo ?? 0) > 0) {
@@ -165,15 +165,15 @@ export default function SalesInsightsPage() {
                     {dealsComparison && (
                         <Card title="Team standing" style={{ marginBottom: 20 }}>
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 16 }}>
-                                <div style={{ padding: 14, borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: `0.5px solid ${theme.border}`, textAlign: 'center' }}>
+                                <div style={{ padding: 14, borderRadius: 10, background: 'rgba(15,23,42,0.03)', border: `0.5px solid ${theme.border}`, textAlign: 'center' }}>
                                     <div style={{ fontSize: 10, textTransform: 'uppercase', color: theme.textDim, marginBottom: 6 }}>Your rank</div>
-                                    <div style={{ fontSize: 22, fontWeight: 700, color: theme.accent }}>#{dealsComparison.myRank || '—'}</div>
+                                    <div style={{ fontSize: 22, fontWeight: 700, color: theme.accent }}>#{dealsComparison.myRank || '-'}</div>
                                 </div>
-                                <div style={{ padding: 14, borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: `0.5px solid ${theme.border}`, textAlign: 'center' }}>
+                                <div style={{ padding: 14, borderRadius: 10, background: 'rgba(15,23,42,0.03)', border: `0.5px solid ${theme.border}`, textAlign: 'center' }}>
                                     <div style={{ fontSize: 10, textTransform: 'uppercase', color: theme.textDim, marginBottom: 6 }}>Your deals</div>
                                     <div style={{ fontSize: 22, fontWeight: 700, color: theme.text }}>{dealsComparison.myDealsClosed ?? 0}</div>
                                 </div>
-                                <div style={{ padding: 14, borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: `0.5px solid ${theme.border}`, textAlign: 'center' }}>
+                                <div style={{ padding: 14, borderRadius: 10, background: 'rgba(15,23,42,0.03)', border: `0.5px solid ${theme.border}`, textAlign: 'center' }}>
                                     <div style={{ fontSize: 10, textTransform: 'uppercase', color: theme.textDim, marginBottom: 6 }}>Team average</div>
                                     <div style={{ fontSize: 22, fontWeight: 700, color: theme.text }}>{dealsComparison.teamAverage ?? 0}</div>
                                 </div>

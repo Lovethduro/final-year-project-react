@@ -1,3 +1,4 @@
+import { theme } from '../styles/theme';
 import { useState } from 'react';
 import { mapProductForDisplay } from '../utils/productUtils';
 
@@ -8,10 +9,10 @@ export function ProductCard({ product, onAddToCart, compact = false }) {
     return (
         <div
             style={{
-                background: '#0D1830',
+                background: '#F8FAFC',
                 borderRadius: compact ? 12 : 16,
                 overflow: 'hidden',
-                border: isHovered ? '0.5px solid rgba(56,189,248,0.3)' : '0.5px solid rgba(99,179,237,0.1)',
+                border: isHovered ? '0.5px solid rgba(0,45,114,0.3)' : '0.5px solid rgba(0,45,114,0.1)',
                 transition: 'all 0.3s ease',
                 transform: isHovered ? 'translateY(-5px)' : 'translateY(0)',
             }}
@@ -39,7 +40,7 @@ export function ProductCard({ product, onAddToCart, compact = false }) {
                         padding: '4px 8px',
                         borderRadius: 4,
                         fontSize: 12,
-                        color: '#fff',
+                        color: '#0F172A',
                     }}>
                         Save {Math.round(((item.originalPrice - item.price) / item.originalPrice) * 100)}%
                     </span>
@@ -53,7 +54,7 @@ export function ProductCard({ product, onAddToCart, compact = false }) {
                         padding: '4px 12px',
                         borderRadius: 4,
                         fontSize: 12,
-                        color: '#fff',
+                        color: '#0F172A',
                         fontWeight: 600,
                     }}>
                         Sold Out
@@ -80,26 +81,26 @@ export function ProductCard({ product, onAddToCart, compact = false }) {
                 <div style={{
                     display: 'inline-block',
                     padding: '2px 8px',
-                    background: 'rgba(56,189,248,0.1)',
+                    background: 'rgba(0,45,114,0.1)',
                     borderRadius: 4,
                     fontSize: 10,
-                    color: '#38BDF8',
+                    color: '#1A4A9E',
                     marginBottom: 10,
                 }}>
                     {item.category}
                 </div>
-                <h3 style={{ fontSize: compact ? 14 : 16, color: '#fff', marginBottom: 8 }}>{item.name}</h3>
-                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 12 }}>{item.description}</p>
+                <h3 style={{ fontSize: compact ? 14 : 16, color: '#0F172A', marginBottom: 8 }}>{item.name}</h3>
+                <p style={{ fontSize: 13, color: 'rgba(15,23,42,0.55)', marginBottom: 12 }}>{item.description}</p>
                 {item.inStock && item.stockQuantity > 5 && (
                     <p style={{ fontSize: 12, color: '#34D399', marginBottom: 10 }}>{item.stockQuantity} in stock</p>
                 )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
                     <div>
-                        <span style={{ fontSize: compact ? 16 : 20, fontWeight: 'bold', color: '#38BDF8' }}>
+                        <span style={{ fontSize: compact ? 16 : 20, fontWeight: 'bold', color: '#1A4A9E' }}>
                             ₦{Number(item.price).toLocaleString()}
                         </span>
                         {item.originalPrice > item.price && (
-                            <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', textDecoration: 'line-through', marginLeft: 8 }}>
+                            <span style={{ fontSize: 12, color: theme.textDim, textDecoration: 'line-through', marginLeft: 8 }}>
                                 ₦{Number(item.originalPrice).toLocaleString()}
                             </span>
                         )}
@@ -110,11 +111,11 @@ export function ProductCard({ product, onAddToCart, compact = false }) {
                             onClick={() => onAddToCart(item)}
                             disabled={!item.inStock}
                             style={{
-                                background: item.inStock ? 'linear-gradient(135deg, #2B5CE6, #38BDF8)' : 'rgba(255,255,255,0.1)',
+                                background: item.inStock ? 'linear-gradient(135deg, #002D72, #1A4A9E)' : 'rgba(255,255,255,0.1)',
                                 border: 'none',
                                 padding: '8px 16px',
                                 borderRadius: 6,
-                                color: '#fff',
+                                color: '#0F172A',
                                 cursor: item.inStock ? 'pointer' : 'not-allowed',
                                 fontSize: 12,
                                 whiteSpace: 'nowrap',

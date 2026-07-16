@@ -2,6 +2,13 @@ import { assetUrl } from '../utils/apiClient';
 import { theme } from '../styles/theme';
 import { AgentStarBadge } from './StarRatingInput';
 import { formatChatDateTime, formatChatExpiry, isChatExpired } from '../utils/chatTime';
+import { sanitizeDisplayMessage } from '../utils/sensitiveContent';
+
+function displayMessageText(raw) {
+    return sanitizeDisplayMessage(raw ?? '', {
+        placeholder: 'This message was hidden because it may contain payment or bank details.',
+    });
+}
 
 export { formatChatDateTime, formatChatExpiry, isChatExpired } from '../utils/chatTime';
 
@@ -20,7 +27,7 @@ export function ChatAvatar({ name, imageUrl, size = 36 }) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#fff',
+            color: '#FFFFFF',
             fontSize: Math.max(12, size * 0.4),
             fontWeight: 700,
         }}>
@@ -53,10 +60,15 @@ export function ChatExpiryNotice({ expiresAt, style }) {
     );
 }
 
+function resolveMessageBody(message) {
+    return message?.message ?? message?.body ?? message?.content ?? message?.text ?? '';
+}
+
 export function ChatMessageRow({ message, isMine, showAvatar = true, showTimestamp = true }) {
     const isSystem = message.messageType === 'system';
     const isInvoice = message.messageType === 'invoice';
     const isEmail = message.messageType === 'email';
+    const bodyText = displayMessageText(resolveMessageBody(message));
 
     if (isSystem) {
         return (
@@ -67,9 +79,9 @@ export function ChatMessageRow({ message, isMine, showAvatar = true, showTimesta
                     borderRadius: 4,
                     fontSize: 12,
                     color: theme.textMuted,
-                    background: 'rgba(255,255,255,0.04)',
+                    background: theme.bgCard,
                 }}>
-                    {message.message}
+                    {bodyText}
                 </span>
                 {showTimestamp && message.createdAt && (
                     <div style={{ fontSize: 10, color: theme.textDim, marginTop: 6 }}>
@@ -95,7 +107,7 @@ export function ChatMessageRow({ message, isMine, showAvatar = true, showTimesta
                 maxWidth: '75%',
                 padding: '10px 14px',
                 borderRadius: isMine ? '14px 14px 4px 14px' : '14px 14px 14px 4px',
-                background: isMine ? 'rgba(43,92,230,0.2)' : 'rgba(255,255,255,0.06)',
+                background: isMine ? 'rgba(0,45,114,0.2)' : 'rgba(255,255,255,0.06)',
                 border: isInvoice ? `1px solid rgba(52,211,153,0.3)` : isEmail ? `1px solid rgba(167,139,250,0.35)` : 'none',
             }}>
                 {!isMine && (
@@ -104,7 +116,9 @@ export function ChatMessageRow({ message, isMine, showAvatar = true, showTimesta
                         {isEmail && <span style={{ marginLeft: 6, color: theme.accent }}>· Email</span>}
                     </div>
                 )}
-                <div style={{ fontSize: 14, color: theme.text, lineHeight: 1.5 }}>{message.message ?? message.body ?? ''}</div>
+                <div style={{ fontSize: 14, color: theme.text, lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>
+                    {bodyText}
+                </div>
                 {showTimestamp && message.createdAt && (
                     <div style={{
                         fontSize: 10,
@@ -238,7 +252,7 @@ export function ChatInboxItem({ active, onClick, title, subtitle }) {
                 borderRadius: 6,
                 border: 'none',
                 cursor: 'pointer',
-                background: active ? 'rgba(43,92,230,0.12)' : 'transparent',
+                background: active ? 'rgba(0,45,114,0.12)' : 'transparent',
                 color: active ? theme.text : theme.textMuted,
                 fontFamily: theme.fontBody,
                 transition: 'background 0.15s ease',

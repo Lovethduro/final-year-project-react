@@ -69,8 +69,8 @@ import {
 } from './lazyDashboardPages';
 import { HotDealsStrip } from './components/HotDealsStrip';
 import { QuoteRequestSection } from './components/QuoteRequestSection';
-import GoogleStarsBadge from './GoogleStarsBadge';
 import { contentApi, productApi } from './utils/apiClient';
+import { Menu, X, ArrowRight } from 'lucide-react';
 import PaymentCallbackPage from './PaymentCallbackPage';
 import PurchaseSurveyPage from './PurchaseSurveyPage';
 import QuotePortalPage from './QuotePortalPage';
@@ -95,7 +95,7 @@ const SERVICES = [
     id: 0,
     title: "Cyber Security Services",
     short: "CyberSec",
-    accent: "#38BDF8",
+    accent: "#002D72",
     tag: "Security",
     desc: "Advanced threat detection, penetration testing, SOC monitoring, and end-to-end security architecture for enterprises and SMEs.",
     img: cyber,
@@ -104,7 +104,7 @@ const SERVICES = [
     id: 1,
     title: "ICT Services",
     short: "ICT",
-    accent: "#34D399",
+    accent: "#1A4A9E",
     tag: "Technology",
     desc: "Network design, IT infrastructure setup, cloud migration, helpdesk support, and managed IT services tailored to your scale.",
     img: ict,
@@ -113,7 +113,7 @@ const SERVICES = [
     id: 2,
     title: "CTR Automation",
     short: "Automation",
-    accent: "#FBBF24",
+    accent: "#003B8E",
     tag: "Automation",
     desc: "Industrial automation, workflow orchestration, SCADA systems, and intelligent process control for modern operations.",
     img: crt,
@@ -122,7 +122,7 @@ const SERVICES = [
     id: 3,
     title: "Solar Energy Solutions",
     short: "Solar",
-    accent: "#F97316",
+    accent: "#002D72",
     tag: "Renewable Energy",
     desc: "Commercial and residential solar installation, energy storage systems, net metering, and smart energy monitoring platforms.",
     img: solar,
@@ -131,7 +131,7 @@ const SERVICES = [
     id: 4,
     title: "S & B Enterprise Solutions",
     short: "Enterprise",
-    accent: "#A78BFA",
+    accent: "#1A4A9E",
     tag: "Enterprise",
     desc: "End-to-end POS systems, ERP integration, business intelligence dashboards, and retail technology for growing businesses.",
     img: sbImg,
@@ -140,7 +140,7 @@ const SERVICES = [
     id: 5,
     title: "Certificate Management",
     short: "Certificates",
-    accent: "#F472B6",
+    accent: "#003B8E",
     tag: "Compliance",
     desc: "SSL/TLS lifecycle management, PKI infrastructure, digital identity provisioning, and compliance reporting automation.",
     img: certi,
@@ -164,10 +164,14 @@ function useInView(threshold = 0.12) {
 
 export { useInView };
 
+const FONT_HERO_SANS = "'Montserrat', 'Plus Jakarta Sans', system-ui, sans-serif";
+const FONT_HERO_SERIF = "'Lora', Georgia, 'Times New Roman', serif";
+
 const navLinkStyle = {
-  fontSize: "clamp(12px, 3vw, 13px)",
+  fontSize: 13,
   textDecoration: "none",
-  fontFamily: "'Inter', system-ui, sans-serif",
+  fontFamily: FONT_HERO_SANS,
+  fontWeight: 500,
   transition: "color 0.2s",
 };
 
@@ -176,9 +180,9 @@ function HomeSectionLink({ hash, children, onClick, style = {} }) {
     <Link
       to={{ pathname: '/', hash }}
       onClick={onClick}
-      style={{ ...navLinkStyle, color: "rgba(255,255,255,0.55)", ...style }}
-      onMouseEnter={e => { e.currentTarget.style.color = "#fff"; }}
-      onMouseLeave={e => { e.currentTarget.style.color = "rgba(255,255,255,0.55)"; }}
+      style={{ ...navLinkStyle, color: theme.primary, ...style }}
+      onMouseEnter={e => { e.currentTarget.style.color = theme.accent; }}
+      onMouseLeave={e => { e.currentTarget.style.color = theme.primary; }}
     >
       {children}
     </Link>
@@ -186,17 +190,21 @@ function HomeSectionLink({ hash, children, onClick, style = {} }) {
 }
 
 const landingCtaLinkStyle = {
-  background: "transparent",
-  color: "#38BDF8",
-  border: "0.5px solid rgba(56,189,248,0.35)",
-  borderRadius: 9,
-  padding: "12px 28px",
-  fontSize: 14,
-  fontFamily: "'Inter', system-ui, sans-serif",
+  background: theme.primary,
+  color: "#FFFFFF",
+  border: "none",
+  borderRadius: 28,
+  padding: "13px 28px",
+  fontSize: 13,
+  fontFamily: FONT_HERO_SANS,
+  fontWeight: 600,
+  letterSpacing: "0.04em",
   cursor: "pointer",
-  transition: "all 0.2s",
+  transition: "background 0.2s, transform 0.2s",
   textDecoration: "none",
-  display: "inline-block",
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 8,
 };
 
 function LandingCtaLink({ to, children }) {
@@ -204,8 +212,14 @@ function LandingCtaLink({ to, children }) {
     <Link
       to={to}
       style={landingCtaLinkStyle}
-      onMouseEnter={e => { e.currentTarget.style.background = "rgba(56,189,248,0.07)"; }}
-      onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}
+      onMouseEnter={e => {
+        e.currentTarget.style.background = theme.accent;
+        e.currentTarget.style.transform = "translateY(-2px)";
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.background = theme.primary;
+        e.currentTarget.style.transform = "none";
+      }}
     >
       {children}
     </Link>
@@ -278,29 +292,11 @@ function LandingPage() {
       <ServicesSection />
       <HotDealsLandingSection />
       <QuoteRequestSection />
-      <GoogleReviewsSection />
     </div>
   );
 }
 
-function GoogleReviewsSection() {
-  return (
-    <section className="cyforce-landing-section cyforce-landing-section--alt cyforce-landing-section--bordered">
-      <div className="cyforce-landing-container">
-        <div className="cyforce-landing-section-header">
-          <p className="cyforce-landing-eyebrow">Client feedback</p>
-          <h2 className="cyforce-landing-title">Google Reviews</h2>
-          <p className="cyforce-landing-subtitle">
-            See what customers say about working with CyForce Technologies.
-          </p>
-        </div>
-        <div className="cyforce-contact-reviews">
-          <GoogleStarsBadge />
-        </div>
-      </div>
-    </section>
-  );
-}
+
 
 // ─── ANIMATED CANVAS ─────────────────────────────────────────────────────────
 function AnimatedCanvas() {
@@ -316,83 +312,63 @@ function AnimatedCanvas() {
       h = canvas.height = canvas.offsetHeight;
     }
     function init() {
-      particles = Array.from({ length: 70 }, () => ({
+      particles = Array.from({ length: 36 }, () => ({
         x: Math.random() * w, y: Math.random() * h,
-        vx: (Math.random() - 0.5) * 0.4, vy: (Math.random() - 0.5) * 0.4,
-        r: Math.random() * 1.8 + 0.4, alpha: Math.random() * 0.45 + 0.1,
+        vx: (Math.random() - 0.5) * 0.22, vy: (Math.random() - 0.5) * 0.22,
+        r: Math.random() * 1.4 + 0.5, alpha: Math.random() * 0.28 + 0.08,
       }));
     }
-    function drawGrid(t) {
-      const cw = w / 26, ch = h / 16;
-      ctx.strokeStyle = "rgba(99,179,237,0.055)"; ctx.lineWidth = 1;
-      for (let c = 0; c <= 26; c++) { ctx.beginPath(); ctx.moveTo(c * cw, 0); ctx.lineTo(c * cw, h); ctx.stroke(); }
-      for (let r = 0; r <= 16; r++) { ctx.beginPath(); ctx.moveTo(0, r * ch); ctx.lineTo(w, r * ch); ctx.stroke(); }
-      for (let c = 0; c <= 26; c += 4) for (let r = 0; r <= 16; r += 3) {
-        const px = c * cw, py = r * ch;
-        const d = Math.hypot(px - w / 2, py - h / 2);
-        const a = (Math.sin(t * 0.0013 - d * 0.013) * 0.5 + 0.5) * 0.22;
-        ctx.beginPath(); ctx.arc(px, py, 1.4, 0, 6.28);
-        ctx.fillStyle = `rgba(99,179,237,${a})`; ctx.fill();
-      }
-    }
     function drawGlow(t) {
-      const cx = w / 2 + Math.sin(t * 0.0004) * 40;
-      const cy = h / 2 + Math.cos(t * 0.0006) * 25;
-      const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.min(w, h) * 0.6);
-      g.addColorStop(0, "rgba(43,92,230,0.13)");
-      g.addColorStop(0.5, "rgba(56,189,248,0.05)");
+      const cx = w * 0.55 + Math.sin(t * 0.00035) * 50;
+      const cy = h * 0.42 + Math.cos(t * 0.00045) * 30;
+      const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.min(w, h) * 0.72);
+      g.addColorStop(0, "rgba(255,255,255,0.10)");
+      g.addColorStop(0.45, "rgba(26,74,158,0.18)");
       g.addColorStop(1, "transparent");
-      ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, w, h);
     }
     function drawParticles(t) {
       particles.forEach((p, i) => {
-        p.x = (p.x + p.vx + w) % w; p.y = (p.y + p.vy + h) % h;
-        const pulse = Math.sin(t * 0.001 + i * 0.28) * 0.3 + 0.7;
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.28);
-        ctx.fillStyle = `rgba(99,179,237,${p.alpha * pulse})`; ctx.fill();
+        p.x = (p.x + p.vx + w) % w;
+        p.y = (p.y + p.vy + h) % h;
+        const pulse = Math.sin(t * 0.001 + i * 0.28) * 0.25 + 0.75;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, 6.28);
+        ctx.fillStyle = `rgba(255,255,255,${p.alpha * pulse})`;
+        ctx.fill();
         for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[j].x - p.x, dy = particles[j].y - p.y;
+          const dx = particles[j].x - p.x;
+          const dy = particles[j].y - p.y;
           const d = Math.hypot(dx, dy);
-          if (d < 95) {
-            ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `rgba(99,179,237,${(1 - d / 95) * 0.07})`; ctx.lineWidth = 0.5; ctx.stroke();
+          if (d < 110) {
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.strokeStyle = `rgba(255,255,255,${(1 - d / 110) * 0.08})`;
+            ctx.lineWidth = 0.6;
+            ctx.stroke();
           }
         }
       });
     }
-    resize(); init();
-    window.addEventListener("resize", () => { resize(); init(); });
+    resize();
+    init();
+    const onResize = () => { resize(); init(); };
+    window.addEventListener("resize", onResize);
     function loop(t) {
-      ctx.clearRect(0, 0, w, h); drawGrid(t); drawGlow(t); drawParticles(t);
+      ctx.clearRect(0, 0, w, h);
+      drawGlow(t);
+      drawParticles(t);
       animId = requestAnimationFrame(loop);
     }
     animId = requestAnimationFrame(loop);
-    return () => { cancelAnimationFrame(animId); window.removeEventListener("resize", resize); };
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener("resize", onResize);
+    };
   }, []);
   return <canvas ref={canvasRef} style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }} />;
-}
-
-// ─── TYPEWRITER ───────────────────────────────────────────────────────────────
-function Typewriter({ words }) {
-  const [wi, setWi] = useState(0);
-  const [ci, setCi] = useState(0);
-  const [del, setDel] = useState(false);
-  const [txt, setTxt] = useState("");
-  useEffect(() => {
-    const cur = words[wi];
-    let to;
-    if (!del && ci < cur.length) to = setTimeout(() => { setTxt(cur.slice(0, ci + 1)); setCi(ci + 1); }, 75);
-    else if (!del && ci === cur.length) to = setTimeout(() => setDel(true), 2000);
-    else if (del && ci > 0) to = setTimeout(() => { setTxt(cur.slice(0, ci - 1)); setCi(ci - 1); }, 42);
-    else if (del && ci === 0) { setDel(false); setWi((wi + 1) % words.length); }
-    return () => clearTimeout(to);
-  }, [ci, del, wi, words]);
-  return (
-      <span style={{ color: "#38BDF8" }}>
-      {txt}
-        <span style={{ display: "inline-block", width: 2, height: "0.88em", background: "#38BDF8", marginLeft: 3, verticalAlign: "middle", animation: "blink 1s step-end infinite" }} />
-    </span>
-  );
 }
 
 // ─── AUTH MODAL ───────────────────────────────────────────────────────────────
@@ -410,11 +386,11 @@ function AuthModal({ mode, onClose }) {
   return (
       <div onClick={onClose} style={{
         position: "fixed", inset: 0, zIndex: 999,
-        background: "rgba(4,10,21,0.82)", backdropFilter: "blur(6px)",
+        background: "rgba(255,255,255,0.82)", backdropFilter: "blur(6px)",
         display: "flex", alignItems: "center", justifyContent: "center",
       }}>
         <div onClick={e => e.stopPropagation()} style={{
-          background: "#0D1830", border: "0.5px solid rgba(56,189,248,0.2)",
+          background: "#F8FAFC", border: "0.5px solid rgba(0,45,114,0.2)",
           borderRadius: 18, padding: "40px 44px", width: "100%", maxWidth: 420,
           boxShadow: "0 32px 80px rgba(0,0,0,0.7)",
           animation: "modalIn 0.3s ease",
@@ -423,22 +399,22 @@ function AuthModal({ mode, onClose }) {
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 28 }}>
             <div style={{
               width: 36, height: 36, borderRadius: 9,
-              background: "linear-gradient(135deg,#2B5CE6,#38BDF8)",
+              background: "linear-gradient(135deg,#002D72,#1A4A9E)",
               display: "flex", alignItems: "center", justifyContent: "center",
               fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", fontWeight: 700, fontSize: 14, color: "#fff",
             }}>CF</div>
-            <span style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", fontWeight: 700, fontSize: 15, color: "#fff" }}>
-            CyForce <span style={{ color: "#38BDF8" }}>Technologies</span>
+            <span style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", fontWeight: 700, fontSize: 15, color: "#0F172A" }}>
+            CyForce <span style={{ color: "#1A4A9E" }}>Technologies</span>
           </span>
           </div>
 
           {/* Tabs */}
-          <div style={{ display: "flex", gap: 0, marginBottom: 28, background: "rgba(255,255,255,0.05)", borderRadius: 10, padding: 4 }}>
+          <div style={{ display: "flex", gap: 0, marginBottom: 28, background: "rgba(15,23,42,0.04)", borderRadius: 10, padding: 4 }}>
             {["login", "signup"].map(t => (
                 <button key={t} onClick={() => setTab(t)} style={{
                   flex: 1, padding: "9px", border: "none", borderRadius: 8, cursor: "pointer",
-                  background: tab === t ? "#2B5CE6" : "transparent",
-                  color: tab === t ? "#fff" : "rgba(255,255,255,0.4)",
+                  background: tab === t ? "#002D72" : "transparent",
+                  color: tab === t ? "#fff" : "rgba(15,23,42,0.45)",
                   fontFamily: "'Inter', system-ui, sans-serif", fontSize: 14, fontWeight: 500,
                   transition: "all 0.2s",
                 }}>{t === "login" ? "Log In" : "Sign Up"}</button>
@@ -463,24 +439,24 @@ function AuthModal({ mode, onClose }) {
             </div>
             {tab === "login" && (
                 <div style={{ textAlign: "right", marginTop: -8 }}>
-                  <Link to="/forgot-password" style={{ fontSize: 12, color: "#38BDF8", textDecoration: "none", fontFamily: "'Inter', system-ui, sans-serif" }}>Forgot password?</Link>
+                  <Link to="/forgot-password" style={{ fontSize: 12, color: "#1A4A9E", textDecoration: "none", fontFamily: "'Inter', system-ui, sans-serif" }}>Forgot password?</Link>
                 </div>
             )}
             <button style={{
-              marginTop: 6, background: "#2B5CE6", color: "#fff", border: "none",
+              marginTop: 6, background: "#002D72", color: "#fff", border: "none",
               borderRadius: 9, padding: "13px", fontSize: 15, fontFamily: "'Inter', system-ui, sans-serif",
-              fontWeight: 500, cursor: "pointer", boxShadow: "0 0 24px rgba(43,92,230,0.4)",
+              fontWeight: 500, cursor: "pointer", boxShadow: "0 0 24px rgba(0,45,114,0.4)",
               transition: "all 0.2s",
             }}
-                    onMouseEnter={e => e.currentTarget.style.background = "#3b6ef0"}
-                    onMouseLeave={e => e.currentTarget.style.background = "#2B5CE6"}
+                    onMouseEnter={e => e.currentTarget.style.background = "#1A4A9E"}
+                    onMouseLeave={e => e.currentTarget.style.background = "#002D72"}
             >{tab === "login" ? "Log In →" : "Create Account →"}</button>
           </div>
 
           <p style={{ textAlign: "center", marginTop: 20, fontSize: 13, color: "rgba(255,255,255,0.3)", fontFamily: "'Inter', system-ui, sans-serif" }}>
             {tab === "login" ? "No account? " : "Already have one? "}
             <span onClick={() => setTab(tab === "login" ? "signup" : "login")}
-                  style={{ color: "#38BDF8", cursor: "pointer" }}>
+                  style={{ color: "#1A4A9E", cursor: "pointer" }}>
             {tab === "login" ? "Sign up" : "Log in"}
           </span>
           </p>
@@ -495,8 +471,8 @@ function AuthModal({ mode, onClose }) {
 }
 const labelStyle = { display: "block", fontSize: 12, color: "rgba(255,255,255,0.45)", fontFamily: "'Inter', system-ui, sans-serif", marginBottom: 6 };
 const inputStyle = {
-  width: "100%", background: "rgba(255,255,255,0.05)", border: "0.5px solid rgba(99,179,237,0.2)",
-  borderRadius: 9, padding: "11px 14px", fontSize: 14, color: "#fff",
+  width: "100%", background: "rgba(15,23,42,0.04)", border: "0.5px solid rgba(0,45,114,0.2)",
+  borderRadius: 9, padding: "11px 14px", fontSize: 14, color: "#0F172A",
   fontFamily: "'Inter', system-ui, sans-serif", outline: "none",
   transition: "border-color 0.2s",
 };
@@ -507,7 +483,7 @@ function NavBar({ scrolled, onAuth }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const closeMenu = () => setIsMobileMenuOpen(false);
 
-  const isActive = (path) => location.pathname === path;
+      const isActive = (path) => location.pathname === path;
 
   const navPageLink = (path, label) => (
     <Link
@@ -515,10 +491,11 @@ function NavBar({ scrolled, onAuth }) {
       onClick={closeMenu}
       style={{
         ...navLinkStyle,
-        color: isActive(path) ? theme.accent : theme.textMuted,
+        color: isActive(path) ? theme.accent : theme.primary,
+        fontWeight: isActive(path) ? 600 : 500,
       }}
-      onMouseEnter={e => { e.currentTarget.style.color = theme.text; }}
-      onMouseLeave={e => { e.currentTarget.style.color = isActive(path) ? theme.accent : theme.textMuted; }}
+      onMouseEnter={e => { e.currentTarget.style.color = theme.accent; }}
+      onMouseLeave={e => { e.currentTarget.style.color = isActive(path) ? theme.accent : theme.primary; }}
     >
       {label}
     </Link>
@@ -527,10 +504,11 @@ function NavBar({ scrolled, onAuth }) {
   return (
       <nav className="cyforce-nav-bar" style={{
         position: "fixed", top: 0, left: 0, right: 0, zIndex: 200,
-        padding: scrolled ? "12px clamp(16px, 4vw, 32px)" : "16px clamp(16px, 4vw, 40px)",
-        background: scrolled ? "rgba(6,11,26,0.94)" : "transparent",
-        backdropFilter: scrolled ? "blur(16px)" : "none",
-        borderBottom: scrolled ? `0.5px solid ${theme.border}` : "none",
+        padding: scrolled ? "12px clamp(16px, 4vw, 32px)" : "14px clamp(16px, 4vw, 40px)",
+        background: "rgba(255,255,255,0.97)",
+        backdropFilter: "blur(16px)",
+        borderBottom: `0.5px solid ${theme.border}`,
+        boxShadow: scrolled ? "0 2px 12px rgba(0,45,114,0.08)" : "none",
         transition: "all 0.3s ease",
       }}>
         <div className="cyforce-nav-top">
@@ -542,10 +520,10 @@ function NavBar({ scrolled, onAuth }) {
         >
           <img src={logo} alt="CyForce Technologies Logo" style={{ height: "40px", width: "auto", objectFit: "contain" }} />
           <div>
-            <div style={{ fontFamily: theme.fontHeading, fontWeight: 700, fontSize: "clamp(14px, 4vw, 16px)", color: theme.text, lineHeight: 1.1 }}>
-              CyForce <span style={{ color: theme.accent }}>Technologies</span>
+            <div style={{ fontFamily: FONT_HERO_SANS, fontWeight: 700, fontSize: "clamp(14px, 4vw, 16px)", color: theme.primary, lineHeight: 1.1 }}>
+              CyForce Technologies
             </div>
-            <div style={{ fontSize: "clamp(8px, 2vw, 9px)", letterSpacing: "0.13em", color: theme.textDim, textTransform: "uppercase", fontFamily: theme.fontBody }}>
+            <div style={{ fontSize: "clamp(8px, 2vw, 9px)", letterSpacing: "0.14em", color: "rgba(10,31,68,0.55)", textTransform: "uppercase", fontFamily: FONT_HERO_SANS, fontWeight: 500 }}>
               Smart Tech Solutions
             </div>
           </div>
@@ -555,16 +533,20 @@ function NavBar({ scrolled, onAuth }) {
         <button
             type="button"
             className="cyforce-mobile-menu-btn"
+            aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             style={{
               background: "transparent",
               border: "none",
               color: theme.text,
-              fontSize: "24px",
               cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: 4,
             }}
         >
-          ☰
+          {isMobileMenuOpen ? <X size={24} strokeWidth={2} /> : <Menu size={24} strokeWidth={2} />}
         </button>
         </div>
 
@@ -587,46 +569,41 @@ function NavBar({ scrolled, onAuth }) {
 
           <Link to="/login" onClick={closeMenu} style={{
             background: "transparent",
-            color: theme.textMuted,
-            border: `0.5px solid ${theme.border}`,
-            borderRadius: 7,
-            padding: "8px 18px",
+            color: theme.primary,
+            border: `1px solid ${theme.border}`,
+            borderRadius: 8,
+            padding: "9px 18px",
             fontSize: "clamp(12px, 3vw, 13px)",
-            fontFamily: "'Inter', system-ui, sans-serif",
+            fontFamily: theme.fontBody,
+            fontWeight: 500,
             textDecoration: "none",
-            transition: "all 0.2s",
+            transition: "border-color 0.2s, background 0.2s",
           }}
                 onMouseEnter={e => {
-                  e.currentTarget.style.borderColor = theme.borderHover;
-                  e.currentTarget.style.color = theme.text;
+                  e.currentTarget.style.borderColor = theme.primary;
+                  e.currentTarget.style.background = "rgba(0,45,114,0.04)";
                 }}
                 onMouseLeave={e => {
                   e.currentTarget.style.borderColor = theme.border;
-                  e.currentTarget.style.color = theme.textMuted;
+                  e.currentTarget.style.background = "transparent";
                 }}>
             Log In
           </Link>
 
           <Link to="/register" onClick={closeMenu} style={{
-            background: "#2B5CE6",
+            background: theme.primary,
             color: "#fff",
             border: "none",
-            borderRadius: 7,
-            padding: "8px 20px",
+            borderRadius: 8,
+            padding: "9px 20px",
             fontSize: "clamp(12px, 3vw, 13px)",
-            fontFamily: "'Inter', system-ui, sans-serif",
+            fontFamily: theme.fontBody,
+            fontWeight: 600,
             textDecoration: "none",
-            transition: "all 0.2s",
-            boxShadow: "0 0 16px rgba(43,92,230,0.35)",
+            transition: "background 0.2s",
           }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.background = "#3b6ef0";
-                  e.currentTarget.style.transform = "scale(1.02)";
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.background = "#2B5CE6";
-                  e.currentTarget.style.transform = "scale(1)";
-                }}>
+                onMouseEnter={e => { e.currentTarget.style.background = theme.accent; }}
+                onMouseLeave={e => { e.currentTarget.style.background = theme.primary; }}>
             Sign Up
           </Link>
         </div>
@@ -638,80 +615,172 @@ function NavBar({ scrolled, onAuth }) {
 function HeroSection() {
   const [vis, setVis] = useState(false);
   useEffect(() => { setTimeout(() => setVis(true), 80); }, []);
-  return (
-      <section className="cyforce-hero" style={{ position: "relative", minHeight: "88vh", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", paddingTop: 88, paddingBottom: 48 }}>
-        <div style={{
-          position: "absolute", inset: 0,
-          backgroundImage: "url(https://images.unsplash.com/photo-1509391366360-2e959784a276?w=1600&q=80&fit=crop)",
-          backgroundSize: "cover", backgroundPosition: "center", opacity: 0.15,
-        }} />
-        <AnimatedCanvas />
-        <div style={{ position: "absolute", inset: 0, zIndex: 1, backgroundImage: "repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px)", pointerEvents: "none" }} />
 
-        <div style={{ position: "relative", zIndex: 2, textAlign: "center", padding: "0 clamp(16px, 5vw, 24px)", maxWidth: "min(800px, 100%)", width: "100%" }}>
-          <div style={{
-            display: "inline-flex", alignItems: "center", gap: 8,
-            border: "0.5px solid rgba(99,179,237,0.3)", borderRadius: 24,
-            padding: "5px 16px", marginBottom: 26,
-            opacity: vis ? 1 : 0, transform: vis ? "none" : "translateY(20px)",
-            transition: "all 0.7s ease 0.1s",
+  const fade = (delay) => ({
+    opacity: vis ? 1 : 0,
+    transform: vis ? "translateY(0)" : "translateY(22px)",
+    transition: `opacity 0.85s cubic-bezier(0.22,1,0.36,1) ${delay}s, transform 0.85s cubic-bezier(0.22,1,0.36,1) ${delay}s`,
+  });
+
+  return (
+      <section className="cyforce-hero" style={{
+        position: "relative",
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        overflow: "hidden",
+        paddingTop: 96,
+        paddingBottom: 72,
+        background: "linear-gradient(135deg, #001A44 0%, #002D72 42%, #0B3A8C 100%)",
+      }}>
+        <AnimatedCanvas />
+        {/* Diagonal accent panel - matches cyforce.ng hero geometry */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            top: 0,
+            right: 0,
+            bottom: 0,
+            width: "42%",
+            zIndex: 1,
+            background: "linear-gradient(160deg, #1A56C4 0%, #0D3F9A 55%, #002D72 100%)",
+            clipPath: "polygon(28% 0, 100% 0, 100% 100%, 0% 100%)",
+            opacity: 0.92,
+            pointerEvents: "none",
+          }}
+        />
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 1,
+            background: "radial-gradient(ellipse at 40% 50%, transparent 30%, rgba(0,18,46,0.45) 100%)",
+            pointerEvents: "none",
+          }}
+        />
+
+        <div style={{
+          position: "relative",
+          zIndex: 2,
+          textAlign: "center",
+          padding: "0 clamp(20px, 5vw, 32px)",
+          maxWidth: 820,
+          width: "100%",
+        }}>
+          <p style={{
+            fontFamily: FONT_HERO_SANS,
+            fontWeight: 500,
+            fontSize: "clamp(11px, 2vw, 13px)",
+            letterSpacing: "0.22em",
+            textTransform: "uppercase",
+            color: "rgba(255,255,255,0.92)",
+            margin: "0 0 22px",
+            ...fade(0.08),
           }}>
-            <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#38BDF8", boxShadow: "0 0 8px #38BDF8", animation: "pulse 2s ease-in-out infinite" }} />
-            <span style={{ fontSize: "clamp(10px, 3vw, 11px)", letterSpacing: "0.12em", color: "#63B3ED", textTransform: "uppercase", fontFamily: "'Inter', system-ui, sans-serif" }}>Abuja's Premier Technology Partner</span>
-          </div>
+            Welcome to CyForce Technologies
+          </p>
 
           <h1 className="cyforce-hero-title" style={{
-            fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", fontWeight: 700,
-            fontSize: "clamp(32px, 6vw, 70px)", color: "#fff", lineHeight: 1.06, margin: "0 0 8px",
-            opacity: vis ? 1 : 0, transform: vis ? "none" : "translateY(30px)",
-            transition: "all 0.8s ease 0.25s",
+            fontFamily: FONT_HERO_SANS,
+            fontWeight: 800,
+            fontSize: "clamp(28px, 5.2vw, 48px)",
+            color: "#FFFFFF",
+            lineHeight: 1.18,
+            margin: "0 0 22px",
+            letterSpacing: "-0.01em",
+            textTransform: "uppercase",
+            ...fade(0.18),
           }}>
-            Your Partner in<br /><Typewriter words={["Cyber Security", "ICT Services", "Solar Energy", "Automation", "Enterprise Tech", "Digital Growth"]} />
+            Leading ICT Infrastructure<br />
+            &amp; Cybersecurity Solutions
           </h1>
 
           <p style={{
-            fontSize: "clamp(14px, 4vw, 16px)", color: "rgba(255,255,255,0.48)", lineHeight: 1.75, maxWidth: "min(480px, 90%)", margin: "20px auto 32px",
-            fontFamily: "'Inter', system-ui, sans-serif",
-            opacity: vis ? 1 : 0, transform: vis ? "none" : "translateY(20px)",
-            transition: "all 0.8s ease 0.42s",
+            fontFamily: FONT_HERO_SERIF,
+            fontWeight: 400,
+            fontSize: "clamp(16px, 2.4vw, 20px)",
+            fontStyle: "italic",
+            color: "rgba(255,255,255,0.9)",
+            lineHeight: 1.7,
+            maxWidth: 620,
+            margin: "0 auto",
+            ...fade(0.3),
           }}>
-            Security, solar, automation, and enterprise systems — supplied and installed across Nigeria.
+            Dedicated to ensuring your safety with customized security solutions that meet your unique requirements.
           </p>
 
           <div style={{
-            display: "flex", gap: "clamp(10px, 3vw, 12px)", justifyContent: "center", flexWrap: "wrap",
-            opacity: vis ? 1 : 0, transform: vis ? "none" : "translateY(20px)",
-            transition: "all 0.8s ease 0.56s",
+            display: "flex",
+            gap: 28,
+            justifyContent: "center",
+            flexWrap: "wrap",
+            alignItems: "center",
+            marginTop: 40,
+            ...fade(0.44),
           }}>
-            <Link to="/services" style={{
-              background: "#2B5CE6", color: "#fff", border: "none", borderRadius: 9,
-              padding: "clamp(10px, 3vw, 14px) clamp(20px, 5vw, 34px)",
-              fontSize: "clamp(13px, 3.5vw, 15px)",
-              fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 500,
-              cursor: "pointer", boxShadow: "0 0 28px rgba(43,92,230,0.45)", transition: "all 0.2s",
-              whiteSpace: "nowrap", textDecoration: "none", display: "inline-block",
-            }}
-                    onMouseEnter={e => { e.currentTarget.style.background = "#3b6ef0"; e.currentTarget.style.transform = "translateY(-2px)"; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = "#2B5CE6"; e.currentTarget.style.transform = "none"; }}
-            >Explore Services &rarr;</Link>
-            <Link to="/register" style={{
-              background: "transparent", color: "rgba(255,255,255,0.72)",
-              border: "0.5px solid rgba(255,255,255,0.18)", borderRadius: 9,
-              padding: "clamp(10px, 3vw, 14px) clamp(18px, 4vw, 30px)",
-              fontSize: "clamp(13px, 3.5vw, 15px)",
-              fontFamily: "'Inter', system-ui, sans-serif", cursor: "pointer", transition: "all 0.2s",
-              whiteSpace: "nowrap", textDecoration: "none", display: "inline-block",
-            }}
-                    onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(56,189,248,0.45)"; e.currentTarget.style.color = "#fff"; }}
-                    onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.18)"; e.currentTarget.style.color = "rgba(255,255,255,0.72)"; }}
-            >Get Started Free</Link>
+            <a
+              href="/#contact"
+              style={{
+                background: "#1A56C4",
+                color: "#FFFFFF",
+                border: "none",
+                borderRadius: 28,
+                padding: "14px 32px",
+                fontSize: 14,
+                fontFamily: FONT_HERO_SANS,
+                fontWeight: 600,
+                letterSpacing: "0.04em",
+                cursor: "pointer",
+                transition: "background 0.2s ease, transform 0.2s ease",
+                whiteSpace: "nowrap",
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = "#2563D4";
+                e.currentTarget.style.transform = "translateY(-2px)";
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = "#1A56C4";
+                e.currentTarget.style.transform = "none";
+              }}
+            >
+              Contact US
+            </a>
+            <Link
+              to="/register"
+              style={{
+                background: "transparent",
+                color: "#FFFFFF",
+                border: "none",
+                padding: "10px 0",
+                fontSize: 15,
+                fontFamily: FONT_HERO_SANS,
+                fontWeight: 500,
+                cursor: "pointer",
+                transition: "opacity 0.2s ease",
+                whiteSpace: "nowrap",
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+              }}
+              onMouseEnter={e => { e.currentTarget.style.opacity = "0.8"; }}
+              onMouseLeave={e => { e.currentTarget.style.opacity = "1"; }}
+            >
+              Become our Partner <ArrowRight size={18} strokeWidth={2} aria-hidden="true" />
+            </Link>
           </div>
         </div>
       </section>
   );
 }
 
-// ─── SERVICE CARD (with Ken Burns image animation) ────────────────────────────
+// ─── SERVICE CARD ─────────────────────────────────────────────────────────────
 function ServiceCard({ svc, index }) {
   const [ref, inView] = useInView();
   const [hov, setHov] = useState(false);
@@ -719,65 +788,103 @@ function ServiceCard({ svc, index }) {
   return (
       <div
           ref={ref}
-          onMouseEnter={() => setHov(true)}
-          onMouseLeave={() => setHov(false)}
           style={{
-            position: "relative", borderRadius: 16, overflow: "hidden",
-            border: hov ? `0.5px solid ${svc.accent}55` : "0.5px solid rgba(99,179,237,0.1)",
-            background: "#0D1830", cursor: "default",
-            opacity: inView ? 1 : 0, transform: inView ? "translateY(0) scale(1)" : "translateY(50px) scale(0.97)",
-            transition: `opacity 0.65s ease ${index * 0.1}s, transform 0.65s ease ${index * 0.1}s, border 0.3s`,
-            boxShadow: hov ? `0 20px 50px rgba(0,0,0,0.5), 0 0 0 1px ${svc.accent}22` : "none",
-          }}>
-        {/* Animated image */}
-        <div style={{ position: "relative", height: "clamp(160px, 25vw, 210px)", overflow: "hidden" }}>
-          <img
-              src={svc.img}
-              alt={svc.title}
-              style={{
-                width: "100%", height: "100%", objectFit: "cover",
-                filter: hov ? "brightness(0.6) saturate(1.1)" : "brightness(0.45) saturate(0.7)",
-                transform: hov ? "scale(1.1) translateY(-4px)" : "scale(1)",
-                transition: "all 1.2s cubic-bezier(0.25,0.46,0.45,0.94)",
-                animation: `kenBurns${index % 2 === 0 ? "A" : "B"} 8s ease-in-out infinite alternate`,
-              }}
-          />
-          {/* Gradient */}
-          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom,transparent 30%,#0D1830 100%)" }} />
-          {/* Tag */}
-          <div style={{
-            position: "absolute", top: 14, left: 14,
-            background: "rgba(4,10,21,0.78)", backdropFilter: "blur(10px)",
-            border: `0.5px solid ${svc.accent}44`, borderRadius: 20,
-            padding: "4px 12px", fontSize: "clamp(9px, 2.5vw, 10px)", color: svc.accent,
-            letterSpacing: "0.09em", textTransform: "uppercase", fontFamily: "'Inter', system-ui, sans-serif",
-          }}>{svc.tag}</div>
-        </div>
+            opacity: inView ? 1 : 0,
+            transform: inView ? "translateY(0)" : "translateY(28px)",
+            transition: `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`,
+          }}
+      >
+        <Link
+            to="/services"
+            onMouseEnter={() => setHov(true)}
+            onMouseLeave={() => setHov(false)}
+            style={{
+              display: "block",
+              textDecoration: "none",
+              color: "inherit",
+              position: "relative",
+              overflow: "hidden",
+              background: "#FFFFFF",
+              border: `1px solid ${hov ? "rgba(0,45,114,0.28)" : "rgba(0,45,114,0.12)"}`,
+              borderTop: `3px solid ${theme.primary}`,
+              cursor: "pointer",
+              transition: "border-color 0.25s, box-shadow 0.25s",
+              boxShadow: hov ? "0 16px 40px rgba(0,45,114,0.12)" : "0 2px 10px rgba(0,45,114,0.04)",
+            }}
+        >
+          <div style={{ position: "relative", height: 200, overflow: "hidden" }}>
+            <img
+                src={svc.img}
+                alt={svc.title}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  transform: hov ? "scale(1.04)" : "scale(1)",
+                  transition: "transform 0.6s ease",
+                  filter: "saturate(0.92) contrast(1.05)",
+                }}
+            />
+            <div style={{
+              position: "absolute",
+              inset: 0,
+              background: "linear-gradient(180deg, rgba(0,26,68,0.15) 0%, rgba(0,26,68,0.55) 100%)",
+            }}
+            />
+            <span style={{
+              position: "absolute",
+              top: 16,
+              left: 16,
+              background: theme.primary,
+              color: "#fff",
+              padding: "5px 12px",
+              fontSize: 10,
+              fontWeight: 600,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              fontFamily: FONT_HERO_SANS,
+            }}>
+              {svc.tag}
+            </span>
+          </div>
 
-        {/* Body */}
-        <div style={{ padding: "clamp(16px, 4vw, 20px) clamp(16px, 4vw, 22px) clamp(20px, 5vw, 26px)" }}>
-          <h3 style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", fontWeight: 700, fontSize: "clamp(16px, 3.5vw, 17px)", color: "#fff", marginBottom: 10, lineHeight: 1.25 }}>
-            {svc.title}
-          </h3>
-          <p style={{ fontSize: "clamp(12px, 3vw, 13px)", color: "rgba(255,255,255,0.42)", lineHeight: 1.68, fontFamily: "'Inter', system-ui, sans-serif", marginBottom: 18 }}>
-            {svc.desc}
-          </p>
-          <Link to="/services" style={{
-            display: "flex", alignItems: "center", gap: 6, fontSize: "clamp(12px, 3vw, 13px)",
-            color: svc.accent, fontFamily: "'Inter', system-ui, sans-serif",
-            opacity: hov ? 1 : 0.55, transform: hov ? "translateX(6px)" : "none",
-            transition: "all 0.3s ease", textDecoration: "none",
-          }}>
-            View details <span style={{ fontSize: 14 }}>&rarr;</span>
-          </Link>
-        </div>
-
-        {/* Bottom accent line */}
-        <div style={{
-          position: "absolute", bottom: 0, left: 0, right: 0, height: 2,
-          background: `linear-gradient(to right, ${svc.accent}00, ${svc.accent}88, ${svc.accent}00)`,
-          opacity: hov ? 1 : 0, transition: "opacity 0.3s",
-        }} />
+          <div style={{ padding: "22px 22px 24px" }}>
+            <h3 style={{
+              fontFamily: FONT_HERO_SANS,
+              fontWeight: 700,
+              fontSize: 17,
+              color: theme.primary,
+              margin: "0 0 10px",
+              lineHeight: 1.3,
+            }}>
+              {svc.title}
+            </h3>
+            <p style={{
+              fontSize: 14,
+              color: "rgba(10,31,68,0.72)",
+              lineHeight: 1.7,
+              fontFamily: FONT_HERO_SERIF,
+              margin: "0 0 18px",
+              minHeight: 72,
+            }}>
+              {svc.desc}
+            </p>
+            <span style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              fontSize: 13,
+              fontWeight: 600,
+              color: theme.primary,
+              fontFamily: FONT_HERO_SANS,
+              letterSpacing: "0.02em",
+              transform: hov ? "translateX(4px)" : "none",
+              transition: "transform 0.25s ease",
+            }}>
+              View details <ArrowRight size={15} strokeWidth={2.25} aria-hidden="true" />
+            </span>
+          </div>
+        </Link>
       </div>
   );
 }
@@ -786,27 +893,30 @@ function ServiceCard({ svc, index }) {
 function ServicesSection() {
   const [ref, inView] = useInView();
   return (
-      <section id="services" className="cyforce-landing-section cyforce-landing-section--bordered">
+      <section id="services" className="cyforce-landing-section">
         <div className="cyforce-landing-container">
           <div ref={ref} style={{
-            opacity: inView ? 1 : 0, transform: inView ? "none" : "translateY(30px)",
+            opacity: inView ? 1 : 0,
+            transform: inView ? "none" : "translateY(24px)",
             transition: "all 0.7s ease",
           }}>
             <LandingSectionHeader
               eyebrow="What We Do"
               title="Our Services"
-              subtitle="Core capabilities at a glance."
+              subtitle="Security, infrastructure, and automation - delivered with precision across Nigeria."
             />
           </div>
           <div style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(min(280px, 100%), 1fr))",
-            gap: "clamp(16px, 3vw, 22px)"
+            gap: 24,
           }}>
             {SERVICES.slice(0, 3).map((s, i) => <ServiceCard key={s.id} svc={s} index={i} />)}
           </div>
-          <div style={{ textAlign: "center", marginTop: 40 }}>
-            <LandingCtaLink to="/services">View all services &rarr;</LandingCtaLink>
+          <div style={{ textAlign: "center", marginTop: 48 }}>
+            <LandingCtaLink to="/services">
+              View all services <ArrowRight size={15} strokeWidth={2.25} aria-hidden="true" />
+            </LandingCtaLink>
           </div>
         </div>
       </section>
@@ -816,7 +926,7 @@ function ServicesSection() {
 // ─── FOOTER ───────────────────────────────────────────────────────────────────
 function Footer() {
   return (
-      <footer id="contact" style={{ background: "#020508", borderTop: "0.5px solid rgba(99,179,237,0.08)", padding: "clamp(48px, 6vw, 60px) clamp(16px, 5vw, 48px) 30px", scrollMarginTop: 92 }}>
+      <footer id="contact" style={{ background: "#F1F5F9", borderTop: "0.5px solid rgba(0,45,114,0.08)", padding: "clamp(48px, 6vw, 60px) clamp(16px, 5vw, 48px) 30px", scrollMarginTop: 92 }}>
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
           {/* Main Footer Content - 4 Columns */}
           <div style={{
@@ -838,13 +948,13 @@ function Footer() {
                       objectFit: "contain",
                     }}
                 />
-                <span style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", fontWeight: 700, fontSize: 16, color: "#fff" }}>
-                CyForce <span style={{ color: "#38BDF8" }}>Technologies</span>
+                <span style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", fontWeight: 700, fontSize: 16, color: "#0F172A" }}>
+                CyForce <span style={{ color: "#1A4A9E" }}>Technologies</span>
               </span>
               </div>
               <p style={{
                 fontSize: 13,
-                color: "rgba(255,255,255,0.4)",
+                color: "rgba(15,23,42,0.45)",
                 lineHeight: 1.6,
                 fontFamily: "'Inter', system-ui, sans-serif",
                 marginBottom: 20
@@ -854,14 +964,20 @@ function Footer() {
               {/* Social Media Icons - Updated for all platforms */}
               {/* Social Media Icons - Properly Aligned */}
               <div style={{ display: "flex", gap: 15, alignItems: "center" }}>
-                {/* Facebook */}
-                <a
-                    href="https://www.facebook.com/cyforcenigeria"
+                {[
+                  { href: "https://www.facebook.com/cyforcenigeria", label: "Facebook", path: "M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" },
+                  { href: "https://x.com/cyforceng", label: "X", path: "M4 4l11.7 16H20L8.3 4H4zm8.6 7.2L18.5 4H20l-6.7 8.6L20 20h-1.5l-5.2-6.8L7.5 20H4l7.4-9.6L5.5 4h1.5l5.6 7.2z" },
+                  { href: "https://www.instagram.com/cyforceng", label: "Instagram", path: "M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37zM17.5 6.5h.01M7.5 2h9A5.5 5.5 0 0 1 22 7.5v9a5.5 5.5 0 0 1-5.5 5.5h-9A5.5 5.5 0 0 1 2 16.5v-9A5.5 5.5 0 0 1 7.5 2z" },
+                  { href: "https://www.youtube.com/@cyforceng", label: "YouTube", path: "M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33zM9.75 15.02V8.98l5.75 3.02-5.75 3.02z" },
+                ].map((s) => (
+                  <a
+                    key={s.label}
+                    href={s.href}
                     target="_blank"
                     rel="noopener noreferrer"
+                    aria-label={s.label}
                     style={{
-                      color: "rgba(255,255,255,0.6)",
-                      fontSize: 18,
+                      color: theme.primary,
                       textDecoration: "none",
                       transition: "all 0.3s ease",
                       display: "flex",
@@ -870,110 +986,22 @@ function Footer() {
                       width: "32px",
                       height: "32px",
                       borderRadius: "50%",
-                      background: "rgba(255,255,255,0.05)",
+                      background: "rgba(0,45,114,0.06)",
                     }}
                     onMouseEnter={e => {
-                      e.currentTarget.style.color = "#1877F2";
-                      e.currentTarget.style.background = "rgba(24,119,242,0.1)";
+                      e.currentTarget.style.color = "#fff";
+                      e.currentTarget.style.background = theme.primary;
                     }}
                     onMouseLeave={e => {
-                      e.currentTarget.style.color = "rgba(255,255,255,0.6)";
-                      e.currentTarget.style.background = "rgba(255,255,255,0.05)";
+                      e.currentTarget.style.color = theme.primary;
+                      e.currentTarget.style.background = "rgba(0,45,114,0.06)";
                     }}
-                >
-                  <i className="fab fa-facebook-f" style={{ fontSize: "16px" }}></i>
-                </a>
-
-                {/* X (Twitter) */}
-                <a
-                    href="https://x.com/cyforceng"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      color: "rgba(255,255,255,0.6)",
-                      fontSize: 18,
-                      fontWeight: "bold",
-                      textDecoration: "none",
-                      transition: "all 0.3s ease",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      width: "32px",
-                      height: "32px",
-                      borderRadius: "50%",
-                      background: "rgba(255,255,255,0.05)",
-                    }}
-                    onMouseEnter={e => {
-                      e.currentTarget.style.color = "#1DA1F2";
-                      e.currentTarget.style.background = "rgba(29,161,242,0.1)";
-                    }}
-                    onMouseLeave={e => {
-                      e.currentTarget.style.color = "rgba(255,255,255,0.6)";
-                      e.currentTarget.style.background = "rgba(255,255,255,0.05)";
-                    }}
-                >
-                  𝕏
-                </a>
-
-                {/* Instagram */}
-                <a
-                    href="https://www.instagram.com/cyforceng"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      color: "rgba(255,255,255,0.6)",
-                      fontSize: 18,
-                      textDecoration: "none",
-                      transition: "all 0.3s ease",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      width: "32px",
-                      height: "32px",
-                      borderRadius: "50%",
-                      background: "rgba(255,255,255,0.05)",
-                    }}
-                    onMouseEnter={e => {
-                      e.currentTarget.style.color = "#E4405F";
-                      e.currentTarget.style.background = "rgba(228,64,95,0.1)";
-                    }}
-                    onMouseLeave={e => {
-                      e.currentTarget.style.color = "rgba(255,255,255,0.6)";
-                      e.currentTarget.style.background = "rgba(255,255,255,0.05)";
-                    }}
-                >
-                  <i className="fab fa-instagram" style={{ fontSize: "16px" }}></i>
-                </a>
-
-                {/* YouTube */}
-                <a
-                    href="https://www.youtube.com/@cyforceng"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      color: "rgba(255,255,255,0.6)",
-                      fontSize: 18,
-                      textDecoration: "none",
-                      transition: "all 0.3s ease",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      width: "32px",
-                      height: "32px",
-                      borderRadius: "50%",
-                      background: "rgba(255,255,255,0.05)",
-                    }}
-                    onMouseEnter={e => {
-                      e.currentTarget.style.color = "#FF0000";
-                      e.currentTarget.style.background = "rgba(255,0,0,0.1)";
-                    }}
-                    onMouseLeave={e => {
-                      e.currentTarget.style.color = "rgba(255,255,255,0.6)";
-                      e.currentTarget.style.background = "rgba(255,255,255,0.05)";
-                    }}
-                >
-                  <i className="fab fa-youtube" style={{ fontSize: "16px" }}></i>
-                </a>
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d={s.path} />
+                    </svg>
+                  </a>
+                ))}
               </div>
             </div>
 
@@ -992,13 +1020,13 @@ function Footer() {
                       to="/services"
                       style={{
                         fontSize: 13,
-                        color: "rgba(255,255,255,0.4)",
+                        color: "rgba(15,23,42,0.45)",
                         textDecoration: "none",
                         fontFamily: "'Inter', system-ui, sans-serif",
                         transition: "color 0.2s"
                       }}
-                      onMouseEnter={e => e.target.style.color = "#38BDF8"}
-                      onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.4)"}
+                      onMouseEnter={e => e.target.style.color = "#1A4A9E"}
+                      onMouseLeave={e => e.target.style.color = "rgba(15,23,42,0.45)"}
                   >
                     Services
                   </Link>
@@ -1008,13 +1036,13 @@ function Footer() {
                       to="/about"
                       style={{
                         fontSize: 13,
-                        color: "rgba(255,255,255,0.4)",
+                        color: "rgba(15,23,42,0.45)",
                         textDecoration: "none",
                         fontFamily: "'Inter', system-ui, sans-serif",
                         transition: "color 0.2s"
                       }}
-                      onMouseEnter={e => e.target.style.color = "#38BDF8"}
-                      onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.4)"}
+                      onMouseEnter={e => e.target.style.color = "#1A4A9E"}
+                      onMouseLeave={e => e.target.style.color = "rgba(15,23,42,0.45)"}
                   >
                     About Us
                   </Link>
@@ -1024,13 +1052,13 @@ function Footer() {
                       to={{ pathname: '/', hash: '#quote-request' }}
                       style={{
                         fontSize: 13,
-                        color: "rgba(255,255,255,0.4)",
+                        color: "rgba(15,23,42,0.45)",
                         textDecoration: "none",
                         fontFamily: "'Inter', system-ui, sans-serif",
                         transition: "color 0.2s"
                       }}
-                      onMouseEnter={e => e.target.style.color = "#38BDF8"}
-                      onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.4)"}
+                      onMouseEnter={e => e.target.style.color = "#1A4A9E"}
+                      onMouseLeave={e => e.target.style.color = "rgba(15,23,42,0.45)"}
                   >
                     Get Quote
                   </Link>
@@ -1040,13 +1068,13 @@ function Footer() {
                       href="#contact"
                       style={{
                         fontSize: 13,
-                        color: "rgba(255,255,255,0.4)",
+                        color: "rgba(15,23,42,0.45)",
                         textDecoration: "none",
                         fontFamily: "'Inter', system-ui, sans-serif",
                         transition: "color 0.2s"
                       }}
-                      onMouseEnter={e => e.target.style.color = "#38BDF8"}
-                      onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.4)"}
+                      onMouseEnter={e => e.target.style.color = "#1A4A9E"}
+                      onMouseLeave={e => e.target.style.color = "rgba(15,23,42,0.45)"}
                   >
                     Contact
                   </a>
@@ -1069,13 +1097,13 @@ function Footer() {
                       to="/services"
                       style={{
                         fontSize: 13,
-                        color: "rgba(255,255,255,0.4)",
+                        color: "rgba(15,23,42,0.45)",
                         textDecoration: "none",
                         fontFamily: "'Inter', system-ui, sans-serif",
                         transition: "color 0.2s"
                       }}
-                      onMouseEnter={e => e.target.style.color = "#38BDF8"}
-                      onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.4)"}
+                      onMouseEnter={e => e.target.style.color = "#1A4A9E"}
+                      onMouseLeave={e => e.target.style.color = "rgba(15,23,42,0.45)"}
                   >
                     Cyber Security Services
                   </Link>
@@ -1085,13 +1113,13 @@ function Footer() {
                       to="/services"
                       style={{
                         fontSize: 13,
-                        color: "rgba(255,255,255,0.4)",
+                        color: "rgba(15,23,42,0.45)",
                         textDecoration: "none",
                         fontFamily: "'Inter', system-ui, sans-serif",
                         transition: "color 0.2s"
                       }}
-                      onMouseEnter={e => e.target.style.color = "#38BDF8"}
-                      onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.4)"}
+                      onMouseEnter={e => e.target.style.color = "#1A4A9E"}
+                      onMouseLeave={e => e.target.style.color = "rgba(15,23,42,0.45)"}
                   >
                     ICT Services
                   </Link>
@@ -1101,13 +1129,13 @@ function Footer() {
                       to="/services"
                       style={{
                         fontSize: 13,
-                        color: "rgba(255,255,255,0.4)",
+                        color: "rgba(15,23,42,0.45)",
                         textDecoration: "none",
                         fontFamily: "'Inter', system-ui, sans-serif",
                         transition: "color 0.2s"
                       }}
-                      onMouseEnter={e => e.target.style.color = "#38BDF8"}
-                      onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.4)"}
+                      onMouseEnter={e => e.target.style.color = "#1A4A9E"}
+                      onMouseLeave={e => e.target.style.color = "rgba(15,23,42,0.45)"}
                   >
                     Solar Energy Solutions
                   </Link>
@@ -1117,13 +1145,13 @@ function Footer() {
                       to="/services"
                       style={{
                         fontSize: 13,
-                        color: "rgba(255,255,255,0.4)",
+                        color: "rgba(15,23,42,0.45)",
                         textDecoration: "none",
                         fontFamily: "'Inter', system-ui, sans-serif",
                         transition: "color 0.2s"
                       }}
-                      onMouseEnter={e => e.target.style.color = "#38BDF8"}
-                      onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.4)"}
+                      onMouseEnter={e => e.target.style.color = "#1A4A9E"}
+                      onMouseLeave={e => e.target.style.color = "rgba(15,23,42,0.45)"}
                   >
                     Automation & Security
                   </Link>
@@ -1133,13 +1161,13 @@ function Footer() {
                       to="/services"
                       style={{
                         fontSize: 13,
-                        color: "rgba(255,255,255,0.4)",
+                        color: "rgba(15,23,42,0.45)",
                         textDecoration: "none",
                         fontFamily: "'Inter', system-ui, sans-serif",
                         transition: "color 0.2s"
                       }}
-                      onMouseEnter={e => e.target.style.color = "#38BDF8"}
-                      onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.4)"}
+                      onMouseEnter={e => e.target.style.color = "#1A4A9E"}
+                      onMouseLeave={e => e.target.style.color = "rgba(15,23,42,0.45)"}
                   >
                     Certificate Management
                   </Link>
@@ -1157,13 +1185,13 @@ function Footer() {
                 letterSpacing: "0.05em"
               }}>Contact Us</h4>
               <div style={{ marginBottom: 15 }}>
-                <div style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", fontFamily: "'Inter', system-ui, sans-serif", marginBottom: 5 }}>
+                <div style={{ fontSize: 13, color: "rgba(15,23,42,0.45)", fontFamily: "'Inter', system-ui, sans-serif", marginBottom: 5 }}>
                   Broadway Mall, No3 Yisa Braimoh Street, Kaura-District, Abuja-FCT
                 </div>
-                <div style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", fontFamily: "'Inter', system-ui, sans-serif", marginBottom: 5 }}>
+                <div style={{ fontSize: 13, color: "rgba(15,23,42,0.45)", fontFamily: "'Inter', system-ui, sans-serif", marginBottom: 5 }}>
                   +234 (0) 901 066 9297
                 </div>
-                <div style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", fontFamily: "'Inter', system-ui, sans-serif" }}>
+                <div style={{ fontSize: 13, color: "rgba(15,23,42,0.45)", fontFamily: "'Inter', system-ui, sans-serif" }}>
                   info@cyforcetech.com
                 </div>
               </div>
@@ -1178,7 +1206,7 @@ function Footer() {
             flexWrap: "wrap",
             gap: 16,
             paddingTop: 30,
-            borderTop: "0.5px solid rgba(99,179,237,0.08)"
+            borderTop: "0.5px solid rgba(0,45,114,0.08)"
           }}>
             <div style={{ fontSize: 12, color: "rgba(255,255,255,0.2)", fontFamily: "'Inter', system-ui, sans-serif" }}>
               © {new Date().getFullYear()} CyForce Technologies Ltd. All rights reserved.
@@ -1241,16 +1269,16 @@ function AppShell() {
   return (
         <>
           <style>{`
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lora:ital,wght@0,400;0,500;1,400&family=Montserrat:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700&display=swap');
   *{margin:0;padding:0;box-sizing:border-box;}
-  body{background:#060B1A;overflow-x:hidden;font-family:'Inter',system-ui,sans-serif;}
+  body{background:#FFFFFF;overflow-x:hidden;font-family:'Inter',system-ui,sans-serif;}
   #quote-request, #quote-chat, #contact, #services, #hot-deals {
     scroll-margin-top: 92px;
   }
   .cyforce-landing-page { font-family: 'Inter', system-ui, sans-serif; width: 100%; overflow-x: hidden; }
   .cyforce-contact-card {
-    background: rgba(255,255,255,0.03);
-    border: 0.5px solid rgba(99,179,237,0.12);
+    background: rgba(15,23,42,0.03);
+    border: 0.5px solid rgba(0,45,114,0.12);
     border-radius: 14px;
     padding: 24px 22px;
     text-align: left;
@@ -1263,8 +1291,8 @@ function AppShell() {
     cursor: pointer;
   }
   .cyforce-contact-card--link:hover {
-    border-color: rgba(56,189,248,0.35);
-    background: rgba(43,92,230,0.06);
+    border-color: rgba(0,45,114,0.35);
+    background: rgba(0,45,114,0.06);
     transform: translateY(-3px);
   }
   .cyforce-contact-action {
@@ -1272,7 +1300,7 @@ function AppShell() {
     margin-top: 14px;
     font-size: 12px;
     font-weight: 600;
-    color: #38BDF8;
+    color: #1A4A9E;
     font-family: 'Inter', system-ui, sans-serif;
   }
   .cyforce-contact-layout {
@@ -1294,14 +1322,14 @@ function AppShell() {
   }
   .cyforce-contact-hours,
   .cyforce-contact-quick {
-    background: #0D1830;
-    border: 0.5px solid rgba(99,179,237,0.12);
+    background: #F8FAFC;
+    border: 0.5px solid rgba(0,45,114,0.12);
     border-radius: 14px;
     padding: 24px 22px;
   }
   .cyforce-contact-hours h3,
   .cyforce-contact-quick p {
-    color: #fff;
+    color: #0F172A;
     margin: 0 0 14px;
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 16px;
@@ -1320,15 +1348,15 @@ function AppShell() {
     justify-content: space-between;
     gap: 12px;
     font-size: 13px;
-    color: rgba(255,255,255,0.48);
+    color: rgba(15,23,42,0.5);
     font-family: 'Inter', system-ui, sans-serif;
   }
   .cyforce-contact-hours li strong {
-    color: rgba(255,255,255,0.78);
+    color: rgba(15,23,42,0.78);
     font-weight: 600;
   }
   .cyforce-contact-quick p {
-    color: rgba(255,255,255,0.52);
+    color: rgba(15,23,42,0.55);
     font-size: 14px;
     line-height: 1.6;
     font-family: 'Inter', system-ui, sans-serif;
@@ -1337,18 +1365,11 @@ function AppShell() {
   .cyforce-contact-quote-link {
     font-size: 13px;
     font-weight: 600;
-    color: #38BDF8;
+    color: #1A4A9E;
     text-decoration: none;
     font-family: 'Inter', system-ui, sans-serif;
   }
-  .cyforce-contact-quote-link:hover { color: #fff; }
-  .cyforce-contact-reviews {
-    display: flex;
-    justify-content: center;
-    padding-top: 8px;
-    min-height: 140px;
-    width: 100%;
-  }
+  .cyforce-contact-quote-link:hover { color: #0F172A; }
   @media (max-width: 900px) {
     .cyforce-contact-layout { grid-template-columns: 1fr; }
   }
@@ -1356,31 +1377,31 @@ function AppShell() {
     font-size: 11px;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: #38BDF8;
+    color: #1A4A9E;
     margin-bottom: 10px;
     font-family: 'Inter', system-ui, sans-serif;
     font-weight: 500;
   }
   .cyforce-contact-card h3 {
-    color: #fff;
+    color: #0F172A;
     margin: 0 0 10px;
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 17px;
     font-weight: 600;
   }
   .cyforce-contact-card p {
-    color: rgba(255,255,255,0.5);
+    color: rgba(15,23,42,0.55);
     margin: 0;
     font-size: 14px;
     line-height: 1.7;
     font-family: 'Inter', system-ui, sans-serif;
   }
   .cyforce-landing-section {
-    background: #060B1A;
+    background: #FFFFFF;
     padding: clamp(64px, 8vw, 96px) clamp(16px, 5vw, 48px);
   }
-  .cyforce-landing-section--alt { background: #04080F; }
-  .cyforce-landing-section--bordered { border-top: 0.5px solid rgba(99,179,237,0.07); }
+  .cyforce-landing-section--alt { background: #F8FAFC; }
+  .cyforce-landing-section--bordered { border-top: 0.5px solid rgba(0,45,114,0.07); }
   .cyforce-landing-container {
     max-width: 1200px;
     margin: 0 auto;
@@ -1391,24 +1412,28 @@ function AppShell() {
     margin-bottom: clamp(36px, 6vw, 56px);
   }
   .cyforce-landing-eyebrow {
-    font-size: 11px;
-    letter-spacing: 0.15em;
+    font-size: 12px;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: #38BDF8;
-    margin-bottom: 12px;
-    font-family: 'Inter', system-ui, sans-serif;
+    color: #002D72;
+    margin-bottom: 14px;
+    font-family: 'Montserrat', 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-weight: 600;
   }
   .cyforce-landing-title {
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    font-weight: 700;
-    font-size: clamp(28px, 5vw, 40px);
-    color: #fff;
-    margin: 0 0 12px;
+    font-family: 'Montserrat', 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-weight: 800;
+    font-size: clamp(26px, 4.5vw, 38px);
+    color: #002D72;
+    margin: 0 0 14px;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
   }
   .cyforce-landing-subtitle {
-    font-size: clamp(14px, 2.5vw, 16px);
-    color: rgba(255,255,255,0.42);
-    font-family: 'Inter', system-ui, sans-serif;
+    font-size: clamp(15px, 2.3vw, 18px);
+    color: rgba(10,31,68,0.72);
+    font-family: 'Lora', Georgia, 'Times New Roman', serif;
+    font-style: italic;
     max-width: 560px;
     margin: 0 auto;
     line-height: 1.7;
@@ -1454,13 +1479,6 @@ function AppShell() {
     }
     .cyforce-mobile-menu-btn { display: none !important; }
   }
-  [data-cyforce-landing-reviews] {
-    display: flex;
-    justify-content: center;
-    max-width: 100%;
-    overflow: hidden;
-  }
-  
   /* Responsive Styles */
   @media (max-width: 1024px) {
     .container { padding-left: 24px; padding-right: 24px; }
@@ -1468,7 +1486,7 @@ function AppShell() {
   
   @media (max-width: 1023px) {
     body { font-size: 14px; }
-    .cyforce-mobile-menu-btn { display: block !important; flex-shrink: 0; }
+    .cyforce-mobile-menu-btn { display: flex !important; flex-shrink: 0; }
     .cyforce-nav-links {
       display: none !important;
       flex-direction: column;
@@ -1477,7 +1495,7 @@ function AppShell() {
       margin-top: 12px;
       gap: 12px;
       padding: 12px 0 4px;
-      border-top: 0.5px solid rgba(99,179,237,0.12);
+      border-top: 0.5px solid rgba(0,45,114,0.12);
     }
     .cyforce-nav-links.open { display: flex !important; }
     .cyforce-nav-links a,
@@ -1512,32 +1530,14 @@ function AppShell() {
   }
   
   @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
-  @keyframes pulse{0%,100%{box-shadow:0 0 8px #38BDF8;opacity:1}50%{box-shadow:0 0 18px #38BDF8;opacity:0.55}}
+  @keyframes pulse{0%,100%{box-shadow:0 0 8px #1A4A9E;opacity:1}50%{box-shadow:0 0 18px #1A4A9E;opacity:0.55}}
   @keyframes kenBurnsA{from{transform:scale(1) translate(0,0)}to{transform:scale(1.08) translate(-1%,-1%)}}
   @keyframes kenBurnsB{from{transform:scale(1) translate(0,0)}to{transform:scale(1.08) translate(1%,1%)}}
   @keyframes modalIn{from{opacity:0;transform:scale(0.94) translateY(12px)}to{opacity:1;transform:none}}
-  input:focus{border-color:rgba(56,189,248,0.5)!important;outline:none!important;}
+  input:focus{border-color:rgba(0,45,114,0.5)!important;outline:none!important;}
   ::-webkit-scrollbar{width:5px}
-  ::-webkit-scrollbar-track{background:#04080F}
+  ::-webkit-scrollbar-track{background:#F8FAFC}
   ::-webkit-scrollbar-thumb{background:#1e3a5f;border-radius:4px}
-  body[data-cyforce-landing="true"] [class*="eapps-floating"],
-  body[data-cyforce-landing="true"] [class*="FloatingButton"],
-  body[data-cyforce-landing="true"] div[class*="elfsight"][style*="position: fixed"],
-  body[data-cyforce-landing="true"] div[class*="eapps"][style*="position: fixed"] {
-    display: none !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-  }
-  body[data-cyforce-landing="false"] [data-cyforce-landing-reviews],
-  body[data-cyforce-landing="false"] [class*="elfsight"],
-  body[data-cyforce-landing="false"] [class*="eapps-"],
-  body[data-cyforce-landing="false"] [id*="elfsight"],
-  body[data-cyforce-landing="false"] iframe[src*="elfsight"],
-  body[data-cyforce-landing="false"] iframe[src*="eapps"] {
-    display: none !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-  }
 `}</style>
 
           <ScrollToTop />

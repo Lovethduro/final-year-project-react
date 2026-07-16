@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { contentApi, getSession } from '../utils/apiClient';
+import { sanitizeDisplayMessage } from '../utils/sensitiveContent';
 import { theme } from '../styles/theme';
 
 const messageCache = new Map();
 
 export function MotivationalBanner({ role }) {
-    const [message, setMessage] = useState(() => messageCache.get(role) || '');
+    const [message, setMessage] = useState(() => sanitizeDisplayMessage(messageCache.get(role) || '', { placeholder: '' }));
     const session = getSession();
 
     useEffect(() => {
@@ -13,25 +14,27 @@ export function MotivationalBanner({ role }) {
             setMessage('');
             return;
         }
+
+        const apply = (raw) => {
+            const next = sanitizeDisplayMessage(raw || '', { placeholder: '' });
+            messageCache.set(role, next);
+            setMessage(next);
+        };
+
         if (messageCache.has(role)) {
-            setMessage(messageCache.get(role));
+            setMessage(sanitizeDisplayMessage(messageCache.get(role)));
             return;
         }
+
         contentApi.motivational(role)
             .then((data) => {
                 if (data?.enabled === false) {
-                    messageCache.set(role, '');
-                    setMessage('');
+                    apply('');
                     return;
                 }
-                const next = data?.message || '';
-                messageCache.set(role, next);
-                setMessage(next);
+                apply(data?.message || '');
             })
-            .catch(() => {
-                messageCache.set(role, '');
-                setMessage('');
-            });
+            .catch(() => apply(''));
     }, [role, session.showMotivationalMessages]);
 
     if (!message) return null;
@@ -41,7 +44,7 @@ export function MotivationalBanner({ role }) {
             marginBottom: 20,
             padding: '12px 16px',
             borderRadius: 6,
-            background: 'rgba(43,92,230,0.08)',
+            background: 'rgba(0,45,114,0.08)',
             border: `1px solid ${theme.border}`,
             borderLeft: `3px solid ${theme.primary}`,
         }}>

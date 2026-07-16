@@ -50,7 +50,7 @@ function eventMonthKey(value) {
 
 function formatEventDate(value) {
     const d = parseApiDate(value);
-    if (!d) return '—';
+    if (!d) return '-';
     return d.toLocaleString(undefined, {
         weekday: 'short',
         month: 'short',
@@ -227,7 +227,7 @@ export default function CalendarPage() {
             {success && <Alert type="success">{success}</Alert>}
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20 }}>
-                <Card title={`Events — ${month}`}>
+                <Card title={`Events - ${month}`}>
                     <input type="month" value={month} onChange={(e) => setMonth(e.target.value)} style={{ ...inputStyle, width: 'auto', marginBottom: 16 }} />
                     {loading ? (
                         <p style={{ color: theme.textDim }}>Loading events…</p>
@@ -241,7 +241,7 @@ export default function CalendarPage() {
                                     padding: '12px 10px',
                                     marginBottom: active ? 4 : 0,
                                     borderRadius: 8,
-                                    background: active ? 'rgba(43,92,230,0.08)' : 'transparent',
+                                    background: active ? 'rgba(0,45,114,0.08)' : 'transparent',
                                     border: active ? `1px solid ${theme.primary}` : `0.5px solid ${theme.border}`,
                                 }}
                             >
@@ -283,7 +283,7 @@ export default function CalendarPage() {
                                 )}
                                 {ev.description && <p style={{ fontSize: 13, color: theme.textMuted, margin: '6px 0 0' }}>{ev.description}</p>}
                                 {ev.eventType === 'leave' && (
-                                    <p style={{ fontSize: 11, color: theme.textDim, margin: '6px 0 0' }}>Managed via Leave — edit the leave request instead.</p>
+                                    <p style={{ fontSize: 11, color: theme.textDim, margin: '6px 0 0' }}>Managed via Leave - edit the leave request instead.</p>
                                 )}
                             </div>
                         );

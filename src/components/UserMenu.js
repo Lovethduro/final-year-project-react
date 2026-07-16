@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { FaChevronDown } from 'react-icons/fa';
 import { theme } from '../styles/theme';
 import { assetUrl } from '../utils/apiClient';
 import { AvatarInitials } from './ui';
@@ -33,7 +34,7 @@ export function UserMenu({ auth, profileImage, onLogout }) {
                     display: 'flex',
                     alignItems: 'center',
                     gap: 10,
-                    background: 'rgba(255,255,255,0.05)',
+                    background: 'rgba(15,23,42,0.04)',
                     border: `1px solid ${theme.border}`,
                     borderRadius: 6,
                     padding: '6px 12px 6px 6px',
@@ -51,16 +52,14 @@ export function UserMenu({ auth, profileImage, onLogout }) {
                         {auth.email}
                     </div>
                 </div>
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={theme.textDim} strokeWidth="2" aria-hidden="true">
-                    <polyline points="6 9 12 15 18 9" />
-                </svg>
+                <FaChevronDown size={12} color={theme.textDim} aria-hidden="true" />
             </button>
 
             {open && (
                 <div style={{
                     position: 'absolute', right: 0, top: 'calc(100% + 8px)', width: 260,
                     background: theme.bgCard, border: `1px solid ${theme.border}`,
-                    borderRadius: 8, boxShadow: '0 20px 50px rgba(0,0,0,0.5)', zIndex: 500,
+                    borderRadius: 8, boxShadow: '0 12px 32px rgba(0,45,114,0.12)', zIndex: 500,
                     overflow: 'hidden',
                 }}>
                     <div style={{ padding: '16px', borderBottom: `1px solid ${theme.border}` }}>

@@ -1,3 +1,4 @@
+import { theme } from './styles/theme';
 import { useEffect, useState } from 'react';
 import { PageHeader, Card, DataTable, StatusBadge, StatCard, Alert } from './components/ui';
 import { useAuth } from './hooks/useAuth';
@@ -54,7 +55,7 @@ export default function SalesPage() {
         const stage = stageLabel(lead.status, lead.score);
         return {
             id: lead.id,
-            deal: lead.company ? `${lead.company} — ${lead.name}` : lead.name,
+            deal: lead.company ? `${lead.company} - ${lead.name}` : lead.name,
             customer: lead.name,
             stage,
             amount: formatNaira(value),
@@ -80,7 +81,7 @@ export default function SalesPage() {
 
             <Card title="Deals">
                 {loading ? (
-                    <p style={{ color: 'rgba(255,255,255,0.45)' }}>Loading deals…</p>
+                    <p style={{ color: theme.textDim }}>Loading deals…</p>
                 ) : (
                     <DataTable
                         columns={[

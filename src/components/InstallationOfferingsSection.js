@@ -19,7 +19,7 @@ export function InstallationOfferingsSection() {
                 >
                     <span className="install-eyebrow">Supply &amp; Installation</span>
                     <h2>Products, Installations, or Both</h2>
-                    <p>We supply technology, carry out professional installs, or handle the full package — same options as our quote form.</p>
+                    <p>We supply technology, carry out professional installs, or handle the full package - same options as our quote form.</p>
                 </div>
 
                 <div className="install-pipeline">
@@ -57,10 +57,10 @@ export function InstallationOfferingsSection() {
                     color: #34D399; font-weight: 700; margin-bottom: 12px;
                 }
                 .install-section-head h2 {
-                    font-family: ${FONT_DISPLAY}; font-size: clamp(28px, 4vw, 36px); color: #fff;
+                    font-family: ${FONT_DISPLAY}; font-size: clamp(28px, 4vw, 36px); color: #0F172A;
                     margin: 0 0 12px; font-weight: 700;
                 }
-                .install-section-head p { font-size: 15px; color: rgba(255,255,255,0.48); line-height: 1.7; margin: 0; }
+                .install-section-head p { font-size: 15px; color: rgba(15,23,42,0.5); line-height: 1.7; margin: 0; }
                 .install-pipeline { display: flex; flex-direction: column; gap: 0; }
                 .install-pipeline-item {
                     display: grid;
@@ -97,11 +97,11 @@ export function InstallationOfferingsSection() {
                     color: #34D399; font-weight: 600;
                 }
                 .install-pipeline-card h3 {
-                    font-family: ${FONT_DISPLAY}; font-size: 20px; color: #fff;
+                    font-family: ${FONT_DISPLAY}; font-size: 20px; color: #0F172A;
                     margin: 10px 0 8px; font-weight: 600;
                 }
-                .install-pipeline-card p { font-size: 14px; color: rgba(255,255,255,0.48); line-height: 1.65; margin: 0 0 12px; }
-                .install-pipeline-card ul { margin: 0; padding-left: 18px; font-size: 13px; color: rgba(255,255,255,0.38); line-height: 1.55; }
+                .install-pipeline-card p { font-size: 14px; color: rgba(15,23,42,0.5); line-height: 1.65; margin: 0 0 12px; }
+                .install-pipeline-card ul { margin: 0; padding-left: 18px; font-size: 13px; color: rgba(10,31,68,0.42); line-height: 1.55; }
                 @media (max-width: 600px) {
                     .install-pipeline-item { grid-template-columns: 40px 1fr; gap: 14px; }
                     .install-pipeline-node { width: 40px; height: 40px; font-size: 16px; }

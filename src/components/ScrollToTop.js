@@ -22,6 +22,8 @@ export default function ScrollToTop() {
             return () => window.clearTimeout(timer);
         }
         window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
     }, [pathname, hash]);
 
     return null;

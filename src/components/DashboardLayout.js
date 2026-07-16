@@ -6,7 +6,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useIsMobile } from '../hooks/useMediaQuery';
 import { NotificationBell } from './NotificationBell';
 import { UserMenu } from './UserMenu';
-import { MotivationalBanner } from './MotivationalBanner';
+import { FaBars } from 'react-icons/fa';
 import { NavIcon } from './dashboard/NavIcons';
 import { getProfileImageUrl, userApi } from '../utils/apiClient';
 
@@ -179,7 +179,7 @@ export function DashboardLayout({ children }) {
                                             borderRadius: 6,
                                             textDecoration: 'none',
                                             color: active ? theme.text : theme.textMuted,
-                                            background: active ? 'rgba(43,92,230,0.12)' : 'transparent',
+                                            background: active ? 'rgba(0,45,114,0.12)' : 'transparent',
                                             borderLeft: active ? `2px solid ${theme.primary}` : '2px solid transparent',
                                             fontSize: 13,
                                             fontWeight: active ? 500 : 400,
@@ -235,11 +235,7 @@ export function DashboardLayout({ children }) {
                                 fontFamily: theme.fontBody,
                             }}
                         >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                                <line x1="3" y1="6" x2="21" y2="6" />
-                                <line x1="3" y1="12" x2="21" y2="12" />
-                                <line x1="3" y1="18" x2="21" y2="18" />
-                            </svg>
+                            <FaBars size={16} aria-hidden="true" />
                         </button>
                         {currentPage && (
                             <span className="cyforce-dashboard-page-title" style={{ fontSize: 14, fontWeight: 500, color: theme.text }}>{currentPage.label}</span>
@@ -252,7 +248,6 @@ export function DashboardLayout({ children }) {
                 </header>
 
                 <main className="cyforce-dashboard-main" style={{ padding: '24px', maxWidth: 1400, margin: '0 auto' }}>
-                    <MotivationalBanner role={auth.role} />
                     {children}
                 </main>
             </div>

@@ -8,10 +8,10 @@ import { theme } from './styles/theme';
 
 function ArticleList({ articles, onSelect, loading, publicMode = false }) {
     if (loading) {
-        return <p style={{ color: publicMode ? 'rgba(255,255,255,0.5)' : theme.textDim, fontSize: 15 }}>Loading articles…</p>;
+        return <p style={{ color: publicMode ? 'rgba(15,23,42,0.55)' : theme.textDim, fontSize: 15 }}>Loading articles…</p>;
     }
     if (!articles.length) {
-        return <p style={{ color: publicMode ? 'rgba(255,255,255,0.5)' : theme.textDim, fontSize: 15 }}>No articles found.</p>;
+        return <p style={{ color: publicMode ? 'rgba(15,23,42,0.55)' : theme.textDim, fontSize: 15 }}>No articles found.</p>;
     }
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: publicMode ? 0 : 10 }}>
@@ -26,7 +26,7 @@ function ArticleList({ articles, onSelect, loading, publicMode = false }) {
                         padding: '18px 0',
                         background: 'transparent',
                         border: 'none',
-                        borderBottom: '0.5px solid rgba(99,179,237,0.12)',
+                        borderBottom: '0.5px solid rgba(0,45,114,0.12)',
                         cursor: 'pointer',
                         textAlign: 'left',
                         fontFamily: "'DM Sans', sans-serif",
@@ -35,7 +35,7 @@ function ArticleList({ articles, onSelect, loading, publicMode = false }) {
                         justifyContent: 'space-between',
                         alignItems: 'center',
                         padding: 14,
-                        background: 'rgba(255,255,255,0.03)',
+                        background: 'rgba(15,23,42,0.03)',
                         borderRadius: 10,
                         border: `0.5px solid ${theme.border}`,
                         cursor: 'pointer',
@@ -54,7 +54,7 @@ function ArticleList({ articles, onSelect, loading, publicMode = false }) {
                         }}>
                             {article.title}
                         </div>
-                        <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)' }}>
+                        <div style={{ fontSize: 13, color: theme.textDim }}>
                             {article.category} · {article.views} views
                         </div>
                     </div>
@@ -230,17 +230,17 @@ export function KnowledgeBaseContent({ publicMode = false }) {
                         <h2 style={{
                             fontFamily: "'Syne', sans-serif",
                             fontSize: '24px',
-                            color: '#38BDF8',
+                            color: '#1A4A9E',
                             marginBottom: '12px',
                         }}>
                             {selected.title}
                         </h2>
-                        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', marginBottom: 20 }}>
+                        <p style={{ fontSize: 13, color: theme.textDim, marginBottom: 20 }}>
                             {selected.category} · {selected.views} views
                         </p>
                         <div style={{
                             fontSize: '15px',
-                            color: 'rgba(255,255,255,0.6)',
+                            color: 'rgba(15,23,42,0.6)',
                             lineHeight: 1.7,
                             whiteSpace: 'pre-wrap',
                         }}>
@@ -252,13 +252,13 @@ export function KnowledgeBaseContent({ publicMode = false }) {
                 <p style={{
                     marginTop: 36,
                     paddingTop: 24,
-                    borderTop: '0.5px solid rgba(99,179,237,0.12)',
+                    borderTop: '0.5px solid rgba(0,45,114,0.12)',
                     textAlign: 'center',
                     fontSize: 14,
-                    color: 'rgba(255,255,255,0.5)',
+                    color: 'rgba(15,23,42,0.55)',
                 }}>
                     Still need help?{' '}
-                    <Link to="/support" style={{ color: '#38BDF8', textDecoration: 'none', fontWeight: 500 }}>
+                    <Link to="/support" style={{ color: '#1A4A9E', textDecoration: 'none', fontWeight: 500 }}>
                         Contact support
                     </Link>
                 </p>
@@ -285,7 +285,7 @@ export function KnowledgeBaseContent({ publicMode = false }) {
                                 placeholder="Article title"
                                 style={{
                                     width: '100%',
-                                    background: 'rgba(255,255,255,0.05)',
+                                    background: 'rgba(15,23,42,0.04)',
                                     border: `0.5px solid ${theme.border}`,
                                     borderRadius: 8,
                                     padding: 10,
@@ -299,7 +299,7 @@ export function KnowledgeBaseContent({ publicMode = false }) {
                                 placeholder="Category"
                                 style={{
                                     width: '100%',
-                                    background: 'rgba(255,255,255,0.05)',
+                                    background: 'rgba(15,23,42,0.04)',
                                     border: `0.5px solid ${theme.border}`,
                                     borderRadius: 8,
                                     padding: 10,
@@ -315,7 +315,7 @@ export function KnowledgeBaseContent({ publicMode = false }) {
                                 placeholder="Tags (comma separated)"
                                 style={{
                                     width: '100%',
-                                    background: 'rgba(255,255,255,0.05)',
+                                    background: 'rgba(15,23,42,0.04)',
                                     border: `0.5px solid ${theme.border}`,
                                     borderRadius: 8,
                                     padding: 10,
@@ -332,7 +332,7 @@ export function KnowledgeBaseContent({ publicMode = false }) {
                                 placeholder="Write article content..."
                                 style={{
                                     width: '100%',
-                                    background: 'rgba(255,255,255,0.05)',
+                                    background: 'rgba(15,23,42,0.04)',
                                     border: `0.5px solid ${theme.border}`,
                                     borderRadius: 8,
                                     padding: 10,
@@ -385,7 +385,7 @@ export function KnowledgeBaseContent({ publicMode = false }) {
                                     padding: '10px 12px',
                                     border: `0.5px solid ${theme.border}`,
                                     borderRadius: 8,
-                                    background: 'rgba(255,255,255,0.02)',
+                                    background: theme.bgCard,
                                 }}
                             >
                                 <div>

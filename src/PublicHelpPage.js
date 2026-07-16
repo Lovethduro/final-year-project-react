@@ -12,7 +12,7 @@ export default function PublicHelpPage() {
     return (
         <div className="cyforce-public-page">
             <div className="cyforce-public-page-inner">
-                <LegalBackLink to="/" label="Return to home" />
+                <LegalBackLink label="Return to home" fallbackTo="/" />
 
                 <div style={{ textAlign: 'center', marginBottom: '40px' }}>
                     <Link to="/" style={{ textDecoration: 'none' }}>
@@ -25,7 +25,7 @@ export default function PublicHelpPage() {
                     <h1 className="cyforce-public-hero-title">
                         Help Center
                     </h1>
-                    <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.5)' }}>
+                    <p style={{ fontSize: '14px', color: 'rgba(15,23,42,0.55)' }}>
                         Browse answers before opening a support ticket
                     </p>
                 </div>

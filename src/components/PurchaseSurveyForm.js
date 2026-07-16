@@ -22,6 +22,7 @@ export function PurchaseSurveyForm({ token, compact = false, onComplete }) {
         recommendScore: 0,
         deliveryExpectation: '',
         wouldBuyAgain: '',
+        wouldBuyAgainReason: '',
         comment: '',
     });
 
@@ -41,13 +42,20 @@ export function PurchaseSurveyForm({ token, compact = false, onComplete }) {
         setSubmitting(true);
         setError('');
         try {
+            const reason = form.wouldBuyAgain === 'no' ? form.wouldBuyAgainReason.trim() : '';
+            const commentParts = [form.comment.trim()];
+            if (reason) commentParts.push(`Why I would not shop with CyForce again: ${reason}`);
+
             const payload = {
                 processRating: form.processRating,
                 checkoutEase: form.checkoutEase || 5,
                 recommendScore: form.recommendScore || 5,
                 wouldBuyAgain: form.wouldBuyAgain,
-                comment: form.comment,
+                comment: commentParts.filter(Boolean).join('\n\n'),
             };
+            if (reason) {
+                payload.wouldBuyAgainReason = reason;
+            }
             if (survey?.agentName && form.agentRating > 0) {
                 payload.agentRating = form.agentRating;
             }
@@ -65,7 +73,7 @@ export function PurchaseSurveyForm({ token, compact = false, onComplete }) {
 
     const inputStyle = {
         width: '100%',
-        background: 'rgba(255,255,255,0.05)',
+        background: 'rgba(15,23,42,0.04)',
         border: `0.5px solid ${theme.border}`,
         borderRadius: 8,
         padding: 10,
@@ -85,7 +93,7 @@ export function PurchaseSurveyForm({ token, compact = false, onComplete }) {
     return (
         <div style={{ marginTop: compact ? 12 : 0 }}>
             {error && <p style={{ color: theme.error, fontSize: 13, marginBottom: 12 }}>{error}</p>}
-            <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: compact ? 12 : 16, marginBottom: 16 }}>
+            <div style={{ background: theme.bgCard, borderRadius: 10, padding: compact ? 12 : 16, marginBottom: 16 }}>
                 <div style={{ fontSize: 12, color: theme.textDim }}>Order</div>
                 <div style={{ fontSize: compact ? 14 : 15, color: theme.text, fontWeight: 600 }}>{survey?.description || 'Purchase'}</div>
                 <div style={{ fontSize: compact ? 16 : 18, color: theme.accent, marginTop: 6 }}>{formatNaira(survey?.amount)}</div>
@@ -107,26 +115,55 @@ export function PurchaseSurveyForm({ token, compact = false, onComplete }) {
                     </>
                 )}
                 <label style={{ display: 'block', fontSize: 13, color: theme.text, margin: '16px 0 8px' }}>
-                    How easy was checkout? (1–10)
+                    How easy was checkout? (1-10)
                 </label>
                 <input type="range" min="1" max="10" value={form.checkoutEase || 5}
                     onChange={(e) => setForm((f) => ({ ...f, checkoutEase: Number(e.target.value) }))}
                     style={{ width: '100%', marginBottom: 4 }} />
                 <div style={{ fontSize: 12, color: theme.textDim, marginBottom: 12 }}>{form.checkoutEase || 5} / 10</div>
                 <label style={{ display: 'block', fontSize: 13, color: theme.text, marginBottom: 8 }}>
-                    How likely are you to recommend CyForce? (1–10)
+                    How likely are you to recommend CyForce? (1-10)
                 </label>
                 <input type="range" min="1" max="10" value={form.recommendScore || 5}
                     onChange={(e) => setForm((f) => ({ ...f, recommendScore: Number(e.target.value) }))}
                     style={{ width: '100%', marginBottom: 4 }} />
                 <div style={{ fontSize: 12, color: theme.textDim, marginBottom: 12 }}>{form.recommendScore || 5} / 10</div>
-                <Select value={form.wouldBuyAgain}
-                    onChange={(e) => setForm((f) => ({ ...f, wouldBuyAgain: e.target.value }))}>
+                <Select
+                    value={form.wouldBuyAgain}
+                    onChange={(e) => setForm((f) => ({
+                        ...f,
+                        wouldBuyAgain: e.target.value,
+                        wouldBuyAgainReason: e.target.value === 'no' ? f.wouldBuyAgainReason : '',
+                    }))}
+                >
                     <option value="">Would you buy from us again?</option>
                     <option value="yes">Yes, definitely</option>
                     <option value="maybe">Maybe</option>
                     <option value="no">No</option>
                 </Select>
+                {form.wouldBuyAgain === 'no' && (
+                    <div style={{
+                        marginBottom: 12,
+                        padding: compact ? '10px 12px' : '12px 14px',
+                        borderRadius: 8,
+                        border: `1px solid ${theme.border}`,
+                        background: 'rgba(180,83,9,0.06)',
+                    }}>
+                        <p style={{ margin: '0 0 8px', fontSize: 13, color: theme.text, lineHeight: 1.45 }}>
+                            We’re sorry to hear you would not shop with us again.
+                            If you are willing, please tell us why - this helps us improve.
+                        </p>
+                        <p style={{ margin: '0 0 8px', fontSize: 11, color: theme.textDim }}>
+                            Optional - you can skip this and still submit.
+                        </p>
+                        <textarea
+                            style={{ ...inputStyle, minHeight: compact ? 64 : 80, marginBottom: 0 }}
+                            placeholder="Why would you not shop with CyForce again? (optional)"
+                            value={form.wouldBuyAgainReason}
+                            onChange={(e) => setForm((f) => ({ ...f, wouldBuyAgainReason: e.target.value }))}
+                        />
+                    </div>
+                )}
                 <textarea style={{ ...inputStyle, minHeight: compact ? 64 : 80 }} placeholder="Any additional comments?"
                     value={form.comment} onChange={(e) => setForm((f) => ({ ...f, comment: e.target.value }))} />
                 <button type="submit" disabled={submitting} style={{

@@ -60,7 +60,7 @@ export default function ApprovalsPage() {
                         { key: 'type', label: 'Type' },
                         { key: 'name', label: 'Requested by' },
                         { key: 'email', label: 'Details' },
-                        { key: 'createdAt', label: 'Submitted', render: (r) => r.createdAt ? new Date(r.createdAt).toLocaleString() : '—' },
+                        { key: 'createdAt', label: 'Submitted', render: (r) => r.createdAt ? new Date(r.createdAt).toLocaleString() : '-' },
                         { key: 'actions', label: 'Actions', render: (r) => (
                             <div style={{ display: 'flex', gap: 8 }}>
                                 <button type="button" disabled={actionId === r.id} onClick={() => startReview(r.id, true)} style={{ padding: '4px 10px', borderRadius: 6, border: 'none', background: theme.success, color: '#fff', fontSize: 11, cursor: 'pointer' }}>Approve</button>

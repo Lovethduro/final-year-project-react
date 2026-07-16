@@ -71,7 +71,7 @@ export default function ConversationMonitorPage() {
                 marginBottom: 16,
                 borderRadius: 8,
                 border: `1px solid ${theme.border}`,
-                background: 'rgba(56,189,248,0.06)',
+                background: 'rgba(0,45,114,0.06)',
                 fontSize: 13,
                 color: theme.textMuted,
             }}>
@@ -115,7 +115,7 @@ export default function ConversationMonitorPage() {
                                 borderBottom: `1px solid ${theme.border}`,
                                 background: 'rgba(251,191,36,0.08)',
                             }}>
-                                View-only — sales agents and supervisors handle customer replies.
+                                View-only - sales agents and supervisors handle customer replies.
                             </div>
 
                             <ChatPanelBody bottomRef={bottomRef}>
@@ -129,7 +129,7 @@ export default function ConversationMonitorPage() {
                                             <ChatMessageRow message={m} isMine={mine} showAvatar={!mine} />
                                             {isInvoice && m.invoice && (
                                                 <div style={{ fontSize: 12, color: theme.accent, margin: '-8px 0 12px 42px' }}>
-                                                    Invoice {formatNaira(m.invoice.amount)} — {m.invoice.status}
+                                                    Invoice {formatNaira(m.invoice.amount)} - {m.invoice.status}
                                                 </div>
                                             )}
                                         </div>

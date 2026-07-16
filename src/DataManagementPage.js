@@ -83,7 +83,7 @@ export default function DataManagementPage() {
             ) : (
                 <>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 20 }}>
-                        <StatCard title="Database Size" value={overview?.databaseSize ?? '—'} icon="ðŸ—„ï¸" status="info" />
+                        <StatCard title="Database Size" value={overview?.databaseSize ?? '-'} icon="ðŸ-„ï¸" status="info" />
                         <StatCard title="Last Backup" value={overview?.lastBackupAgo ?? 'Never'} icon="ðŸ’¾" status="success" />
                         <StatCard title="Retention" value={`${overview?.retentionDays ?? retentionDays} days`} icon="ðŸ“…" status="info" />
                     </div>

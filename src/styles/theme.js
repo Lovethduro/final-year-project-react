@@ -1,17 +1,20 @@
 export const theme = {
-    bg: '#060B1A',
-    bgCard: '#0D1830',
-    bgDark: '#04080F',
-    accent: '#38BDF8',
-    primary: '#2B5CE6',
-    text: '#fff',
-    textMuted: 'rgba(255,255,255,0.5)',
-    textDim: 'rgba(255,255,255,0.35)',
-    border: 'rgba(99,179,237,0.1)',
-    borderHover: 'rgba(56,189,248,0.3)',
-    success: '#34D399',
-    warning: '#FBBF24',
-    error: '#EF4444',
+    bg: '#FFFFFF',
+    bgCard: '#F8FAFC',
+    bgDark: '#EEF2F7',
+    accent: '#1A4A9E',
+    primary: '#002D72',
+    navy: '#002D72',
+    navyDeep: '#001A44',
+    navyMid: '#1A4A9E',
+    text: '#0A1F44',
+    textMuted: 'rgba(10,31,68,0.62)',
+    textDim: 'rgba(10,31,68,0.42)',
+    border: 'rgba(0,45,114,0.12)',
+    borderHover: 'rgba(0,45,114,0.28)',
+    success: '#0F766E',
+    warning: '#B45309',
+    error: '#B91C1C',
     fontHeading: "'Plus Jakarta Sans', system-ui, sans-serif",
     fontBody: "'Inter', system-ui, sans-serif",
 };
@@ -25,7 +28,7 @@ export const cardStyle = {
 
 export const dashboardCardStyle = {
     ...cardStyle,
-    boxShadow: '0 1px 2px rgba(0,0,0,0.2)',
+    boxShadow: '0 1px 2px rgba(0,45,114,0.06)',
 };
 
 export function formatRoleLabel(role) {
@@ -35,21 +38,21 @@ export function formatRoleLabel(role) {
 
 export const inputStyle = {
     width: '100%',
-    background: 'rgba(255,255,255,0.05)',
-    border: '0.5px solid rgba(99,179,237,0.2)',
+    background: '#FFFFFF',
+    border: `0.5px solid ${theme.border}`,
     borderRadius: 9,
     padding: '11px 14px',
     fontSize: 14,
-    color: '#fff',
+    color: theme.text,
     fontFamily: theme.fontBody,
     outline: 'none',
 };
 
-/** Use on native select elements — pairs with styles/forms.css */
+/** Use on native select elements - pairs with styles/forms.css */
 export const selectStyle = {
     ...inputStyle,
-    background: '#0D1830',
-    color: '#f1f5f9',
+    background: '#FFFFFF',
+    color: theme.text,
     colorScheme: 'light',
     cursor: 'pointer',
 };
@@ -68,8 +71,8 @@ export const buttonPrimary = {
 
 export const buttonGhost = {
     background: 'transparent',
-    color: 'rgba(255,255,255,0.7)',
-    border: '0.5px solid rgba(255,255,255,0.2)',
+    color: theme.textMuted,
+    border: `0.5px solid ${theme.border}`,
     borderRadius: 9,
     padding: '10px 20px',
     fontSize: 14,

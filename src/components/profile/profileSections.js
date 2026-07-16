@@ -319,7 +319,7 @@ export function StaffSecurityCard({ profile, role }) {
         <Card title="Account & Security">
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, fontSize: 14, color: theme.textMuted }}>
                 <SecurityRow label="Role" value={formatRoleLabel(role)} valueColor={theme.accent} />
-                <SecurityRow label="Member since" value={profile?.createdAt || '—'} />
+                <SecurityRow label="Member since" value={profile?.createdAt || '-'} />
                 <SecurityRow
                     label="Email verified"
                     value={profile?.emailVerified ? 'Yes' : 'No'}
@@ -345,8 +345,8 @@ export function CustomerSecurityCard({ profile, formatPaymentMethod }) {
     return (
         <Card title="Account & Security">
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, fontSize: 14, color: theme.textMuted }}>
-                <SecurityRow label="Account type" value={profile?.customerType ? formatRoleLabel(profile.customerType) : '—'} />
-                <SecurityRow label="Member since" value={profile?.createdAt || '—'} />
+                <SecurityRow label="Account type" value={profile?.customerType ? formatRoleLabel(profile.customerType) : '-'} />
+                <SecurityRow label="Member since" value={profile?.createdAt || '-'} />
                 <SecurityRow label="Payment method" value={formatPaymentMethod(profile?.preferredPaymentMethod)} valueColor={theme.accent} />
                 <SecurityRow
                     label="Email verified"
@@ -391,13 +391,13 @@ export function StaffWorkCard({ role, profile }) {
                 <p style={{ fontSize: 13, color: theme.textMuted, margin: 0, lineHeight: 1.55 }}>{info.body}</p>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 12 }}>
-                <div style={{ padding: '12px 14px', borderRadius: 6, background: 'rgba(255,255,255,0.03)', border: `1px solid ${theme.border}` }}>
+                <div style={{ padding: '12px 14px', borderRadius: 6, background: 'rgba(15,23,42,0.03)', border: `1px solid ${theme.border}` }}>
                     <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.06em', color: theme.textDim, marginBottom: 4 }}>Role</div>
                     <div style={{ fontSize: 14, fontWeight: 600, color: theme.text }}>{formatRoleLabel(role)}</div>
                 </div>
-                <div style={{ padding: '12px 14px', borderRadius: 6, background: 'rgba(255,255,255,0.03)', border: `1px solid ${theme.border}` }}>
+                <div style={{ padding: '12px 14px', borderRadius: 6, background: 'rgba(15,23,42,0.03)', border: `1px solid ${theme.border}` }}>
                     <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.06em', color: theme.textDim, marginBottom: 4 }}>Email</div>
-                    <div style={{ fontSize: 13, color: theme.text, wordBreak: 'break-all' }}>{profile?.email || '—'}</div>
+                    <div style={{ fontSize: 13, color: theme.text, wordBreak: 'break-all' }}>{profile?.email || '-'}</div>
                 </div>
             </div>
         </Card>

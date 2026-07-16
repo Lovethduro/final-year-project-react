@@ -1,18 +1,11 @@
 import { useEffect, useState, useRef } from 'react';
+import { FaBell } from 'react-icons/fa';
 import { notificationApi, getSession } from '../utils/apiClient';
 import { PurchaseSurveyForm } from './PurchaseSurveyForm';
+import { containsSensitivePaymentInfo } from '../utils/sensitiveContent';
 import { theme } from '../styles/theme';
 
 const STAFF_ROLES = ['ADMIN', 'SUPERVISOR', 'SALES_AGENT', 'SUPPORT_AGENT'];
-
-function BellIcon() {
-    return (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-        </svg>
-    );
-}
 
 export function NotificationBell() {
     const [open, setOpen] = useState(false);
@@ -30,7 +23,12 @@ export function NotificationBell() {
 
     const loadList = () => {
         notificationApi.list()
-            .then(setNotifications)
+            .then((items) => {
+                const list = Array.isArray(items) ? items : [];
+                setNotifications(list.filter((n) => (
+                    !containsSensitivePaymentInfo(n?.title) && !containsSensitivePaymentInfo(n?.message)
+                )));
+            })
             .catch(() => setNotifications([]));
     };
 
@@ -104,7 +102,7 @@ export function NotificationBell() {
                 aria-label={`Notifications${unread > 0 ? `, ${unread} unread` : ''}`}
                 style={{
                     position: 'relative',
-                    background: 'rgba(255,255,255,0.05)',
+                    background: 'rgba(15,23,42,0.04)',
                     border: `1px solid ${theme.border}`,
                     borderRadius: 6,
                     width: 36,
@@ -116,11 +114,11 @@ export function NotificationBell() {
                     justifyContent: 'center',
                 }}
             >
-                <BellIcon />
+                <FaBell size={16} aria-hidden="true" />
                 {unread > 0 && (
                     <span style={{
                         position: 'absolute', top: -4, right: -4, background: theme.error,
-                        color: '#fff', fontSize: 10, fontWeight: 700, borderRadius: 10,
+                        color: '#0F172A', fontSize: 10, fontWeight: 700, borderRadius: 10,
                         padding: '2px 6px', minWidth: 18, textAlign: 'center',
                     }}>
                         {unread > 9 ? '9+' : unread}
@@ -165,7 +163,7 @@ export function NotificationBell() {
                     ) : notifications.map((n) => (
                         <div key={n.id} style={{
                             padding: '12px 16px', borderBottom: `1px solid ${theme.border}`,
-                            background: n.read ? 'transparent' : 'rgba(43,92,230,0.08)',
+                            background: n.read ? 'transparent' : 'rgba(0,45,114,0.08)',
                         }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
                                 <div style={{ flex: 1 }}>

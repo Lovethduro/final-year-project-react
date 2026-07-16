@@ -19,7 +19,7 @@ const fieldStyle = {
     border: '1px solid rgba(51,65,85,1)',
     borderRadius: '10px',
     fontSize: '14px',
-    color: '#fff',
+    color: '#0F172A',
     outline: 'none',
 };
 
@@ -94,7 +94,7 @@ export default function CompleteProfilePage() {
             <div style={{ width: '100%', maxWidth: 440 }}>
                 <div style={{
                     backdropFilter: 'blur(12px)',
-                    background: 'rgba(255,255,255,0.05)',
+                    background: 'rgba(15,23,42,0.04)',
                     border: '1px solid rgba(255,255,255,0.1)',
                     borderRadius: '20px',
                     padding: '32px',
@@ -102,9 +102,9 @@ export default function CompleteProfilePage() {
                 >
                     <div style={{ textAlign: 'center', marginBottom: 24 }}>
                         <img src={logo} alt="CyForce" style={{ height: 48, objectFit: 'contain' }} />
-                        <h1 style={{ color: '#fff', fontSize: 24, margin: '16px 0 8px' }}>Finish your profile</h1>
-                        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, margin: 0, lineHeight: 1.6 }}>
-                            Signed in as <strong style={{ color: '#fff' }}>{session.fullName || session.email}</strong>.
+                        <h1 style={{ color: '#0F172A', fontSize: 24, margin: '16px 0 8px' }}>Finish your profile</h1>
+                        <p style={{ color: 'rgba(15,23,42,0.55)', fontSize: 14, margin: 0, lineHeight: 1.6 }}>
+                            Signed in as <strong style={{ color: '#0F172A' }}>{session.fullName || session.email}</strong>.
                             {' '}Add the details we need to set up your account.
                         </p>
                     </div>
@@ -152,7 +152,7 @@ export default function CompleteProfilePage() {
                             inputStyle={{
                                 background: 'rgba(15,23,42,0.5)',
                                 border: '1px solid rgba(51,65,85,1)',
-                                color: '#fff',
+                                color: '#0F172A',
                             }}
                         />
 
@@ -187,18 +187,18 @@ export default function CompleteProfilePage() {
                             />
                         </div>
 
-                        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, color: 'rgba(255,255,255,0.55)' }}>
+                        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, color: 'rgba(15,23,42,0.55)' }}>
                             <input
                                 type="checkbox"
                                 checked={agreeToTerms}
                                 onChange={(e) => setAgreeToTerms(e.target.checked)}
-                                style={{ marginTop: 3, accentColor: '#2DD4BF' }}
+                                style={{ marginTop: 3, accentColor: '#1A4A9E' }}
                             />
                             <span>
                                 I agree to the{' '}
-                                <Link to="/terms" style={{ color: '#2DD4BF' }}>Terms of Service</Link>
+                                <Link to="/terms" style={{ color: '#1A4A9E' }}>Terms of Service</Link>
                                 {' '}and{' '}
-                                <Link to="/privacy" style={{ color: '#2DD4BF' }}>Privacy Policy</Link>
+                                <Link to="/privacy" style={{ color: '#1A4A9E' }}>Privacy Policy</Link>
                             </span>
                         </label>
 
@@ -214,8 +214,8 @@ export default function CompleteProfilePage() {
                                 padding: '12px 16px',
                                 border: 'none',
                                 borderRadius: 10,
-                                background: 'linear-gradient(135deg, #2563EB, #2DD4BF)',
-                                color: '#fff',
+                                background: 'linear-gradient(135deg, #002D72, #1A4A9E)',
+                                color: '#0F172A',
                                 fontWeight: 600,
                                 cursor: loading ? 'not-allowed' : 'pointer',
                                 opacity: loading ? 0.7 : 1,

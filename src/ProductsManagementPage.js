@@ -106,7 +106,7 @@ export default function ProductsManagementPage() {
 
     const inputStyle = {
         width: '100%',
-        background: 'rgba(255,255,255,0.05)',
+        background: 'rgba(15,23,42,0.04)',
         border: `0.5px solid ${theme.border}`,
         borderRadius: 8,
         padding: 10,
@@ -194,7 +194,7 @@ export default function ProductsManagementPage() {
                                 )}
                             </div>
                         )},
-                        { key: 'stockQuantity', label: 'Qty', render: (r) => (Number(r.stockQuantity) > 0 ? Number(r.stockQuantity) : '—') },
+                        { key: 'stockQuantity', label: 'Qty', render: (r) => (Number(r.stockQuantity) > 0 ? Number(r.stockQuantity) : '-') },
                         { key: 'inStock', label: 'Stock', render: (r) => <StatusBadge status={r.inStock ? 'success' : 'warning'} label={r.inStock ? 'Available' : 'Sold out'} /> },
                         { key: 'active', label: 'Status', render: (r) => <StatusBadge status={r.active ? 'success' : 'warning'} label={r.active ? 'Live' : 'Hidden'} /> },
                         { key: 'actions', label: '', render: (r) => (

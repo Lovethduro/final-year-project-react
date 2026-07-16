@@ -1,3 +1,4 @@
+import { theme } from '../styles/theme';
 import { useMemo, useState } from 'react';
 import { COUNTRY_CODES, GROUPED_COUNTRY_CODES } from '../constants/countryCodes';
 import { clampLocalPhoneDigits, countryOptionValue, MAX_LOCAL_PHONE_DIGITS } from '../utils/phoneFormat';
@@ -24,12 +25,12 @@ export function PhoneWithCountryCode({
     const [countryCodeOpen, setCountryCodeOpen] = useState(false);
 
     const fieldStyle = {
-        background: 'rgba(255,255,255,0.05)',
-        border: '0.5px solid rgba(99,179,237,0.2)',
+        background: 'rgba(15,23,42,0.04)',
+        border: '0.5px solid rgba(0,45,114,0.2)',
         borderRadius: 9,
         padding: '11px 14px',
         fontSize: 14,
-        color: '#fff',
+        color: '#0F172A',
         outline: 'none',
         ...inputStyle,
     };
@@ -40,7 +41,7 @@ export function PhoneWithCountryCode({
                 <label style={{
                     display: 'block',
                     fontSize: 12,
-                    color: 'rgba(255,255,255,0.65)',
+                    color: theme.textMuted,
                     marginBottom: 6,
                     ...labelStyle,
                 }}
@@ -68,7 +69,7 @@ export function PhoneWithCountryCode({
                         <span style={{ fontSize: 13, whiteSpace: 'nowrap' }}>
                             {selectedCountry.flag} {countryCode}
                         </span>
-                        <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)' }}>
+                        <span style={{ fontSize: 10, color: theme.textDim }}>
                             {countryCodeOpen ? '▲' : '▼'}
                         </span>
                     </button>
@@ -80,8 +81,8 @@ export function PhoneWithCountryCode({
                             width: 240,
                             maxHeight: 220,
                             overflowY: 'auto',
-                            background: '#0D1830',
-                            border: '0.5px solid rgba(99,179,237,0.25)',
+                            background: '#F8FAFC',
+                            border: '0.5px solid rgba(0,45,114,0.25)',
                             borderRadius: 9,
                             zIndex: 30,
                             boxShadow: '0 12px 32px rgba(0,0,0,0.35)',
@@ -118,9 +119,9 @@ export function PhoneWithCountryCode({
                                                     padding: '8px 10px',
                                                     border: 'none',
                                                     background: country.code === countryCode
-                                                        ? 'rgba(43,92,230,0.15)'
+                                                        ? 'rgba(0,45,114,0.15)'
                                                         : 'transparent',
-                                                    color: '#fff',
+                                                    color: '#0F172A',
                                                     cursor: 'pointer',
                                                     textAlign: 'left',
                                                     fontSize: 13,
@@ -128,7 +129,7 @@ export function PhoneWithCountryCode({
                                             >
                                                 <span>{country.flag}</span>
                                                 <span>{country.code}</span>
-                                                <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: 12 }}>
+                                                <span style={{ color: theme.textDim, fontSize: 12 }}>
                                                     {country.country}
                                                 </span>
                                             </button>

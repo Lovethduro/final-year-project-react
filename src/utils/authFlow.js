@@ -58,7 +58,7 @@ export function storeAuthSession(data, rememberMe = false) {
     if (data.createdAt) storage.setItem('userMemberSince', data.createdAt);
 }
 
-/** Saved email/role/method for login form convenience only — never stores a password. */
+/** Saved email/role/method for login form convenience only - never stores a password. */
 export function loadRememberedLogin() {
     migrateLegacyRememberedLogin();
     try {

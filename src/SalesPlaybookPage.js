@@ -271,14 +271,14 @@ export default function SalesPlaybookPage() {
                         <button type="button" onClick={() => setCategory('')} style={{
                             padding: '4px 10px', borderRadius: 4, fontSize: 11, cursor: 'pointer', fontFamily: theme.fontBody,
                             border: `1px solid ${!category ? theme.primary : theme.border}`,
-                            background: !category ? 'rgba(43,92,230,0.12)' : 'transparent',
+                            background: !category ? 'rgba(0,45,114,0.12)' : 'transparent',
                             color: !category ? theme.text : theme.textMuted,
                         }}>All</button>
                         {Object.entries(CATEGORY_LABELS).map(([k, v]) => (
                             <button key={k} type="button" onClick={() => setCategory(k)} style={{
                                 padding: '4px 10px', borderRadius: 4, fontSize: 11, cursor: 'pointer', fontFamily: theme.fontBody,
                                 border: `1px solid ${category === k ? theme.primary : theme.border}`,
-                                background: category === k ? 'rgba(43,92,230,0.12)' : 'transparent',
+                                background: category === k ? 'rgba(0,45,114,0.12)' : 'transparent',
                                 color: category === k ? theme.text : theme.textMuted,
                             }}>{v}</button>
                         ))}

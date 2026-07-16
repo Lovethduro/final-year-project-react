@@ -27,7 +27,7 @@ const ACTION_SEVERITY = {
 };
 
 function formatRelativeTime(iso) {
-    if (!iso) return '—';
+    if (!iso) return '-';
     const date = new Date(iso);
     const diffMs = Date.now() - date.getTime();
     const mins = Math.floor(diffMs / 60000);
@@ -40,7 +40,7 @@ function formatRelativeTime(iso) {
 }
 
 function formatTimestamp(iso) {
-    if (!iso) return '—';
+    if (!iso) return '-';
     return new Date(iso).toLocaleString();
 }
 
@@ -48,12 +48,12 @@ function mapLogEntry(log) {
     const action = (log.action || '').toUpperCase();
     const label = ACTION_LABELS[action] || log.action || 'Security event';
     const severity = ACTION_SEVERITY[action] || 'info';
-    const details = log.details ? ` — ${log.details}` : '';
+    const details = log.details ? ` - ${log.details}` : '';
     return {
         id: log.id,
         event: `${label}${details}`,
         user: log.userEmail || 'unknown',
-        ip: log.clientIp || '—',
+        ip: log.clientIp || '-',
         time: formatRelativeTime(log.createdAt),
         timestamp: formatTimestamp(log.createdAt),
         severity,
@@ -141,20 +141,20 @@ export default function SecurityAuditPage() {
             <Card style={{ marginBottom: 20 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, gap: 12, flexWrap: 'wrap' }}>
                     <div>
-                        <h3 style={{ margin: 0, color: '#fff', fontSize: 16 }}>Active sessions</h3>
-                        <p style={{ margin: '6px 0 0', color: 'rgba(255,255,255,0.5)', fontSize: 13 }}>
+                        <h3 style={{ margin: 0, color: '#0F172A', fontSize: 16 }}>Active sessions</h3>
+                        <p style={{ margin: '6px 0 0', color: 'rgba(15,23,42,0.55)', fontSize: 13 }}>
                             Users are marked unavailable when they sign out. Active count: {sessions.filter((s) => s.active).length}
                         </p>
                     </div>
                     <GhostButton onClick={loadSessions} disabled={sessionsLoading}>Refresh</GhostButton>
                 </div>
                 {sessionsLoading ? (
-                    <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14 }}>Loading sessions…</p>
+                    <p style={{ color: 'rgba(15,23,42,0.55)', fontSize: 14 }}>Loading sessions…</p>
                 ) : (
                     <DataTable
                         columns={[
-                            { key: 'fullName', label: 'User', render: (row) => row.fullName || row.userEmail || '—' },
-                            { key: 'role', label: 'Role', render: (row) => (row.role || '—').replace(/_/g, ' ') },
+                            { key: 'fullName', label: 'User', render: (row) => row.fullName || row.userEmail || '-' },
+                            { key: 'role', label: 'Role', render: (row) => (row.role || '-').replace(/_/g, ' ') },
                             { key: 'clientIp', label: 'IP' },
                             {
                                 key: 'active',
@@ -183,7 +183,7 @@ export default function SecurityAuditPage() {
                     <SearchInput value={search} onChange={setSearch} placeholder="Search events, users, or IP addresses..." />
                 </div>
                 {loading ? (
-                    <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14 }}>Loading security events…</p>
+                    <p style={{ color: 'rgba(15,23,42,0.55)', fontSize: 14 }}>Loading security events…</p>
                 ) : (
                     <DataTable
                         columns={[

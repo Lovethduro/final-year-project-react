@@ -40,8 +40,8 @@ export default function RolePermissionsPage() {
                                     borderRadius: 8,
                                     border: 'none',
                                     cursor: 'pointer',
-                                    background: selectedRoleId === role.id ? 'rgba(43,92,230,0.15)' : 'transparent',
-                                    color: selectedRoleId === role.id ? theme.accent : 'rgba(255,255,255,0.7)',
+                                    background: selectedRoleId === role.id ? 'rgba(0,45,114,0.15)' : 'transparent',
+                                    color: selectedRoleId === role.id ? theme.accent : theme.textMuted,
                                     fontFamily: theme.fontBody,
                                 }}
                             >
@@ -54,7 +54,7 @@ export default function RolePermissionsPage() {
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                     <Card title={selectedRole.label}>
-                        <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14, marginBottom: 16, lineHeight: 1.5 }}>
+                        <p style={{ color: theme.textMuted, fontSize: 14, marginBottom: 16, lineHeight: 1.5 }}>
                             {selectedRole.description}
                         </p>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -65,9 +65,9 @@ export default function RolePermissionsPage() {
                                         padding: '6px 10px',
                                         borderRadius: 20,
                                         fontSize: 12,
-                                        background: 'rgba(43,92,230,0.12)',
+                                        background: 'rgba(0,45,114,0.12)',
                                         color: theme.accent,
-                                        border: '0.5px solid rgba(56,189,248,0.25)',
+                                        border: '0.5px solid rgba(0,45,114,0.25)',
                                     }}
                                 >
                                     {item}
@@ -87,11 +87,11 @@ export default function RolePermissionsPage() {
                                 </thead>
                                 <tbody>
                                     {access.areas.map((area) => (
-                                        <tr key={area.module} style={{ borderTop: '0.5px solid rgba(255,255,255,0.06)' }}>
+                                        <tr key={area.module} style={{ borderTop: `0.5px solid ${theme.border}` }}>
                                             <td style={{ padding: 12, color: theme.text, fontWeight: 500, verticalAlign: 'top' }}>
                                                 {area.module}
                                             </td>
-                                            <td style={{ padding: 12, color: 'rgba(255,255,255,0.65)', fontSize: 13, lineHeight: 1.5 }}>
+                                            <td style={{ padding: 12, color: theme.textMuted, fontSize: 13, lineHeight: 1.5 }}>
                                                 {area.access}
                                             </td>
                                         </tr>

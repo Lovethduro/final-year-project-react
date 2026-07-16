@@ -1,3 +1,4 @@
+import { theme } from './styles/theme';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from './images/CYFORCE 2-1.jpg';
@@ -8,11 +9,11 @@ import { SecurePasswordInput, AutofillTrapFields } from './components/SecurePass
 const inputStyle = {
     width: '100%',
     padding: '10px 12px',
-    background: 'rgba(15,23,42,0.5)',
-    border: '1px solid rgba(51,65,85,1)',
+    background: '#FFFFFF',
+    border: `1px solid ${theme.border}`,
     borderRadius: '10px',
     fontSize: '14px',
-    color: '#fff',
+    color: theme.text,
     outline: 'none',
 };
 
@@ -71,20 +72,21 @@ export default function ChangePasswordPage() {
     return (
     <>
         <div style={{
-            minHeight: '100vh', background: '#0F172A', display: 'flex', alignItems: 'center',
-            justifyContent: 'center', fontFamily: "'DM Sans', sans-serif", padding: 16,
+            minHeight: '100vh', background: theme.bg, display: 'flex', alignItems: 'center',
+            justifyContent: 'center', fontFamily: theme.fontBody, padding: 16,
         }}>
             <div style={{ width: '100%', maxWidth: 420 }}>
                 <div style={{
-                    backdropFilter: 'blur(12px)', background: 'rgba(255,255,255,0.05)',
-                    border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20, padding: 32,
+                    background: '#FFFFFF',
+                    border: `1px solid ${theme.border}`, borderRadius: 20, padding: 32,
+                    boxShadow: '0 12px 32px rgba(0,45,114,0.1)',
                 }}>
                     <div style={{ textAlign: 'center', marginBottom: 24 }}>
                         <img src={logo} alt="CyForce" style={{ height: 48, marginBottom: 12 }} />
-                        <h1 style={{ fontSize: 22, color: '#fff', marginBottom: 8 }}>
+                        <h1 style={{ fontSize: 22, color: '#0F172A', marginBottom: 8 }}>
                             {forced ? 'Update your password' : 'Change password'}
                         </h1>
-                        <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)' }}>
+                        <p style={{ fontSize: 14, color: 'rgba(15,23,42,0.55)' }}>
                             {forced
                                 ? 'Your account uses a temporary password. Set a new one before continuing.'
                                 : 'Enter your current password and choose a new one.'}
@@ -94,7 +96,7 @@ export default function ChangePasswordPage() {
                     <form onSubmit={handleSubmit} autoComplete="off" style={{ display: 'flex', flexDirection: 'column', gap: 16, position: 'relative' }}>
                         <AutofillTrapFields />
                         <div>
-                            <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 6 }}>
+                            <label style={{ display: 'block', fontSize: 12, color: theme.textMuted, marginBottom: 6 }}>
                                 {forced ? 'Temporary password' : 'Current password'}
                             </label>
                             <SecurePasswordInput
@@ -107,7 +109,7 @@ export default function ChangePasswordPage() {
                             />
                         </div>
                         <div>
-                            <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 6 }}>
+                            <label style={{ display: 'block', fontSize: 12, color: theme.textMuted, marginBottom: 6 }}>
                                 New password
                             </label>
                             <SecurePasswordInput
@@ -121,7 +123,7 @@ export default function ChangePasswordPage() {
                             />
                         </div>
                         <div>
-                            <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 6 }}>
+                            <label style={{ display: 'block', fontSize: 12, color: theme.textMuted, marginBottom: 6 }}>
                                 Confirm new password
                             </label>
                             <SecurePasswordInput
@@ -151,8 +153,8 @@ export default function ChangePasswordPage() {
                             disabled={loading}
                             style={{
                                 width: '100%', padding: 12, border: 'none', borderRadius: 10,
-                                background: 'linear-gradient(135deg, #2563EB, #2DD4BF)',
-                                color: '#fff', fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer',
+                                background: 'linear-gradient(135deg, #002D72, #1A4A9E)',
+                                color: '#FFFFFF', fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer',
                                 opacity: loading ? 0.7 : 1,
                             }}
                         >

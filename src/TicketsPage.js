@@ -316,7 +316,7 @@ export default function TicketsPage() {
 
     const inputStyle = {
         width: '100%',
-        background: 'rgba(255,255,255,0.05)',
+        background: 'rgba(15,23,42,0.04)',
         border: `0.5px solid ${theme.border}`,
         borderRadius: 8,
         padding: 10,
@@ -411,7 +411,7 @@ export default function TicketsPage() {
                                     value={transferNote}
                                     onChange={(e) => setTransferNote(e.target.value)}
                                     placeholder="Note for sales (optional)"
-                                    style={{ fontSize: 11, padding: '4px 6px', borderRadius: 6, border: `0.5px solid ${theme.border}`, background: 'rgba(255,255,255,0.05)', color: theme.text }}
+                                    style={{ fontSize: 11, padding: '4px 6px', borderRadius: 6, border: `0.5px solid ${theme.border}`, background: 'rgba(15,23,42,0.04)', color: theme.text }}
                                 />
                                 <div style={{ display: 'flex', gap: 4 }}>
                                     <PrimaryButton onClick={() => handleTransferToSales(r.id)} style={{ fontSize: 10, padding: '3px 8px' }}>Confirm</PrimaryButton>
@@ -495,7 +495,7 @@ export default function TicketsPage() {
                 subtitle={auth.role === 'SUPPORT_AGENT'
                     ? 'Chat with customers and resolve support requests'
                     : isAdmin
-                        ? 'Monitor support threads — add internal notes, or take over escalated tickets to reply'
+                        ? 'Monitor support threads - add internal notes, or take over escalated tickets to reply'
                         : 'Track and resolve customer support requests'}
             />
             {error && <Alert type="error">{error}</Alert>}
@@ -673,8 +673,8 @@ export default function TicketsPage() {
                                     background: adminNoteOnly ? 'rgba(251,191,36,0.08)' : 'rgba(52,211,153,0.08)',
                                 }}>
                                     {adminNoteOnly
-                                        ? 'Oversight mode — internal notes only. Take over or wait for SLA escalation to reply to the customer.'
-                                        : (selected.adminTakeover ? 'You have taken over — customer replies enabled.' : 'SLA escalated — you may reply to the customer.')}
+                                        ? 'Oversight mode - internal notes only. Take over or wait for SLA escalation to reply to the customer.'
+                                        : (selected.adminTakeover ? 'You have taken over - customer replies enabled.' : 'SLA escalated - you may reply to the customer.')}
                                 </div>
                             )}
                         </div>
@@ -695,7 +695,7 @@ export default function TicketsPage() {
                                     {duplicates.map((dup) => (
                                         <div key={dup.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center', padding: '8px 0', borderTop: `0.5px solid ${theme.border}`, marginTop: 8 }}>
                                             <div style={{ minWidth: 0, flex: 1 }}>
-                                                <div style={{ fontSize: 12, fontWeight: 600, color: theme.text }}>{dup.ticketNumber} — {dup.subject}</div>
+                                                <div style={{ fontSize: 12, fontWeight: 600, color: theme.text }}>{dup.ticketNumber} - {dup.subject}</div>
                                                 <div style={{ fontSize: 11, color: theme.textDim }}>{dup.reason}</div>
                                             </div>
                                             <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
@@ -777,7 +777,7 @@ export default function TicketsPage() {
                                     </div>
                                 </form>
                             ) : (
-                                <p style={{ fontSize: 13, color: theme.textDim, margin: 0 }}>This ticket is closed or transferred — chat is read-only.</p>
+                                <p style={{ fontSize: 13, color: theme.textDim, margin: 0 }}>This ticket is closed or transferred - chat is read-only.</p>
                             )}
                         </div>
                     </Card>

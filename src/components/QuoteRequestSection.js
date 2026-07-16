@@ -1,3 +1,4 @@
+import { theme } from '../styles/theme';
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { quoteApi, productApi } from '../utils/apiClient';
@@ -37,12 +38,12 @@ const EMPTY_FORM = {
 
 const inputStyle = {
     width: '100%',
-    background: 'rgba(255,255,255,0.05)',
-    border: '0.5px solid rgba(99,179,237,0.2)',
+    background: 'rgba(15,23,42,0.04)',
+    border: '0.5px solid rgba(0,45,114,0.2)',
     borderRadius: 9,
     padding: '11px 14px',
     fontSize: 14,
-    color: '#fff',
+    color: '#0F172A',
     fontFamily: FONT_BODY,
     outline: 'none',
     marginBottom: 12,
@@ -51,7 +52,7 @@ const inputStyle = {
 const labelStyle = {
     display: 'block',
     fontSize: 12,
-    color: 'rgba(255,255,255,0.65)',
+    color: theme.textMuted,
     marginBottom: 6,
     fontFamily: FONT_BODY,
 };
@@ -143,7 +144,7 @@ function ProductFields({ form, setForm, products, loadingProducts }) {
                 <option value="">{loadingProducts ? 'Loading products…' : 'Select a product'}</option>
                 {products.map((product) => (
                     <option key={product.id} value={product.id}>
-                        {product.name}{product.price ? ` — ${formatNaira(product.price)}` : ''}
+                        {product.name}{product.price ? ` - ${formatNaira(product.price)}` : ''}
                     </option>
                 ))}
             </Select>
@@ -364,11 +365,11 @@ export function QuoteRequestSection() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!isValidLocalPhone(form.phone)) {
-            setError(`Please enter a valid phone number (${MIN_LOCAL_PHONE_DIGITS}–${MAX_LOCAL_PHONE_DIGITS} digits).`);
+            setError(`Please enter a valid phone number (${MIN_LOCAL_PHONE_DIGITS}-${MAX_LOCAL_PHONE_DIGITS} digits).`);
             return;
         }
         if (activeType !== 'products_only' && !isValidLocalPhone(form.siteContactPhone)) {
-            setError(`Please enter a valid site contact phone (${MIN_LOCAL_PHONE_DIGITS}–${MAX_LOCAL_PHONE_DIGITS} digits).`);
+            setError(`Please enter a valid site contact phone (${MIN_LOCAL_PHONE_DIGITS}-${MAX_LOCAL_PHONE_DIGITS} digits).`);
             return;
         }
         if (activeType !== 'installation_only') {
@@ -408,7 +409,7 @@ export function QuoteRequestSection() {
                 <div className="quote-section-head">
                     <span className="quote-step-label">Step 1 of 2</span>
                     <h2>Request a Free Quote</h2>
-                    <p>Pick the option that fits your project. A sales agent will follow up by email and online chat — no account required.</p>
+                    <p>Pick the option that fits your project. A sales agent will follow up by email and online chat - no account required.</p>
                 </div>
 
                 <div className="quote-compare">
@@ -448,8 +449,8 @@ export function QuoteRequestSection() {
                         <div className="quote-modal-header">
                             <div>
                                 <span className="quote-compare-tag">{selected.tag}</span>
-                                <h3 style={{ fontFamily: FONT_DISPLAY, color: '#fff', fontSize: 22, margin: '8px 0 6px' }}>{selected.title}</h3>
-                                <p style={{ margin: 0, color: 'rgba(255,255,255,0.48)', fontSize: 13 }}>No login needed — we will email or call you back.</p>
+                                <h3 style={{ fontFamily: FONT_DISPLAY, color: '#0F172A', fontSize: 22, margin: '8px 0 6px' }}>{selected.title}</h3>
+                                <p style={{ margin: 0, color: 'rgba(15,23,42,0.5)', fontSize: 13 }}>No login needed - we will email or call you back.</p>
                             </div>
                             <button type="button" onClick={closeModal} disabled={loading} aria-label="Close" className="quote-modal-close">×</button>
                         </div>
@@ -468,15 +469,15 @@ export function QuoteRequestSection() {
                                 </div>
                                 {portalToken && (
                                     <>
-                                        <p style={{ ...labelStyle, marginBottom: 12, color: 'rgba(255,255,255,0.5)' }}>
-                                            Step 2 — message {assignedAgent || 'your sales agent'} (saved on this device)
+                                        <p style={{ ...labelStyle, marginBottom: 12, color: 'rgba(15,23,42,0.55)' }}>
+                                            Step 2 - message {assignedAgent || 'your sales agent'} (saved on this device)
                                         </p>
                                         <QuoteGuestChat
                                             token={portalToken}
                                             compact
                                             onInvalidToken={() => setPortalToken('')}
                                         />
-                                        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', marginTop: 12, marginBottom: 0 }}>
+                                        <p style={{ fontSize: 12, color: 'rgba(15,23,42,0.38)', marginTop: 12, marginBottom: 0 }}>
                                             You can close this and return anytime from the chat section below. We also emailed you a backup link.
                                         </p>
                                     </>
@@ -484,15 +485,15 @@ export function QuoteRequestSection() {
                             </div>
                         ) : (
                             <form onSubmit={handleSubmit}>
-                                <p style={{ ...labelStyle, marginBottom: 14, color: 'rgba(255,255,255,0.45)' }}>Your contact details</p>
+                                <p style={{ ...labelStyle, marginBottom: 14, color: theme.textDim }}>Your contact details</p>
                                 <ContactFields form={form} setForm={setForm} />
-                                <p style={{ ...labelStyle, marginBottom: 14, marginTop: 4, color: 'rgba(255,255,255,0.45)' }}>Request details</p>
+                                <p style={{ ...labelStyle, marginBottom: 14, marginTop: 4, color: theme.textDim }}>Request details</p>
                                 <TypeSpecificFields quoteType={activeType} form={form} setForm={setForm} products={products} loadingProducts={loadingProducts} />
                                 <div style={{ marginBottom: 16, padding: 14, borderRadius: 10, border: '0.5px solid rgba(167,139,250,0.25)', background: 'rgba(167,139,250,0.06)' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: bundle ? 12 : 0 }}>
                                         <div>
                                             <div style={{ fontSize: 13, fontWeight: 600, color: '#C4B5FD' }}>Bundle assistant</div>
-                                            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', marginTop: 2 }}>
+                                            <div style={{ fontSize: 11, color: theme.textDim, marginTop: 2 }}>
                                                 Get a suggested product bundle based on your request
                                             </div>
                                         </div>
@@ -505,7 +506,7 @@ export function QuoteRequestSection() {
                                                 padding: '8px 14px',
                                                 borderRadius: 8,
                                                 border: 'none',
-                                                background: 'linear-gradient(135deg, #7C3AED, #2B5CE6)',
+                                                background: 'linear-gradient(135deg, #7C3AED, #002D72)',
                                                 color: '#fff',
                                                 cursor: bundleLoading ? 'not-allowed' : 'pointer',
                                                 opacity: bundleLoading ? 0.7 : 1,
@@ -516,24 +517,24 @@ export function QuoteRequestSection() {
                                     </div>
                                     {bundleError && <p style={{ color: '#F87171', fontSize: 12, margin: '0 0 8px' }}>{bundleError}</p>}
                                     {bundle && (
-                                        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.75)', lineHeight: 1.55 }}>
+                                        <div style={{ fontSize: 12, color: theme.textMuted, lineHeight: 1.55 }}>
                                             {bundle.summary && <p style={{ margin: '0 0 10px', lineHeight: 1.55 }}>{plainAiText(bundle.summary)}</p>}
                                             {bundle.installNote && (
-                                                <p style={{ margin: '0 0 10px', color: 'rgba(255,255,255,0.5)', fontSize: 11 }}>{bundle.installNote}</p>
+                                                <p style={{ margin: '0 0 10px', color: 'rgba(15,23,42,0.55)', fontSize: 11 }}>{bundle.installNote}</p>
                                             )}
                                             <ul style={{ margin: '0 0 10px', paddingLeft: 18 }}>
                                                 {(bundle.items || []).map((item) => (
                                                     <li key={item.productId || item.name} style={{ marginBottom: 4 }}>
                                                         {item.quantity}× {item.name}
-                                                        {item.lineTotal ? ` — ${item.lineTotal}` : ''}
-                                                        {item.reason ? <span style={{ color: 'rgba(255,255,255,0.4)' }}> ({item.reason})</span> : null}
+                                                        {item.lineTotal ? ` - ${item.lineTotal}` : ''}
+                                                        {item.reason ? <span style={{ color: 'rgba(15,23,42,0.45)' }}> ({item.reason})</span> : null}
                                                     </li>
                                                 ))}
                                             </ul>
                                             {bundle.estimatedTotal && (
                                                 <div style={{ fontWeight: 600, color: '#34D399', marginBottom: 10 }}>
                                                     Est. total: {bundle.estimatedTotal}
-                                                    {!bundle.aiEnabled && <span style={{ fontWeight: 400, color: 'rgba(255,255,255,0.4)', marginLeft: 8 }}>catalog-based</span>}
+                                                    {!bundle.aiEnabled && <span style={{ fontWeight: 400, color: 'rgba(15,23,42,0.45)', marginLeft: 8 }}>catalog-based</span>}
                                                 </div>
                                             )}
                                             {activeType !== 'installation_only' && bundle.items?.some((i) => i.productId) && (
@@ -569,10 +570,10 @@ export function QuoteRequestSection() {
             <style>{`
                 .quote-section {
                     padding: clamp(72px, 10vw, 104px) clamp(18px, 4vw, 44px);
-                    background: #060B1A;
-                    background-image: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(43,92,230,0.14), transparent);
-                    border-top: 0.5px solid rgba(99,179,237,0.08);
-                    border-bottom: 0.5px solid rgba(99,179,237,0.08);
+                    background: #FFFFFF;
+                    background-image: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,45,114,0.14), transparent);
+                    border-top: 0.5px solid rgba(0,45,114,0.08);
+                    border-bottom: 0.5px solid rgba(0,45,114,0.08);
                     font-family: ${FONT_BODY};
                 }
                 .quote-section-inner { max-width: 1100px; margin: 0 auto; }
@@ -582,10 +583,10 @@ export function QuoteRequestSection() {
                     color: #A78BFA; font-weight: 700; margin-bottom: 12px;
                 }
                 .quote-section-head h2 {
-                    font-family: ${FONT_DISPLAY}; font-size: clamp(28px, 4vw, 38px); color: #fff;
+                    font-family: ${FONT_DISPLAY}; font-size: clamp(28px, 4vw, 38px); color: #0F172A;
                     margin: 0 0 12px; font-weight: 700;
                 }
-                .quote-section-head p { font-size: 15px; color: rgba(255,255,255,0.48); line-height: 1.7; margin: 0; }
+                .quote-section-head p { font-size: 15px; color: rgba(15,23,42,0.5); line-height: 1.7; margin: 0; }
                 .quote-compare {
                     display: grid;
                     grid-template-columns: repeat(3, 1fr);
@@ -597,7 +598,7 @@ export function QuoteRequestSection() {
                     grid-template-columns: 56px 1fr;
                     gap: 0;
                     text-align: left;
-                    background: #0D1830;
+                    background: #F8FAFC;
                     border: 0.5px solid rgba(167,139,250,0.2);
                     border-radius: 14px;
                     overflow: hidden;
@@ -608,7 +609,7 @@ export function QuoteRequestSection() {
                 .quote-compare-card:hover {
                     border-color: rgba(167,139,250,0.45);
                     transform: translateY(-4px);
-                    box-shadow: 0 20px 40px rgba(43,92,230,0.2);
+                    box-shadow: 0 20px 40px rgba(0,45,114,0.2);
                 }
                 .quote-compare-step {
                     display: flex; align-items: center; justify-content: center;
@@ -622,35 +623,35 @@ export function QuoteRequestSection() {
                     color: #A78BFA; font-weight: 600;
                 }
                 .quote-compare-body h3 {
-                    font-family: ${FONT_DISPLAY}; font-size: 17px; color: #fff;
+                    font-family: ${FONT_DISPLAY}; font-size: 17px; color: #0F172A;
                     margin: 10px 0 8px; font-weight: 600;
                 }
-                .quote-compare-body p { font-size: 13px; color: rgba(255,255,255,0.48); line-height: 1.6; margin: 0 0 12px; }
-                .quote-compare-body ul { margin: 0 0 14px; padding-left: 16px; font-size: 12px; color: rgba(255,255,255,0.38); line-height: 1.55; }
+                .quote-compare-body p { font-size: 13px; color: rgba(15,23,42,0.5); line-height: 1.6; margin: 0 0 12px; }
+                .quote-compare-body ul { margin: 0 0 14px; padding-left: 16px; font-size: 12px; color: rgba(10,31,68,0.42); line-height: 1.55; }
                 .quote-compare-action { font-size: 12px; font-weight: 600; color: #C4B5FD; }
                 .quote-section-foot {
-                    text-align: center; margin-top: 28px; font-size: 13px; color: rgba(255,255,255,0.38);
+                    text-align: center; margin-top: 28px; font-size: 13px; color: rgba(10,31,68,0.42);
                 }
                 .quote-section-foot a { color: #A78BFA; font-weight: 600; text-decoration: none; }
                 .quote-submit-btn {
                     width: 100%; padding: 14px; border: none; border-radius: 9px;
                     background: linear-gradient(135deg, #7C3AED, #A78BFA);
-                    color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; font-family: ${FONT_BODY};
+                    color: #0F172A; font-size: 15px; font-weight: 600; cursor: pointer; font-family: ${FONT_BODY};
                 }
                 .quote-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
                 @media (max-width: 900px) { .quote-compare { grid-template-columns: 1fr; } }
                 .quote-modal-overlay {
-                    position: fixed; inset: 0; z-index: 1200; background: rgba(4,10,21,0.88);
+                    position: fixed; inset: 0; z-index: 1200; background: rgba(255,255,255,0.88);
                     backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; padding: 20px;
                 }
                 .quote-modal {
-                    background: #0D1830; border: 0.5px solid rgba(99,179,237,0.2); border-radius: 18px;
+                    background: #F8FAFC; border: 0.5px solid rgba(0,45,114,0.2); border-radius: 18px;
                     padding: 28px 26px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto;
                     box-shadow: 0 32px 64px rgba(0,0,0,0.45);
                 }
                 .quote-modal--chat { max-width: 640px; }
                 .quote-modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; gap: 12px; }
-                .quote-modal-close { background: none; border: none; color: rgba(255,255,255,0.45); font-size: 24px; cursor: pointer; }
+                .quote-modal-close { background: none; border: none; color: rgba(10,31,68,0.42); font-size: 24px; cursor: pointer; }
             `}</style>
         </section>
     );

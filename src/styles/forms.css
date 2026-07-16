@@ -1,19 +1,16 @@
 /**
- * Native form controls — readable on CyForce dark UI.
+ * Native form controls - readable on CyForce white / navy UI.
  * Loaded after Bootstrap so these rules take precedence.
- *
- * Closed select: dark field, light text.
- * Open dropdown (OS popup): light background, dark text — works on Windows Chrome/Edge.
  */
 
 :root {
-  --cyforce-select-bg: #0d1830;
-  --cyforce-select-text: #f1f5f9;
-  --cyforce-select-border: rgba(99, 179, 237, 0.25);
+  --cyforce-select-bg: #FFFFFF;
+  --cyforce-select-text: #0A1F44;
+  --cyforce-select-border: rgba(0, 45, 114, 0.18);
   --cyforce-option-bg: #ffffff;
-  --cyforce-option-text: #0f172a;
-  --cyforce-option-hover: #e0e7ff;
-  --cyforce-option-selected: #c7d2fe;
+  --cyforce-option-text: #0A1F44;
+  --cyforce-option-hover: #E8EEF7;
+  --cyforce-option-selected: #D6E0F0;
   --cyforce-option-muted: #64748b;
 }
 
@@ -32,7 +29,7 @@ select:disabled,
   cursor: not-allowed;
 }
 
-/* Native OS dropdown list — must be light bg + dark text on Windows */
+/* Native OS dropdown list - must be light bg + dark text on Windows */
 select option,
 select optgroup,
 .cyforce-select option,

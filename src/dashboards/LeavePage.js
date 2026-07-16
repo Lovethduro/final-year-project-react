@@ -13,7 +13,7 @@ function statusTone(status) {
 }
 
 function formatRole(role) {
-    if (!role) return '—';
+    if (!role) return '-';
     return role.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
@@ -151,7 +151,7 @@ export default function LeavePage() {
                             { key: 'startDate', label: 'Start' },
                             { key: 'endDate', label: 'End' },
                             { key: 'daysRequested', label: 'Days' },
-                            { key: 'reason', label: 'Reason', render: (r) => r.reason || '—' },
+                            { key: 'reason', label: 'Reason', render: (r) => r.reason || '-' },
                             {
                                 key: 'status',
                                 label: 'Status',
@@ -256,7 +256,7 @@ export default function LeavePage() {
                             { key: 'startDate', label: 'Start' },
                             { key: 'endDate', label: 'End' },
                             { key: 'daysRequested', label: 'Days' },
-                            { key: 'reason', label: 'Reason', render: (r) => r.reason || '—' },
+                            { key: 'reason', label: 'Reason', render: (r) => r.reason || '-' },
                             {
                                 key: 'actions',
                                 label: '',

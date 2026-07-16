@@ -1,5 +1,6 @@
 import { theme, dashboardCardStyle, inputStyle, selectStyle, buttonPrimary, buttonGhost } from '../styles/theme';
 import { useEffect, useState } from 'react';
+import { LuSearch } from 'react-icons/lu';
 
 export { inputStyle, selectStyle };
 
@@ -62,7 +63,7 @@ export function StatCard({ title, value, trend, status = 'info', progress, progr
             <div style={{ width: '100%', height: 2, background: accent, borderRadius: 1, opacity: 0.7 }} />
             {progress != null && (
                 <>
-                    <div style={{ height: 4, background: 'rgba(255,255,255,0.08)', borderRadius: 2, marginTop: 12 }}>
+                    <div style={{ height: 4, background: 'rgba(15,23,42,0.08)', borderRadius: 2, marginTop: 12 }}>
                         <div style={{ width: `${Math.min(100, progress)}%`, height: '100%', background: theme.primary, borderRadius: 2 }} />
                     </div>
                     {progressLabel && <div style={{ fontSize: 11, color: theme.textDim, marginTop: 4 }}>{progressLabel}</div>}
@@ -101,10 +102,35 @@ export function StatusBadge({ status, label }) {
     );
 }
 
-export function Card({ title, children, style }) {
+export function Card({ title, icon: Icon, action, children, style }) {
     return (
         <div style={{ ...dashboardCardStyle, color: theme.text, ...style }}>
-            {title && <h2 style={{ fontSize: 14, fontWeight: 600, color: theme.text, margin: '0 0 16px', fontFamily: theme.fontHeading }}>{title}</h2>}
+            {(title || action) && (
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: 12,
+                    marginBottom: 16,
+                }}>
+                    {title ? (
+                        <h2 style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 8,
+                            fontSize: 14,
+                            fontWeight: 600,
+                            color: theme.text,
+                            margin: 0,
+                            fontFamily: theme.fontHeading,
+                        }}>
+                            {Icon ? <Icon size={16} color={theme.primary} aria-hidden="true" /> : null}
+                            {title}
+                        </h2>
+                    ) : <span />}
+                    {action}
+                </div>
+            )}
             {children}
         </div>
     );
@@ -146,14 +172,14 @@ export function DataTable({ columns, rows, emptyMessage = 'No data found', onRow
                                 onClick={onRowClick ? () => onRowClick(row) : undefined}
                                 style={{
                                     cursor: onRowClick ? 'pointer' : undefined,
-                                    background: isActive ? 'rgba(43,92,230,0.12)' : undefined,
+                                    background: isActive ? 'rgba(0,45,114,0.12)' : undefined,
                                 }}
                             >
                                 {columns.map((col) => (
                                     <td key={col.key} style={{
                                         padding: compact ? '10px' : '14px',
                                         fontSize: compact ? 13 : 14,
-                                        color: 'rgba(255,255,255,0.85)',
+                                        color: theme.text,
                                         borderBottom: `0.5px solid ${theme.border}`,
                                     }}>
                                         {col.render ? col.render(row) : row[col.key]}
@@ -170,13 +196,26 @@ export function DataTable({ columns, rows, emptyMessage = 'No data found', onRow
 
 export function SearchInput({ value, onChange, placeholder = 'Search...' }) {
     return (
-        <input
-            className="cyforce-search-input"
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            placeholder={placeholder}
-            style={{ ...inputStyle, maxWidth: 320 }}
-        />
+        <div className="cyforce-search-input" style={{ position: 'relative', maxWidth: 320, width: '100%' }}>
+            <LuSearch
+                size={16}
+                aria-hidden="true"
+                style={{
+                    position: 'absolute',
+                    left: 12,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    color: theme.textDim,
+                    pointerEvents: 'none',
+                }}
+            />
+            <input
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                placeholder={placeholder}
+                style={{ ...inputStyle, maxWidth: '100%', paddingLeft: 36 }}
+            />
+        </div>
     );
 }
 
@@ -266,7 +305,7 @@ export function ConfirmDialog({
                 position: 'fixed',
                 inset: 0,
                 zIndex: 1000,
-                background: 'rgba(4,10,21,0.82)',
+                background: 'rgba(255,255,255,0.82)',
                 backdropFilter: 'blur(6px)',
                 display: 'flex',
                 alignItems: 'center',
@@ -367,7 +406,7 @@ export function ReviewNoteDialog({
                 position: 'fixed',
                 inset: 0,
                 zIndex: 1000,
-                background: 'rgba(4,10,21,0.82)',
+                background: 'rgba(255,255,255,0.82)',
                 backdropFilter: 'blur(6px)',
                 display: 'flex',
                 alignItems: 'center',

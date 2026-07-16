@@ -15,7 +15,7 @@ export default function QuotePortalPage() {
                         Your Quote Conversation
                     </h1>
                     <p style={{ color: theme.textMuted, fontSize: 14, margin: 0 }}>
-                        Message your sales agent here — no account required. This link is also saved when you visit from the same browser.
+                        Message your sales agent here - no account required. This link is also saved when you visit from the same browser.
                     </p>
                 </div>
 

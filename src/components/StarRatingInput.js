@@ -14,7 +14,7 @@ export function StarRatingInput({ value = 0, onChange, size = 28 }) {
                         border: 'none',
                         cursor: 'pointer',
                         fontSize: size,
-                        color: star <= value ? theme.warning : 'rgba(255,255,255,0.25)',
+                        color: star <= value ? theme.warning : 'rgba(0,45,114,0.2)',
                         padding: 0,
                         lineHeight: 1,
                     }}
@@ -33,7 +33,7 @@ export function AgentStarBadge({ rating = 0, count = 0 }) {
     if (!rating && !count) return null;
     return (
         <span style={{ fontSize: 12, color: theme.textMuted, fontWeight: 500 }}>
-            {rating ? `${Number(rating).toFixed(1)} / 5` : '—'}
+            {rating ? `${Number(rating).toFixed(1)} / 5` : '-'}
             {count > 0 && <span style={{ color: theme.textDim, fontWeight: 400 }}> ({count} reviews)</span>}
         </span>
     );

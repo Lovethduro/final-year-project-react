@@ -3,7 +3,7 @@ export const QUOTE_OFFERINGS = [
         id: 'products_only',
         title: 'Products Only',
         tag: 'Supply',
-        description: 'CCTV, solar, security gear, and enterprise products — supplied and delivered without installation.',
+        description: 'CCTV, solar, security gear, and enterprise products - supplied and delivered without installation.',
         highlights: ['Catalog products', 'Quantity pricing', 'Delivery to your address'],
     },
     {
@@ -17,7 +17,7 @@ export const QUOTE_OFFERINGS = [
         id: 'installation_only',
         title: 'Installation Only',
         tag: 'On-site',
-        description: 'You already own the equipment — we handle professional installation, configuration, and handover.',
+        description: 'You already own the equipment - we handle professional installation, configuration, and handover.',
         highlights: ['Existing equipment', 'Residential and commercial', 'Certified installers'],
     },
 ];

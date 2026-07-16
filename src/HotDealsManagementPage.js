@@ -206,8 +206,8 @@ export default function HotDealsManagementPage() {
         }
     };
 
-    const productName = (productId) => products.find((p) => p.id === productId)?.name || '—';
-    const inputStyle = { width: '100%', background: 'rgba(255,255,255,0.05)', border: `0.5px solid ${theme.border}`, borderRadius: 8, padding: 10, color: theme.text, fontFamily: theme.fontBody, marginBottom: 12 };
+    const productName = (productId) => products.find((p) => p.id === productId)?.name || '-';
+    const inputStyle = { width: '100%', background: 'rgba(15,23,42,0.04)', border: `0.5px solid ${theme.border}`, borderRadius: 8, padding: 10, color: theme.text, fontFamily: theme.fontBody, marginBottom: 12 };
 
     return (
         <>
@@ -230,7 +230,7 @@ export default function HotDealsManagementPage() {
                             <option value="">Select product</option>
                             {products.map((product) => (
                                 <option key={product.id} value={product.id}>
-                                    {product.name} — ₦{Number(product.price).toLocaleString()}
+                                    {product.name} - ₦{Number(product.price).toLocaleString()}
                                 </option>
                             ))}
                         </Select>
@@ -289,15 +289,15 @@ export default function HotDealsManagementPage() {
                         { key: 'productId', label: 'Product', render: (r) => productName(r.productId) },
                         { key: 'imageUrl', label: 'Image', render: (r) => r.imageUrl ? (
                             <img src={assetUrl(r.imageUrl)} alt="" style={{ width: 48, height: 36, objectFit: 'cover', borderRadius: 6 }} />
-                        ) : '—' },
-                        { key: 'price', label: 'Price', render: (r) => r.price != null ? `₦${Number(r.price).toLocaleString()}` : '—' },
+                        ) : '-' },
+                        { key: 'price', label: 'Price', render: (r) => r.price != null ? `₦${Number(r.price).toLocaleString()}` : '-' },
                         {
                             key: 'schedule',
                             label: 'Schedule',
                             render: (r) => (
                                 r.startsAt || r.expiresAt
                                     ? `${r.startsAt ? new Date(r.startsAt).toLocaleString() : '?'} → ${r.expiresAt ? new Date(r.expiresAt).toLocaleString() : '?'}`
-                                    : '—'
+                                    : '-'
                             ),
                         },
                         {

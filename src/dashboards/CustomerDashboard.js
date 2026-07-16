@@ -57,7 +57,7 @@ export default function CustomerDashboard() {
     const subscriptions = products.length > 0 ? Math.min(products.length, 3) : 0;
 
     const activity = tickets.slice(0, 5).map((t) => ({
-        title: `${t.subject} — ${t.status}`,
+        title: `${t.subject} - ${t.status}`,
         time: formatRelative(t.createdAt),
     }));
 
@@ -74,7 +74,7 @@ export default function CustomerDashboard() {
         }
     };
 
-    const inputStyle = { width: '100%', background: 'rgba(255,255,255,0.05)', border: `0.5px solid ${theme.border}`, borderRadius: 8, padding: 10, color: theme.text, fontFamily: theme.fontBody, marginBottom: 12 };
+    const inputStyle = { width: '100%', background: 'rgba(15,23,42,0.04)', border: `0.5px solid ${theme.border}`, borderRadius: 8, padding: 10, color: theme.text, fontFamily: theme.fontBody, marginBottom: 12 };
 
     return (
         <>
@@ -159,11 +159,11 @@ export default function CustomerDashboard() {
                     <Card title="Recent Support Tickets">
                         <DataTable
                             columns={[
-                                { key: 'id', label: 'Ticket #', render: (r) => r.id?.slice(-6).toUpperCase() || '—' },
+                                { key: 'id', label: 'Ticket #', render: (r) => r.id?.slice(-6).toUpperCase() || '-' },
                                 { key: 'subject', label: 'Subject' },
                                 { key: 'status', label: 'Status', render: (r) => <StatusBadge status={r.status === 'resolved' ? 'success' : 'warning'} label={r.status} /> },
                                 { key: 'priority', label: 'Priority' },
-                                { key: 'createdAt', label: 'Date', render: (r) => r.createdAt ? new Date(r.createdAt).toLocaleDateString() : '—' },
+                                { key: 'createdAt', label: 'Date', render: (r) => r.createdAt ? new Date(r.createdAt).toLocaleDateString() : '-' },
                             ]}
                             rows={tickets.slice(0, 6)}
                             emptyMessage="No support tickets yet."
@@ -189,7 +189,7 @@ export default function CustomerDashboard() {
                     <Card title="Account Summary">
                         <div style={{ fontSize: 13, color: theme.textMuted, lineHeight: 1.8 }}>
                             <div><span style={{ color: theme.textDim }}>Account type:</span> {profile?.customerType || 'Individual'}</div>
-                            <div><span style={{ color: theme.textDim }}>Member since:</span> {profile?.createdAt || '—'}</div>
+                            <div><span style={{ color: theme.textDim }}>Member since:</span> {profile?.createdAt || '-'}</div>
                             <div><span style={{ color: theme.textDim }}>Email:</span> {auth.email}</div>
                             <div><span style={{ color: theme.textDim }}>Payment method:</span> {formatPaymentMethod(profile?.preferredPaymentMethod)}</div>
                             <div style={{ marginTop: 12 }}>

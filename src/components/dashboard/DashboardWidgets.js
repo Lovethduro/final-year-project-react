@@ -1,11 +1,28 @@
 import { Link } from 'react-router-dom';
 import { theme, dashboardCardStyle } from '../../styles/theme';
 
-export function MetricCard({ label, value, detail, accent = theme.accent, trend }) {
+export function MetricCard({ label, value, detail, accent = theme.accent, trend, icon: Icon }) {
     return (
         <div style={{ ...dashboardCardStyle, padding: '16px 20px' }}>
-            <div style={{ fontSize: 11, letterSpacing: '0.05em', textTransform: 'uppercase', color: theme.textDim, marginBottom: 8, fontWeight: 500 }}>
-                {label}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10, marginBottom: 8 }}>
+                <div style={{ fontSize: 11, letterSpacing: '0.05em', textTransform: 'uppercase', color: theme.textDim, fontWeight: 500 }}>
+                    {label}
+                </div>
+                {Icon && (
+                    <span style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: 32,
+                        height: 32,
+                        borderRadius: 8,
+                        background: `${accent}14`,
+                        color: accent,
+                        flexShrink: 0,
+                    }}>
+                        <Icon size={16} aria-hidden="true" />
+                    </span>
+                )}
             </div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
                 <div style={{ fontSize: value?.length > 8 ? 22 : 26, fontWeight: 600, color: theme.text, lineHeight: 1.2 }}>
@@ -59,19 +76,28 @@ export function QuickActions({ actions }) {
             <h2 style={{ fontSize: 14, fontWeight: 600, color: theme.text, margin: '0 0 14px', letterSpacing: '0.01em' }}>Quick Actions</h2>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {actions.map((a) => {
+                    const Icon = a.icon;
                     const style = {
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 8,
                         padding: '8px 14px',
                         borderRadius: 6,
                         textDecoration: 'none',
                         color: theme.text,
                         cursor: 'pointer',
                         border: `1px solid ${theme.border}`,
-                        background: 'rgba(255,255,255,0.03)',
+                        background: '#FFFFFF',
                         fontSize: 13,
                         fontWeight: 500,
                         fontFamily: theme.fontBody,
                     };
-                    const inner = <span>{a.label}</span>;
+                    const inner = (
+                        <>
+                            {Icon ? <Icon size={15} color={theme.primary} aria-hidden="true" /> : null}
+                            <span>{a.label}</span>
+                        </>
+                    );
                     if (a.to) return <Link key={a.label} to={a.to} style={style}>{inner}</Link>;
                     return <button key={a.label} type="button" onClick={a.onClick} style={style}>{inner}</button>;
                 })}
@@ -189,7 +215,7 @@ export function GaugeChart({ percent = 0, label = '', size = 120 }) {
         <div style={{ textAlign: 'center' }}>
             <div style={{
                 width: size, height: size, borderRadius: '50%', margin: '0 auto',
-                background: `conic-gradient(${color} ${p * 3.6}deg, rgba(255,255,255,0.08) 0)`,
+                background: `conic-gradient(${color} ${p * 3.6}deg, rgba(15,23,42,0.08) 0)`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 position: 'relative',
             }}>
@@ -217,7 +243,7 @@ export function HorizontalBarChart({ items, maxValue }) {
                         <span style={{ color: theme.text }}>{item.label}{item.overloaded ? ' (overloaded)' : ''}</span>
                         <span style={{ color: theme.textMuted }}>{item.value}</span>
                     </div>
-                    <div style={{ height: 8, background: 'rgba(255,255,255,0.08)', borderRadius: 4 }}>
+                    <div style={{ height: 8, background: 'rgba(15,23,42,0.08)', borderRadius: 4 }}>
                         <div style={{
                             width: `${(item.value / max) * 100}%`,
                             height: '100%',
@@ -248,7 +274,7 @@ export function StatusToggle({ value, options, onChange }) {
             {options.map((opt) => (
                 <button key={opt.value} type="button" onClick={() => onChange(opt.value)} style={{
                     padding: '6px 12px', borderRadius: 6, border: `1px solid ${value === opt.value ? theme.accent : theme.border}`,
-                    background: value === opt.value ? 'rgba(43,92,230,0.15)' : 'transparent',
+                    background: value === opt.value ? 'rgba(0,45,114,0.15)' : 'transparent',
                     color: value === opt.value ? theme.text : theme.textMuted,
                     fontSize: 12, cursor: 'pointer', fontFamily: theme.fontBody,
                     display: 'flex', alignItems: 'center', gap: 6,
@@ -270,7 +296,7 @@ export function ProgressStat({ title, value, target, unit = '' }) {
                 <span style={{ fontSize: 12, color: theme.textMuted }}>{pct}%</span>
             </div>
             <div style={{ fontSize: 26, fontWeight: 600, color: theme.text, marginBottom: 10 }}>{value}{unit}</div>
-            <div style={{ height: 4, background: 'rgba(255,255,255,0.08)', borderRadius: 2 }}>
+            <div style={{ height: 4, background: 'rgba(15,23,42,0.08)', borderRadius: 2 }}>
                 <div style={{ width: `${pct}%`, height: '100%', background: theme.primary, borderRadius: 2 }} />
             </div>
             <div style={{ fontSize: 11, color: theme.textDim, marginTop: 6 }}>Target: {target}{unit}</div>

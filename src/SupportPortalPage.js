@@ -58,7 +58,7 @@ export default function SupportPortalPage() {
 
     const inputStyle = {
         flex: 1,
-        background: 'rgba(255,255,255,0.05)',
+        background: 'rgba(15,23,42,0.04)',
         border: `0.5px solid ${theme.border}`,
         borderRadius: 8,
         padding: '10px 12px',
@@ -78,7 +78,7 @@ export default function SupportPortalPage() {
                         Your Support Ticket
                     </h1>
                     <p style={{ color: theme.textMuted, fontSize: 14, margin: 0 }}>
-                        Track your request and reply to our support team — no account required.
+                        Track your request and reply to our support team - no account required.
                     </p>
                 </div>
 
@@ -146,8 +146,7 @@ export default function SupportPortalPage() {
                                             type="submit"
                                             disabled={sending || !text.trim()}
                                             style={{
-                                                background: theme.primary,
-                                                color: '#fff',
+                                                background: theme.primary, color: '#fff',
                                                 border: 'none',
                                                 borderRadius: 8,
                                                 padding: '10px 16px',

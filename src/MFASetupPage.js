@@ -33,7 +33,7 @@ function ParticleBackground() {
                     speedX: (Math.random() - 0.5) * 0.5,
                     speedY: (Math.random() - 0.5) * 0.3,
                     opacity: Math.random() * 0.3 + 0.1,
-                    color: `rgba(56, 189, 248, ${Math.random() * 0.2 + 0.05})`
+                    color: `rgba(0, 45, 114, ${Math.random() * 0.2 + 0.05})`
                 });
             }
         };
@@ -141,14 +141,14 @@ function OTPInput({ value, onChange, length = 6 }) {
                         fontSize: "20px",
                         fontWeight: "600",
                         background: "rgba(15,23,42,0.5)",
-                        border: `1px solid ${value[index] ? "#2DD4BF" : "rgba(51,65,85,1)"}`,
+                        border: `1px solid ${value[index] ? "#1A4A9E" : "rgba(51,65,85,1)"}`,
                         borderRadius: "10px",
-                        color: "#fff",
+                        color: "#0F172A",
                         outline: "none",
                         transition: "all 0.2s"
                     }}
-                    onFocus={(e) => e.target.style.borderColor = "#2DD4BF"}
-                    onBlur={(e) => e.target.style.borderColor = value[index] ? "#2DD4BF" : "rgba(51,65,85,1)"}
+                    onFocus={(e) => e.target.style.borderColor = "#1A4A9E"}
+                    onBlur={(e) => e.target.style.borderColor = value[index] ? "#1A4A9E" : "rgba(51,65,85,1)"}
                 />
             ))}
         </div>
@@ -182,7 +182,7 @@ function formatSecretKey(secret) {
 }
 
 const MFA_METHODS = [
-    { value: "authenticator", label: "Authenticator App", description: "Google Authenticator, Authy, etc. — use setup key if QR scan fails", icon: "📱", recommended: true },
+    { value: "authenticator", label: "Authenticator App", description: "Google Authenticator, Authy, etc. - use setup key if QR scan fails", icon: "📱", recommended: true },
     { value: "email", label: "Email Verification", description: "Receive codes via email", icon: "✉️", recommended: false },
 ];
 
@@ -208,7 +208,7 @@ function MFASetupPage() {
                 width: 32,
                 height: 32,
                 borderRadius: 8,
-                border: '1px solid rgba(255,255,255,0.08)',
+                border: '1px solid rgba(15,23,42,0.08)',
                 background: 'rgba(255,255,255,0.04)',
                 color: 'rgba(255,255,255,0.45)',
                 fontSize: 20,
@@ -222,11 +222,11 @@ function MFASetupPage() {
             onMouseEnter={(e) => {
                 e.currentTarget.style.color = 'rgba(255,255,255,0.8)';
                 e.currentTarget.style.borderColor = 'rgba(255,255,255,0.16)';
-                e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
+                e.currentTarget.style.background = 'rgba(15,23,42,0.08)';
             }}
             onMouseLeave={(e) => {
                 e.currentTarget.style.color = 'rgba(255,255,255,0.45)';
-                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
+                e.currentTarget.style.borderColor = 'rgba(15,23,42,0.08)';
                 e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
             }}
         >
@@ -453,7 +453,7 @@ function MFASetupPage() {
                     <div style={{
                         position: "relative",
                         backdropFilter: "blur(12px)",
-                        background: "rgba(255,255,255,0.05)",
+                        background: "rgba(15,23,42,0.04)",
                         border: "1px solid rgba(255,255,255,0.1)",
                         borderRadius: "20px",
                         boxShadow: "0 25px 50px rgba(0,0,0,0.3)",
@@ -475,10 +475,10 @@ function MFASetupPage() {
                                     <span style={{ fontSize: "32px" }}>✓</span>
                                 </div>
                             </div>
-                            <h1 style={{ fontSize: "24px", fontWeight: "bold", color: "#fff", marginBottom: "12px" }}>
+                            <h1 style={{ fontSize: "24px", fontWeight: "bold", color: "#0F172A", marginBottom: "12px" }}>
                                 MFA Enabled Successfully!
                             </h1>
-                            <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.5)", marginBottom: "24px", lineHeight: "1.5" }}>
+                            <p style={{ fontSize: "14px", color: "rgba(15,23,42,0.55)", marginBottom: "24px", lineHeight: "1.5" }}>
                                 Your account is now protected with multi-factor authentication.
                             </p>
                             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -492,12 +492,12 @@ function MFASetupPage() {
                                     style={{
                                         width: "100%",
                                         padding: "12px",
-                                        background: "linear-gradient(135deg, #2563EB, #2DD4BF)",
+                                        background: "linear-gradient(135deg, #002D72, #1A4A9E)",
                                         border: "none",
                                         borderRadius: "10px",
                                         fontSize: "14px",
                                         fontWeight: "600",
-                                        color: "#fff",
+                                        color: "#0F172A",
                                         cursor: "pointer",
                                         transition: "transform 0.2s"
                                     }}
@@ -555,7 +555,7 @@ function MFASetupPage() {
                 <div style={{
                     position: "relative",
                     backdropFilter: "blur(12px)",
-                    background: "rgba(255,255,255,0.05)",
+                    background: "rgba(15,23,42,0.04)",
                     border: "1px solid rgba(255,255,255,0.1)",
                     borderRadius: "20px",
                     boxShadow: "0 25px 50px rgba(0,0,0,0.3)",
@@ -563,26 +563,26 @@ function MFASetupPage() {
                 }}>
                     {cardDismiss}
                     {/* Header */}
-                    <div style={{ padding: "32px 32px 24px 32px", textAlign: "center", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                    <div style={{ padding: "32px 32px 24px 32px", textAlign: "center", borderBottom: "1px solid rgba(15,23,42,0.04)" }}>
                         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
-                            <img src={logo} alt="CyForce Technologies" style={{ height: "55px", width: "auto", objectFit: "contain", filter: "drop-shadow(0 0 8px rgba(56,189,248,0.4))" }} />
+                            <img src={logo} alt="CyForce Technologies" style={{ height: "55px", width: "auto", objectFit: "contain", filter: "drop-shadow(0 0 8px rgba(0,45,114,0.4))" }} />
                             <div style={{ textAlign: "center" }}>
-                                <span style={{ fontSize: "20px", fontWeight: "bold", letterSpacing: "1px", color: "#fff" }}>CyForce</span>
-                                <div style={{ fontSize: "10px", fontWeight: "500", letterSpacing: "0.2em", color: "#2DD4BF", textTransform: "uppercase" }}>Technologies</div>
+                                <span style={{ fontSize: "20px", fontWeight: "bold", letterSpacing: "1px", color: "#0F172A" }}>CyForce</span>
+                                <div style={{ fontSize: "10px", fontWeight: "500", letterSpacing: "0.2em", color: "#1A4A9E", textTransform: "uppercase" }}>Technologies</div>
                             </div>
                         </div>
-                        <h1 style={{ fontSize: "24px", fontWeight: "bold", color: "#fff", marginTop: "24px", marginBottom: "8px" }}>
+                        <h1 style={{ fontSize: "24px", fontWeight: "bold", color: "#0F172A", marginTop: "24px", marginBottom: "8px" }}>
                             {step === "select" && (isProfileSetup ? "Enable Two-Factor Authentication" : "Setup Two-Factor Authentication")}
                             {step === "setup" && "Add CyForce to your authenticator app"}
                             {step === "verify" && (
                                 selectedMethod === "email" ? "Verify Email Code" : "Verify Your Code"
                             )}
                         </h1>
-                        <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.5)" }}>
+                        <p style={{ fontSize: "14px", color: "rgba(15,23,42,0.55)" }}>
                             {step === "select" && (isProfileSetup
                                 ? "Protect your account with an authenticator app or email codes"
                                 : "Add an extra layer of security to your account")}
-                            {step === "setup" && "On a laptop? Enter the setup key manually — Google Authenticator often cannot scan desktop screens."}
+                            {step === "setup" && "On a laptop? Enter the setup key manually - Google Authenticator often cannot scan desktop screens."}
                             {step === "verify" && (
                                 selectedMethod === "email" ? "Enter the code we sent to your email"
                                     : "Enter the 6-digit code from your app"
@@ -616,7 +616,7 @@ function MFASetupPage() {
                                 border: "1px solid rgba(45,212,191,0.3)",
                                 borderRadius: "10px"
                             }}>
-                                <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#2DD4BF", flexShrink: 0 }} />
+                                <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#1A4A9E", flexShrink: 0 }} />
                                 <p style={{ fontSize: "12px", color: "#5EEAD4" }}>{infoMessage}</p>
                             </div>
                         )}
@@ -661,17 +661,17 @@ function MFASetupPage() {
                                                         fontSize: "10px",
                                                         fontWeight: "600",
                                                         background: "rgba(45,212,191,0.2)",
-                                                        color: "#2DD4BF",
+                                                        color: "#1A4A9E",
                                                         borderRadius: "20px"
                                                     }}>
                                                         RECOMMENDED
                                                     </span>
                                                 )}
                                             </div>
-                                            <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", marginTop: "4px" }}>{method.description}</p>
+                                            <p style={{ fontSize: "11px", color: "rgba(15,23,42,0.45)", marginTop: "4px" }}>{method.description}</p>
                                         </div>
                                         {selectedMethod === method.value && (
-                                            <span style={{ fontSize: "18px", color: "#2DD4BF", marginLeft: "8px" }}>✓</span>
+                                            <span style={{ fontSize: "18px", color: "#1A4A9E", marginLeft: "8px" }}>✓</span>
                                         )}
                                     </button>
                                 ))}
@@ -682,12 +682,12 @@ function MFASetupPage() {
                                         width: "100%",
                                         padding: "12px",
                                         marginTop: "8px",
-                                        background: "linear-gradient(135deg, #2563EB, #2DD4BF)",
+                                        background: "linear-gradient(135deg, #002D72, #1A4A9E)",
                                         border: "none",
                                         borderRadius: "10px",
                                         fontSize: "14px",
                                         fontWeight: "600",
-                                        color: "#fff",
+                                        color: "#0F172A",
                                         cursor: isLoading ? "not-allowed" : "pointer",
                                         opacity: isLoading ? 0.7 : 1,
                                         transition: "transform 0.2s"
@@ -714,7 +714,7 @@ function MFASetupPage() {
                                     <p style={{ fontSize: "13px", color: "#FDE68A", margin: 0, lineHeight: 1.55 }}>
                                         <strong>Can&apos;t scan the code?</strong> Google Authenticator on phones often shows
                                         &quot;Try using camera on your iPhone or iPad&quot; when the QR code is on a laptop screen.
-                                        Use <strong>Enter a setup key</strong> below instead — or choose Email on the previous step.
+                                        Use <strong>Enter a setup key</strong> below instead - or choose Email on the previous step.
                                     </p>
                                 </div>
 
@@ -724,7 +724,7 @@ function MFASetupPage() {
                                     borderRadius: "12px",
                                     border: "1px solid rgba(45,212,191,0.35)",
                                 }}>
-                                    <p style={{ fontSize: "13px", fontWeight: 600, color: "#2DD4BF", margin: "0 0 12px" }}>
+                                    <p style={{ fontSize: "13px", fontWeight: 600, color: "#1A4A9E", margin: "0 0 12px" }}>
                                         Recommended: Enter setup key manually
                                     </p>
                                     <ol style={{ margin: "0 0 14px", paddingLeft: "18px", fontSize: "12px", color: "rgba(255,255,255,0.65)", lineHeight: 1.7 }}>
@@ -735,10 +735,10 @@ function MFASetupPage() {
                                     </ol>
                                     <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.45)", margin: "0 0 8px" }}>Your setup key</p>
                                     <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "12px", background: "rgba(15,23,42,0.7)", border: "1px solid rgba(51,65,85,1)", borderRadius: "10px" }}>
-                                        <code style={{ flex: 1, fontSize: "15px", color: "#fff", fontFamily: "monospace", letterSpacing: "0.08em", wordBreak: "break-all" }}>
+                                        <code style={{ flex: 1, fontSize: "15px", color: "#0F172A", fontFamily: "monospace", letterSpacing: "0.08em", wordBreak: "break-all" }}>
                                             {formatSecretKey(secretKey)}
                                         </code>
-                                        <button type="button" onClick={handleCopySecret} style={{ padding: "8px 12px", background: "rgba(43,92,230,0.35)", border: "none", cursor: "pointer", borderRadius: "6px", color: "#fff", fontSize: "12px", whiteSpace: "nowrap" }}>
+                                        <button type="button" onClick={handleCopySecret} style={{ padding: "8px 12px", background: "rgba(0,45,114,0.35)", border: "none", cursor: "pointer", borderRadius: "6px", color: "#0F172A", fontSize: "12px", whiteSpace: "nowrap" }}>
                                             {copied ? "Copied!" : "Copy key"}
                                         </button>
                                     </div>
@@ -746,7 +746,7 @@ function MFASetupPage() {
 
                                 <div style={{ textAlign: "center" }}>
                                     <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.45)", margin: "0 0 12px" }}>
-                                        Optional — scan with iPhone/iPad camera (point at this screen)
+                                        Optional - scan with iPhone/iPad camera (point at this screen)
                                     </p>
                                     <div style={{ display: "inline-block", padding: "20px", background: "#fff", borderRadius: "12px", boxShadow: "0 4px 24px rgba(0,0,0,0.25)" }}>
                                         {otpAuthUrl ? (
@@ -762,12 +762,12 @@ function MFASetupPage() {
                                 <button type="button" onClick={() => { setOtp(''); setStep('verify'); }} style={{
                                     width: "100%",
                                     padding: "12px",
-                                    background: "linear-gradient(135deg, #2563EB, #2DD4BF)",
+                                    background: "linear-gradient(135deg, #002D72, #1A4A9E)",
                                     border: "none",
                                     borderRadius: "10px",
                                     fontSize: "14px",
                                     fontWeight: "600",
-                                    color: "#fff",
+                                    color: "#0F172A",
                                     cursor: "pointer",
                                     transition: "transform 0.2s"
                                 }}
@@ -782,7 +782,7 @@ function MFASetupPage() {
                                     border: "1px solid rgba(51,65,85,1)",
                                     borderRadius: "10px",
                                     fontSize: "13px",
-                                    color: "rgba(255,255,255,0.55)",
+                                    color: "rgba(15,23,42,0.55)",
                                     cursor: "pointer",
                                 }}>
                                     Use Email instead
@@ -794,7 +794,7 @@ function MFASetupPage() {
                                     border: "1px solid rgba(51,65,85,1)",
                                     borderRadius: "10px",
                                     fontSize: "13px",
-                                    color: "rgba(255,255,255,0.55)",
+                                    color: "rgba(15,23,42,0.55)",
                                     cursor: isLoading ? "not-allowed" : "pointer",
                                 }}>
                                     {isLoading ? "Resetting…" : "Start over (new setup key)"}
@@ -811,9 +811,9 @@ function MFASetupPage() {
                                 border: "1px solid rgba(51,65,85,0.5)",
                                 textAlign: "center"
                             }}>
-                                <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>
+                                <p style={{ fontSize: "12px", color: "rgba(15,23,42,0.55)" }}>
                                     Enter the 6-digit code sent to{" "}
-                                    <strong style={{ color: "#fff" }}>{userEmail}</strong>
+                                    <strong style={{ color: "#0F172A" }}>{userEmail}</strong>
                                 </p>
                             </div>
                         )}
@@ -828,10 +828,10 @@ function MFASetupPage() {
                                 border: "1px solid rgba(51,65,85,0.5)",
                                 textAlign: "center",
                             }}>
-                                <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.55)", marginBottom: 4 }}>
-                                    Use the 6-digit code for <strong style={{ color: "#fff" }}>CyForce</strong> ({userEmail})
+                                <p style={{ fontSize: "12px", color: "rgba(15,23,42,0.55)", marginBottom: 4 }}>
+                                    Use the 6-digit code for <strong style={{ color: "#0F172A" }}>CyForce</strong> ({userEmail})
                                 </p>
-                                <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)" }}>
+                                <p style={{ fontSize: "11px", color: "rgba(15,23,42,0.45)" }}>
                                     If codes keep failing, tap “Start over”, delete old CyForce entries in your app, then add the account again with a new setup key.
                                 </p>
                             </div>
@@ -866,12 +866,12 @@ function MFASetupPage() {
                                 <button onClick={handleVerify} disabled={otp.length !== 6 || isVerifying} style={{
                                     width: "100%",
                                     padding: "12px",
-                                    background: "linear-gradient(135deg, #2563EB, #2DD4BF)",
+                                    background: "linear-gradient(135deg, #002D72, #1A4A9E)",
                                     border: "none",
                                     borderRadius: "10px",
                                     fontSize: "14px",
                                     fontWeight: "600",
-                                    color: "#fff",
+                                    color: "#0F172A",
                                     cursor: otp.length === 6 && !isVerifying ? "pointer" : "not-allowed",
                                     opacity: otp.length === 6 && !isVerifying ? 1 : 0.7,
                                     transition: "transform 0.2s"
@@ -883,14 +883,14 @@ function MFASetupPage() {
                                     variant="subtle"
                                     label="Return to setup"
                                     onClick={() => { setOtp(''); setStep(selectedMethod === "authenticator" ? "setup" : "select"); }}
-                                    style={{ color: 'rgba(255,255,255,0.55)' }}
+                                    style={{ color: 'rgba(15,23,42,0.55)' }}
                                 />
                                 {selectedMethod === "authenticator" && (
                                     <button type="button" onClick={handleStartOver} disabled={isLoading} style={{
                                         background: "none",
                                         border: "none",
                                         fontSize: "13px",
-                                        color: "#2DD4BF",
+                                        color: "#1A4A9E",
                                         cursor: isLoading ? "not-allowed" : "pointer",
                                     }}>
                                         Start over with a new setup key
@@ -904,12 +904,12 @@ function MFASetupPage() {
                     <div style={{
                         padding: "16px 32px",
                         background: "rgba(15,23,42,0.3)",
-                        borderTop: "1px solid rgba(255,255,255,0.05)",
+                        borderTop: "1px solid rgba(15,23,42,0.04)",
                         textAlign: "center"
                     }}>
-                        <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>
+                        <p style={{ fontSize: "12px", color: "rgba(15,23,42,0.55)" }}>
                             Need help?{" "}
-                            <Link to="/help" style={{ color: "#2DD4BF", textDecoration: "none" }}>
+                            <Link to="/help" style={{ color: "#1A4A9E", textDecoration: "none" }}>
                                 Visit Help Center
                             </Link>
                         </p>
@@ -925,7 +925,7 @@ function MFASetupPage() {
                     justifyContent: "center",
                     gap: "24px",
                     fontSize: "11px",
-                    color: "rgba(255,255,255,0.4)"
+                    color: "rgba(15,23,42,0.45)"
                 }}>
                     <Link to="/privacy" style={{ color: "inherit", textDecoration: "none" }}>Privacy Policy</Link>
                     <Link to="/terms" style={{ color: "inherit", textDecoration: "none" }}>Terms of Service</Link>

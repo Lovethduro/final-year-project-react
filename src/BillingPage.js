@@ -54,7 +54,7 @@ export default function BillingPage() {
                 token: session.token,
             }, session.rememberMe);
         } catch {
-            // Non-blocking — selection still applies for this session
+            // Non-blocking - selection still applies for this session
         }
     };
 
@@ -127,7 +127,7 @@ export default function BillingPage() {
                 {(isStaff ? ['transactions'] : ['invoices', 'transactions']).map((t) => (
                     <button key={t} type="button" onClick={() => setTab(t)} style={{
                         padding: '8px 16px', borderRadius: 8, border: 'none', cursor: 'pointer',
-                        background: tab === t ? theme.primary : 'rgba(255,255,255,0.05)',
+                        background: tab === t ? theme.primary : 'rgba(15,23,42,0.04)',
                         color: tab === t ? '#fff' : theme.textMuted, textTransform: 'capitalize',
                     }}>
                         {t}
@@ -145,7 +145,7 @@ export default function BillingPage() {
                         columns={[
                             { key: 'description', label: 'Description' },
                             { key: 'amount', label: 'Amount', render: (r) => formatAmount(r.amount) },
-                            { key: 'dueDate', label: 'Due', render: (r) => r.dueDate ? new Date(r.dueDate).toLocaleDateString() : '—' },
+                            { key: 'dueDate', label: 'Due', render: (r) => r.dueDate ? new Date(r.dueDate).toLocaleDateString() : '-' },
                             { key: 'status', label: 'Status', render: (r) => <StatusBadge status={r.status === 'paid' ? 'success' : 'warning'} label={r.status} /> },
                             { key: 'actions', label: '', render: (r) => r.status !== 'paid' && (
                                 <PrimaryButton onClick={() => payInvoice(r)} disabled={paying === r.id} style={{ fontSize: 12, padding: '6px 12px' }}>
@@ -164,7 +164,7 @@ export default function BillingPage() {
                             { key: 'provider', label: 'Provider' },
                             { key: 'amount', label: 'Amount', render: (r) => formatAmount(r.amount) },
                             { key: 'status', label: 'Status', render: (r) => <StatusBadge status={r.status === 'success' ? 'success' : 'warning'} label={r.status} /> },
-                            { key: 'createdAt', label: 'Date', render: (r) => r.createdAt ? new Date(r.createdAt).toLocaleString() : '—' },
+                            { key: 'createdAt', label: 'Date', render: (r) => r.createdAt ? new Date(r.createdAt).toLocaleString() : '-' },
                         ]}
                         rows={transactions}
                     />

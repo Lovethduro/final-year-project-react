@@ -77,7 +77,7 @@ function TransferActions({ ticketId, transferringId, transferMode, transferNote,
                         <option key={a.id} value={a.id}>{a.name} ({a.openTickets} open)</option>
                     ))}
                 </Select>
-                <input value={transferNote} onChange={(e) => onNoteChange(e.target.value)} placeholder="Handoff note for the next agent" style={{ fontSize: 12, padding: '6px 8px', borderRadius: 6, border: `0.5px solid ${theme.border}`, background: 'rgba(255,255,255,0.05)', color: theme.text }} />
+                <input value={transferNote} onChange={(e) => onNoteChange(e.target.value)} placeholder="Handoff note for the next agent" style={{ fontSize: 12, padding: '6px 8px', borderRadius: 6, border: `0.5px solid ${theme.border}`, background: 'rgba(15,23,42,0.04)', color: theme.text }} />
                 <div style={{ display: 'flex', gap: 6 }}>
                     <PrimaryButton onClick={() => onConfirmAgent(ticketId)} style={{ fontSize: 11, padding: '4px 10px' }}>Confirm transfer</PrimaryButton>
                     <button type="button" onClick={onCancel} style={{ fontSize: 11, padding: '4px 10px', background: 'transparent', border: `0.5px solid ${theme.border}`, color: theme.textDim, borderRadius: 6, cursor: 'pointer' }}>Cancel</button>
@@ -88,7 +88,7 @@ function TransferActions({ ticketId, transferringId, transferMode, transferNote,
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 8, maxWidth: 320 }}>
-            <input value={transferNote} onChange={(e) => onNoteChange(e.target.value)} placeholder="Note for sales" style={{ fontSize: 12, padding: '6px 8px', borderRadius: 6, border: `0.5px solid ${theme.border}`, background: 'rgba(255,255,255,0.05)', color: theme.text }} />
+            <input value={transferNote} onChange={(e) => onNoteChange(e.target.value)} placeholder="Note for sales" style={{ fontSize: 12, padding: '6px 8px', borderRadius: 6, border: `0.5px solid ${theme.border}`, background: 'rgba(15,23,42,0.04)', color: theme.text }} />
             <div style={{ display: 'flex', gap: 6 }}>
                 <PrimaryButton onClick={() => onConfirmSales(ticketId)} style={{ fontSize: 11, padding: '4px 10px' }}>Confirm transfer</PrimaryButton>
                 <button type="button" onClick={onCancel} style={{ fontSize: 11, padding: '4px 10px', background: 'transparent', border: `0.5px solid ${theme.border}`, color: theme.textDim, borderRadius: 6, cursor: 'pointer' }}>Cancel</button>
@@ -197,7 +197,7 @@ export default function SupportAgentDashboard() {
             >
                 <div style={{ textAlign: 'right' }}>
                     <div style={{ fontSize: 12, color: theme.textDim, marginBottom: 4 }}>Current Shift</div>
-                    <div style={{ fontSize: 14, color: theme.text, fontWeight: 500 }}>{agentStatus.shiftLabel || '8:00 AM – 4:00 PM'}</div>
+                    <div style={{ fontSize: 14, color: theme.text, fontWeight: 500 }}>{agentStatus.shiftLabel || '8:00 AM - 4:00 PM'}</div>
                 </div>
             </WelcomeBanner>
 
@@ -210,9 +210,9 @@ export default function SupportAgentDashboard() {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 16, marginBottom: 24 }}>
                 <MetricCard label="My Open Tickets" value={stats.openTickets ?? 0} accent={theme.accent} />
-                <MetricCard label="Avg Response Time" value={stats.avgResponseTime || '—'} accent={theme.warning} />
+                <MetricCard label="Avg Response Time" value={stats.avgResponseTime || '-'} accent={theme.warning} />
                 <MetricCard label="Resolved Today" value={stats.resolvedToday ?? 0} accent={theme.success} />
-                <MetricCard label="Satisfaction Rating" value={stats.satisfactionRating ? `${stats.satisfactionRating}` : '—'} accent={theme.success} />
+                <MetricCard label="Satisfaction Rating" value={stats.satisfactionRating ? `${stats.satisfactionRating}` : '-'} accent={theme.success} />
                 <MetricCard label="SLA Compliance" value={`${stats.slaCompliance ?? 0}%`} accent={stats.slaCompliance >= 90 ? theme.success : theme.warning} />
             </div>
 
@@ -228,7 +228,7 @@ export default function SupportAgentDashboard() {
             <div id="priority-tickets">
                 <Card title="Needs Your Attention" style={{ marginBottom: 24 }}>
                     {(overview?.priorityTickets || []).length ? overview.priorityTickets.map((t) => (
-                        <div key={t.id} style={{ padding: 14, marginBottom: 10, background: 'rgba(255,255,255,0.03)', borderRadius: 10, border: `0.5px solid ${t.slaBreached ? theme.error : theme.border}` }}>
+                        <div key={t.id} style={{ padding: 14, marginBottom: 10, background: 'rgba(15,23,42,0.03)', borderRadius: 10, border: `0.5px solid ${t.slaBreached ? theme.error : theme.border}` }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
                                 <div>
                                     <StatusBadge status={priorityBadgeStatus(t.priority)} label={priorityLabel(t.priority)} />
@@ -244,7 +244,7 @@ export default function SupportAgentDashboard() {
                                 {t.slaRemaining}
                                 {t.openedAt ? ` · Opened ${t.openedAt}` : ''}
                             </div>
-                            <div style={{ height: 6, background: 'rgba(255,255,255,0.08)', borderRadius: 4, marginBottom: 4 }}>
+                            <div style={{ height: 6, background: 'rgba(15,23,42,0.08)', borderRadius: 4, marginBottom: 4 }}>
                                 <div style={{ width: `${t.slaPercent}%`, height: '100%', background: t.slaBreached ? theme.error : theme.warning, borderRadius: 4 }} />
                             </div>
                             <TransferActions
@@ -287,7 +287,7 @@ export default function SupportAgentDashboard() {
                                     { key: 'status', label: 'Status', render: (r) => <StatusBadge status={r.status === 'resolved' ? 'success' : 'info'} label={(r.status || '').replace('_', ' ')} /> },
                                     { key: 'slaPercent', label: 'SLA', render: (r) => (
                                         <div style={{ minWidth: 80 }}>
-                                            <div style={{ height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 2 }}>
+                                            <div style={{ height: 4, background: 'rgba(0,45,114,0.08)', borderRadius: 2 }}>
                                                 <div style={{ width: `${r.slaPercent}%`, height: '100%', background: r.slaBreached ? theme.error : theme.accent, borderRadius: 2 }} />
                                             </div>
                                             <span style={{ fontSize: 10, color: theme.textDim }}>{r.slaRemaining}</span>
@@ -313,7 +313,7 @@ export default function SupportAgentDashboard() {
                         <div style={{ fontSize: 13, color: theme.textMuted, marginBottom: 8 }}>
                             Target vs Achieved · {performance.achieved ?? 0} / {performance.target ?? 8}
                         </div>
-                        <div style={{ height: 10, background: 'rgba(255,255,255,0.08)', borderRadius: 6 }}>
+                        <div style={{ height: 10, background: 'rgba(15,23,42,0.08)', borderRadius: 6 }}>
                             <div style={{ width: `${performance.percent ?? 0}%`, height: '100%', background: `linear-gradient(90deg, ${theme.primary}, ${theme.success})`, borderRadius: 6 }} />
                         </div>
                         <div style={{ fontSize: 22, fontWeight: 700, color: theme.text, marginTop: 12 }}>{performance.percent ?? 0}%</div>
@@ -362,7 +362,7 @@ export default function SupportAgentDashboard() {
                                         width: 34,
                                         height: 34,
                                         borderRadius: '50%',
-                                        background: 'rgba(255,255,255,0.08)',
+                                        background: 'rgba(15,23,42,0.08)',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',

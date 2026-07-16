@@ -68,7 +68,7 @@ export default function PaymentCallbackPage() {
                 <div style={{ fontSize: 48, marginBottom: 16 }}>{status === 'success' ? '✅' : status === 'error' ? '❌' : '⏳'}</div>
                 {autoComplete && status === 'success' && (
                     <p style={{ color: theme.warning, fontSize: 13, marginBottom: 16, padding: '10px 12px', background: 'rgba(251,191,36,0.1)', borderRadius: 8 }}>
-                        Test mode — no real payment was taken. Add Paystack or Flutterwave API keys on the server for live checkout.
+                        Test mode - no real payment was taken. Add Paystack or Flutterwave API keys on the server for live checkout.
                     </p>
                 )}
                 <h1 style={{ color: theme.text, fontSize: 22, marginBottom: 12 }}>Payment {status === 'verifying' ? 'Processing' : status === 'success' ? 'Complete' : 'Failed'}</h1>

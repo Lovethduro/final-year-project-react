@@ -1,19 +1,6 @@
 import { Link } from 'react-router-dom';
+import { ChevronLeft } from 'lucide-react';
 import { theme } from '../styles/theme';
-
-function ChevronLeftIcon({ size = 16 }) {
-    return (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path
-                d="M15 18l-6-6 6-6"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-            />
-        </svg>
-    );
-}
 
 const PALETTES = {
     default: {
@@ -22,15 +9,15 @@ const PALETTES = {
         iconColor: theme.accent,
         iconBg: 'rgba(255,255,255,0.04)',
         iconBorder: theme.border,
-        iconHoverBg: 'rgba(43,92,230,0.12)',
+        iconHoverBg: 'rgba(0,45,114,0.12)',
         iconHoverBorder: theme.borderHover,
     },
     auth: {
-        color: 'rgba(255,255,255,0.72)',
-        hoverColor: '#fff',
-        iconColor: '#2DD4BF',
+        color: 'rgba(15,23,42,0.72)',
+        hovercolor: '#0F172A',
+        iconColor: '#1A4A9E',
         iconBg: 'rgba(255,255,255,0.04)',
-        iconBorder: 'rgba(255,255,255,0.12)',
+        iconBorder: 'rgba(15,23,42,0.1)',
         iconHoverBg: 'rgba(45,212,191,0.1)',
         iconHoverBorder: 'rgba(45,212,191,0.45)',
     },
@@ -54,16 +41,18 @@ export function BackLink({
     to,
     onClick,
     label,
+    ariaLabel,
     variant = 'default',
     floating = false,
     centered = false,
     style,
 }) {
     const palette = PALETTES[variant] || PALETTES.default;
+    const accessibleLabel = ariaLabel || label || 'Go back';
     const sharedStyle = {
         display: centered ? 'inline-flex' : 'inline-flex',
         alignItems: 'center',
-        gap: palette.compact ? 8 : 12,
+        gap: label ? (palette.compact ? 8 : 12) : 0,
         padding: palette.compact ? '4px 0' : '6px 0',
         color: palette.color,
         textDecoration: 'none',
@@ -103,9 +92,9 @@ export function BackLink({
                     transition: 'background 0.2s ease, border-color 0.2s ease',
                 }}
             >
-                <ChevronLeftIcon size={palette.compact ? 14 : 16} />
+                <ChevronLeft size={palette.compact ? 14 : 16} strokeWidth={2} aria-hidden="true" />
             </span>
-            {label}
+            {label || null}
         </>
     );
 
@@ -118,7 +107,7 @@ export function BackLink({
         return (
             <Link
                 to={to}
-                aria-label={label}
+                aria-label={accessibleLabel}
                 className={floating ? 'cyforce-back-link--floating' : undefined}
                 style={sharedStyle}
                 {...handlers}
@@ -132,7 +121,7 @@ export function BackLink({
         <button
             type="button"
             onClick={onClick}
-            aria-label={label}
+            aria-label={accessibleLabel}
             className={floating ? 'cyforce-back-link--floating' : undefined}
             style={sharedStyle}
             {...handlers}

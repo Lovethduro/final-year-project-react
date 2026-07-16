@@ -10,7 +10,7 @@ const ghostButtonStyle = {
     padding: '8px 14px',
     borderRadius: 8,
     border: `0.5px solid ${theme.border}`,
-    background: 'rgba(255,255,255,0.03)',
+    background: 'rgba(15,23,42,0.03)',
     color: theme.text,
     fontSize: 13,
     fontWeight: 500,
@@ -124,7 +124,7 @@ export default function FeedbackPage() {
                                     {loading ? '…' : Number(sentiment[item.key] || 0).toLocaleString()}
                                 </span>
                             </div>
-                            <div style={{ height: 8, background: 'rgba(255,255,255,0.08)', borderRadius: 4 }}>
+                            <div style={{ height: 8, background: 'rgba(15,23,42,0.08)', borderRadius: 4 }}>
                                 <div style={{
                                     width: `${sentiment[`${item.key}Percent`] || 0}%`,
                                     height: '100%',
@@ -158,18 +158,18 @@ export default function FeedbackPage() {
                         columns={[
                             { key: 'displayId', label: 'ID', render: (row) => row.displayId || row.id?.slice(-6).toUpperCase() },
                             { key: 'customerName', label: 'Customer' },
-                            { key: 'agentName', label: 'Agent', render: (row) => row.agentName || '—' },
+                            { key: 'agentName', label: 'Agent', render: (row) => row.agentName || '-' },
                             {
                                 key: 'rating',
                                 label: 'Rating',
-                                render: (row) => (row.rating ? <StarRating rating={row.rating} /> : '—'),
+                                render: (row) => (row.rating ? <StarRating rating={row.rating} /> : '-'),
                             },
                             {
                                 key: 'comment',
                                 label: 'Comment',
                                 render: (row) => (
                                     <span style={{ fontSize: 13, color: theme.textMuted, maxWidth: 320, display: 'inline-block' }}>
-                                        {row.comment || '—'}
+                                        {row.comment || '-'}
                                     </span>
                                 ),
                             },
@@ -178,7 +178,7 @@ export default function FeedbackPage() {
                                 label: 'Sentiment',
                                 render: (row) => <StatusBadge status={sentimentStatus(row.sentiment)} label={row.sentiment} />,
                             },
-                            { key: 'dateLabel', label: 'Date', render: (row) => row.dateLabel || '—' },
+                            { key: 'dateLabel', label: 'Date', render: (row) => row.dateLabel || '-' },
                         ]}
                         rows={filteredRecent}
                         emptyMessage="No feedback matches this filter."

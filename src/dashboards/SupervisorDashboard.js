@@ -10,7 +10,7 @@ const TEAM_OPTIONS = [
     { value: 'support', label: 'Support Team' },
 ];
 
-const STATUS_COLORS = { Open: '#38BDF8', 'In Progress': '#FBBF24', Resolved: '#34D399', Closed: '#94A3B8' };
+const STATUS_COLORS = { Open: '#1A4A9E', 'In Progress': '#FBBF24', Resolved: '#34D399', Closed: '#94A3B8' };
 const TREND_TABS = ['total', 'resolved', 'open'];
 
 function formatDate() {
@@ -106,9 +106,9 @@ export default function SupervisorDashboard() {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 16, marginBottom: 24 }}>
                 <MetricCard label="Open Tickets" value={stats.openTickets ?? 0} detail="Awaiting response" accent={theme.warning} />
-                <MetricCard label="Avg Response Time" value={stats.avgResponseTime || '—'} accent={theme.accent} />
-                <MetricCard label="Avg Resolution Time" value={stats.avgResolutionTime || '—'} accent={theme.accent} />
-                <MetricCard label="Customer Satisfaction" value={stats.customerSatisfaction ? `${stats.customerSatisfaction}/5` : '—'} accent={theme.success} />
+                <MetricCard label="Avg Response Time" value={stats.avgResponseTime || '-'} accent={theme.accent} />
+                <MetricCard label="Avg Resolution Time" value={stats.avgResolutionTime || '-'} accent={theme.accent} />
+                <MetricCard label="Customer Satisfaction" value={stats.customerSatisfaction ? `${stats.customerSatisfaction}/5` : '-'} accent={theme.success} />
                 <MetricCard label="Sales Target" value={`${stats.salesAchieved ?? 0}/${stats.salesTarget ?? 20}`} accent={theme.success} />
                 <MetricCard label="Open Escalations" value={stats.openEscalations ?? 0} accent={theme.error} />
             </div>
@@ -127,7 +127,7 @@ export default function SupervisorDashboard() {
                             {TREND_TABS.map((tab) => (
                                 <button key={tab} type="button" onClick={() => setTrendTab(tab)} style={{
                                     padding: '6px 14px', borderRadius: 8, border: 'none', cursor: 'pointer',
-                                    background: trendTab === tab ? theme.primary : 'rgba(255,255,255,0.05)',
+                                    background: trendTab === tab ? theme.primary : 'rgba(15,23,42,0.04)',
                                     color: trendTab === tab ? '#fff' : theme.textMuted, fontSize: 12, textTransform: 'capitalize',
                                 }}>
                                     {tab}
@@ -169,7 +169,7 @@ export default function SupervisorDashboard() {
                                     <StarRating rating={f.rating} />
                                 </div>
                                 <div style={{ fontSize: 12, color: theme.textDim }}>
-                                    {f.type || 'feedback'} · {f.agentName || '—'}
+                                    {f.type || 'feedback'} · {f.agentName || '-'}
                                 </div>
                                 <p style={{ fontSize: 13, color: theme.textMuted, margin: '6px 0 0' }}>{f.comment}</p>
                             </div>
@@ -200,7 +200,7 @@ export default function SupervisorDashboard() {
 
                     <Card title="Recent Alerts" style={{ marginBottom: 20 }}>
                         {(overview?.recentAlerts || []).map((a) => (
-                            <div key={a.id} style={{ padding: 10, marginBottom: 8, background: 'rgba(255,255,255,0.03)', borderRadius: 8, borderLeft: `3px solid ${a.priority === 'critical' ? theme.error : theme.warning}` }}>
+                            <div key={a.id} style={{ padding: 10, marginBottom: 8, background: 'rgba(15,23,42,0.03)', borderRadius: 8, borderLeft: `3px solid ${a.priority === 'critical' ? theme.error : theme.warning}` }}>
                                 <div style={{ fontSize: 11, color: a.priority === 'critical' ? theme.error : theme.warning }}>{a.type}</div>
                                 <div style={{ fontSize: 12, color: theme.textMuted, marginTop: 4 }}>{a.message}</div>
                             </div>

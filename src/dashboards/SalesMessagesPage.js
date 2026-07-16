@@ -186,7 +186,7 @@ export default function SalesMessagesPage() {
                                         fontSize: 12,
                                         cursor: 'pointer',
                                         border: `1px solid ${inboxTab === tab.id ? theme.primary : theme.border}`,
-                                        background: inboxTab === tab.id ? 'rgba(43,92,230,0.12)' : 'transparent',
+                                        background: inboxTab === tab.id ? 'rgba(0,45,114,0.12)' : 'transparent',
                                         color: inboxTab === tab.id ? theme.text : theme.textMuted,
                                         fontFamily: theme.fontBody,
                                     }}
@@ -247,7 +247,7 @@ export default function SalesMessagesPage() {
                                     fontSize: 12,
                                     color: theme.textMuted,
                                     borderBottom: `1px solid ${theme.border}`,
-                                    background: 'rgba(43,92,230,0.06)',
+                                    background: 'rgba(0,45,114,0.06)',
                                 }}>
                                     Replies are sent to {active.customerEmail} with a link back to their quote portal.
                                 </div>
@@ -335,7 +335,7 @@ export default function SalesMessagesPage() {
                                             <ChatMessageRow message={m} isMine={mine} showAvatar={!mine} />
                                             {isInvoice && m.invoice && (
                                                 <div style={{ fontSize: 12, color: theme.accent, margin: '-8px 0 12px 42px' }}>
-                                                    Invoice {formatNaira(m.invoice.amount)} — {m.invoice.status}
+                                                    Invoice {formatNaira(m.invoice.amount)} - {m.invoice.status}
                                                 </div>
                                             )}
                                         </div>

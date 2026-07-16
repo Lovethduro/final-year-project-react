@@ -12,7 +12,7 @@ import {
 import { analyticsApi } from './utils/apiClient';
 import { theme } from './styles/theme';
 
-const CHART_COLORS = ['#38BDF8', '#6366F1', '#34D399', '#FBBF24', '#F87171', '#A78BFA', '#FB923C', '#2DD4BF'];
+const CHART_COLORS = ['#1A4A9E', '#6366F1', '#34D399', '#FBBF24', '#F87171', '#A78BFA', '#FB923C', '#1A4A9E'];
 
 function ChartLegendItem({ color, label }) {
     return (
@@ -118,7 +118,7 @@ export default function AnalyticsPage() {
                         <MetricCard label="Customers" value={data?.totalCustomers ?? 0} detail={`${data?.totalAgents ?? 0} active agents`} accent="#A78BFA" />
                         <MetricCard
                             label="Avg CSAT"
-                            value={csat > 0 ? `${csat}/5` : '—'}
+                            value={csat > 0 ? `${csat}/5` : '-'}
                             detail={data?.feedbackCount ? `${data.feedbackCount} ratings` : 'No feedback yet'}
                             accent={theme.success}
                         />
@@ -162,11 +162,11 @@ export default function AnalyticsPage() {
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20, marginBottom: 20 }}>
-                        <Card title="New leads — last 6 months">
+                        <Card title="New leads - last 6 months">
                             <LineChart data={leadTrend} series={['total']} height={160} />
                         </Card>
 
-                        <Card title="Support activity — last 7 days">
+                        <Card title="Support activity - last 7 days">
                             <div style={{ display: 'flex', gap: 16, marginBottom: 12, flexWrap: 'wrap' }}>
                                 <ChartLegendItem color={theme.primary} label="Created" />
                                 <ChartLegendItem color={theme.success} label="Resolved" />

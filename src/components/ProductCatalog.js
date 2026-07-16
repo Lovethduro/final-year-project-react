@@ -208,7 +208,7 @@ export function ProductCatalog({ variant = 'public' }) {
                     onClick={() => setShowCart(!showCart)}
                     aria-label="Open cart"
                     style={{
-                        background: 'linear-gradient(135deg, #2B5CE6, #38BDF8)',
+                        background: 'linear-gradient(135deg, #002D72, #1A4A9E)',
                         border: 'none',
                         borderRadius: '50%',
                         width: 60,
@@ -216,8 +216,8 @@ export function ProductCatalog({ variant = 'public' }) {
                         padding: 0,
                         cursor: 'pointer',
                         position: 'relative',
-                        boxShadow: '0 4px 20px rgba(43,92,230,0.4)',
-                        color: '#fff',
+                        boxShadow: '0 4px 20px rgba(0,45,114,0.4)',
+                        color: '#0F172A',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -237,7 +237,7 @@ export function ProductCatalog({ variant = 'public' }) {
                             alignItems: 'center',
                             justifyContent: 'center',
                             fontSize: 12,
-                            color: '#fff',
+                            color: '#0F172A',
                         }}>
                             {cartCount}
                         </span>
@@ -252,19 +252,19 @@ export function ProductCatalog({ variant = 'public' }) {
                     right: 0,
                     width: 'min(400px, 100vw)',
                     height: '100vh',
-                    background: '#0D1830',
+                    background: '#F8FAFC',
                     zIndex: 1000,
                     padding: 20,
                     boxShadow: '-5px 0 30px rgba(0,0,0,0.5)',
                     overflowY: 'auto',
                 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
-                        <h3 style={{ color: '#fff' }}>Your Cart ({cart.length} items)</h3>
-                        <button type="button" onClick={() => setShowCart(false)} style={{ background: 'none', border: 'none', color: '#fff', fontSize: 24, cursor: 'pointer' }}>✕</button>
+                        <h3 style={{ color: '#0F172A' }}>Your Cart ({cart.length} items)</h3>
+                        <button type="button" onClick={() => setShowCart(false)} style={{ background: 'none', border: 'none', color: '#0F172A', fontSize: 24, cursor: 'pointer' }}>✕</button>
                     </div>
 
                     {cart.length === 0 ? (
-                        <p style={{ color: 'rgba(255,255,255,0.5)', textAlign: 'center' }}>Your cart is empty</p>
+                        <p style={{ color: 'rgba(15,23,42,0.55)', textAlign: 'center' }}>Your cart is empty</p>
                     ) : (
                         <>
                             {cart.map((item) => (
@@ -273,25 +273,25 @@ export function ProductCatalog({ variant = 'public' }) {
                                     gap: 15,
                                     marginBottom: 20,
                                     padding: 10,
-                                    borderBottom: '0.5px solid rgba(99,179,237,0.1)',
+                                    borderBottom: '0.5px solid rgba(0,45,114,0.1)',
                                 }}>
                                     <img src={item.image} alt={item.name} style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 8 }} />
                                     <div style={{ flex: 1 }}>
-                                        <h4 style={{ color: '#fff', fontSize: 14, marginBottom: 5 }}>{item.name}</h4>
-                                        <p style={{ color: '#38BDF8', fontSize: 13 }}>₦{item.price.toLocaleString()}</p>
+                                        <h4 style={{ color: '#0F172A', fontSize: 14, marginBottom: 5 }}>{item.name}</h4>
+                                        <p style={{ color: '#1A4A9E', fontSize: 13 }}>₦{item.price.toLocaleString()}</p>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 5 }}>
-                                            <button type="button" onClick={() => updateQuantity(item.id, item.quantity - 1)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', width: 25, height: 25, borderRadius: 4, cursor: 'pointer', color: '#fff' }}>-</button>
-                                            <span style={{ color: '#fff', fontSize: 14 }}>{item.quantity}</span>
-                                            <button type="button" onClick={() => updateQuantity(item.id, item.quantity + 1)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', width: 25, height: 25, borderRadius: 4, cursor: 'pointer', color: '#fff' }}>+</button>
+                                            <button type="button" onClick={() => updateQuantity(item.id, item.quantity - 1)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', width: 25, height: 25, borderRadius: 4, cursor: 'pointer', color: '#0F172A' }}>-</button>
+                                            <span style={{ color: '#0F172A', fontSize: 14 }}>{item.quantity}</span>
+                                            <button type="button" onClick={() => updateQuantity(item.id, item.quantity + 1)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', width: 25, height: 25, borderRadius: 4, cursor: 'pointer', color: '#0F172A' }}>+</button>
                                             <button type="button" onClick={() => removeFromCart(item.id)} style={{ background: 'none', border: 'none', color: '#FF0000', cursor: 'pointer' }}>Remove</button>
                                         </div>
                                     </div>
                                 </div>
                             ))}
-                            <div style={{ marginTop: 20, paddingTop: 20, borderTop: '1px solid rgba(99,179,237,0.2)' }}>
+                            <div style={{ marginTop: 20, paddingTop: 20, borderTop: '1px solid rgba(0,45,114,0.2)' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-                                    <span style={{ color: '#fff' }}>Total:</span>
-                                    <span style={{ color: '#38BDF8', fontSize: 20, fontWeight: 'bold' }}>₦{cartTotal.toLocaleString()}</span>
+                                    <span style={{ color: '#0F172A' }}>Total:</span>
+                                    <span style={{ color: '#1A4A9E', fontSize: 20, fontWeight: 'bold' }}>₦{cartTotal.toLocaleString()}</span>
                                 </div>
                                 {cartNotice && (
                                     <p style={{ color: '#FBBF24', fontSize: 13, marginBottom: 12 }}>{cartNotice}</p>
@@ -310,8 +310,8 @@ export function ProductCatalog({ variant = 'public' }) {
                                                 padding: '10px 12px',
                                                 borderRadius: 8,
                                                 border: `0.5px solid ${theme.border}`,
-                                                background: 'rgba(255,255,255,0.05)',
-                                                color: '#fff',
+                                                background: 'rgba(15,23,42,0.04)',
+                                                color: '#0F172A',
                                             }}
                                         >
                                             <option value="paystack">Paystack</option>
@@ -326,10 +326,10 @@ export function ProductCatalog({ variant = 'public' }) {
                                     style={{
                                         width: '100%',
                                         padding: 15,
-                                        background: checkingOut ? 'rgba(43,92,230,0.5)' : 'linear-gradient(135deg, #2B5CE6, #38BDF8)',
+                                        background: checkingOut ? 'rgba(0,45,114,0.5)' : 'linear-gradient(135deg, #002D72, #1A4A9E)',
                                         border: 'none',
                                         borderRadius: 8,
-                                        color: '#fff',
+                                        color: '#0F172A',
                                         fontSize: 16,
                                         fontWeight: 'bold',
                                         cursor: checkingOut ? 'not-allowed' : 'pointer',
@@ -415,17 +415,17 @@ function AuthModal({ onClose, onLogin }) {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
             <div style={{
-                background: '#0D1830', borderRadius: 16, padding: 40, width: '100%', maxWidth: 450, position: 'relative', textAlign: 'center',
+                background: '#F8FAFC', borderRadius: 16, padding: 40, width: '100%', maxWidth: 450, position: 'relative', textAlign: 'center',
             }}>
-                <button type="button" onClick={onClose} style={{ position: 'absolute', top: 15, right: 15, background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: 20, cursor: 'pointer' }}>✕</button>
-                <h2 style={{ color: '#fff', marginBottom: 12 }}>Login Required</h2>
-                <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 14, marginBottom: 24 }}>
+                <button type="button" onClick={onClose} style={{ position: 'absolute', top: 15, right: 15, background: 'none', border: 'none', color: 'rgba(15,23,42,0.55)', fontSize: 20, cursor: 'pointer' }}>✕</button>
+                <h2 style={{ color: '#0F172A', marginBottom: 12 }}>Login Required</h2>
+                <p style={{ color: 'rgba(15,23,42,0.6)', fontSize: 14, marginBottom: 24 }}>
                     Sign in with your customer account to complete checkout and pay securely.
                 </p>
                 <button
                     type="button"
                     onClick={onLogin}
-                    style={{ width: '100%', padding: 14, background: 'linear-gradient(135deg, #2B5CE6, #38BDF8)', border: 'none', borderRadius: 8, color: '#fff', fontSize: 16, fontWeight: 'bold', cursor: 'pointer' }}
+                    style={{ width: '100%', padding: 14, background: 'linear-gradient(135deg, #002D72, #1A4A9E)', border: 'none', borderRadius: 8, color: '#fff', fontSize: 16, fontWeight: 'bold', cursor: 'pointer' }}
                 >
                     Go to Login
                 </button>

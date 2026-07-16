@@ -11,7 +11,7 @@ const QUOTE_TYPE_LABELS = {
 };
 
 function formatQuoteType(type) {
-    if (!type) return '—';
+    if (!type) return '-';
     return QUOTE_TYPE_LABELS[type] || type.replace(/_/g, ' ');
 }
 
@@ -26,7 +26,7 @@ function formatLeadSummary(lead) {
     if (lead.preferredInstallationDate) parts.push(`Date: ${lead.preferredInstallationDate}`);
     if (lead.existingProductDetails) parts.push(`Existing: ${lead.existingProductDetails}`);
     if (lead.siteContactName) parts.push(`Site: ${lead.siteContactName}`);
-    return parts.length ? parts.join(' · ') : '—';
+    return parts.length ? parts.join(' · ') : '-';
 }
 
 const STATUSES = ['new', 'contacted', 'qualified', 'lost', 'converted'];
@@ -96,7 +96,7 @@ export default function LeadsPage() {
 
     const inputStyle = {
         width: '100%',
-        background: 'rgba(255,255,255,0.05)',
+        background: 'rgba(15,23,42,0.04)',
         border: `0.5px solid ${theme.border}`,
         borderRadius: 8,
         padding: 10,
@@ -162,9 +162,9 @@ export default function LeadsPage() {
                             { key: 'quoteType', label: 'Quote type', render: (r) => formatQuoteType(r.quoteType) },
                             { key: 'details', label: 'Details', render: (r) => {
                                 const summary = formatLeadSummary(r);
-                                return summary !== '—' ? (
+                                return summary !== '-' ? (
                                     <span title={summary} style={{ fontSize: 12, color: theme.textMuted }}>{summary.length > 56 ? `${summary.slice(0, 56)}…` : summary}</span>
-                                ) : '—';
+                                ) : '-';
                             } },
                             { key: 'source', label: 'Source' },
                             { key: 'ownerName', label: 'Owner', render: (r) => r.ownerName || 'Unassigned' },

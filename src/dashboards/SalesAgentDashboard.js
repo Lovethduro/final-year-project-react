@@ -68,7 +68,7 @@ function LeadAvatar({ name }) {
             justifyContent: 'center',
             fontSize: 13,
             fontWeight: 700,
-            color: '#fff',
+            color: '#0F172A',
             flexShrink: 0,
         }}>
             {initials(name)}
@@ -81,7 +81,7 @@ function ComparisonTile({ label, value, sub, accent }) {
         <div style={{
             padding: '14px 16px',
             borderRadius: 10,
-            background: 'rgba(255,255,255,0.03)',
+            background: 'rgba(15,23,42,0.03)',
             border: `0.5px solid ${theme.border}`,
             textAlign: 'center',
         }}>
@@ -291,7 +291,7 @@ export default function SalesAgentDashboard() {
                                             gap: 14,
                                             padding: 14,
                                             borderRadius: 10,
-                                            background: 'rgba(255,255,255,0.03)',
+                                            background: 'rgba(15,23,42,0.03)',
                                             border: `0.5px solid ${theme.border}`,
                                         }}
                                     >
@@ -306,8 +306,8 @@ export default function SalesAgentDashboard() {
                                             </div>
                                             <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', fontSize: 12, marginBottom: 10 }}>
                                                 <span style={{ color: theme.success, fontWeight: 600 }}>{formatNaira(lead.valueKobo)}</span>
-                                                <span style={{ color: theme.accent }}>Score {lead.score ?? '—'}</span>
-                                                <span style={{ color: theme.textDim }}>Last contact: {lead.lastContact || '—'}</span>
+                                                <span style={{ color: theme.accent }}>Score {lead.score ?? '-'}</span>
+                                                <span style={{ color: theme.textDim }}>Last contact: {lead.lastContact || '-'}</span>
                                             </div>
                                             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                                                 {lead.phone && (
@@ -315,8 +315,7 @@ export default function SalesAgentDashboard() {
                                                         href={`tel:${lead.phone}`}
                                                         style={{
                                                             padding: '6px 12px',
-                                                            background: theme.primary,
-                                                            color: '#fff',
+                                                            background: theme.primary, color: '#fff',
                                                             borderRadius: 8,
                                                             fontSize: 12,
                                                             fontWeight: 500,
@@ -392,7 +391,7 @@ export default function SalesAgentDashboard() {
                                                 {formatNaira(opp.valueKobo)}
                                             </div>
                                         </div>
-                                        <div style={{ height: 6, background: 'rgba(255,255,255,0.08)', borderRadius: 4 }}>
+                                        <div style={{ height: 6, background: 'rgba(15,23,42,0.08)', borderRadius: 4 }}>
                                             <div style={{
                                                 width: `${Math.min(100, opp.score || 0)}%`,
                                                 height: '100%',
@@ -414,7 +413,7 @@ export default function SalesAgentDashboard() {
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 12, marginBottom: 20 }}>
                                 <ComparisonTile
                                     label="Your rank"
-                                    value={`#${dealsComparison.myRank || '—'}`}
+                                    value={`#${dealsComparison.myRank || '-'}`}
                                     sub={`${dealsComparison.myDealsClosed ?? 0} deals closed`}
                                     accent={theme.accent}
                                 />
@@ -426,7 +425,7 @@ export default function SalesAgentDashboard() {
                                 <ComparisonTile
                                     label="Top performer"
                                     value={dealsComparison.highest?.dealsClosed ?? 0}
-                                    sub={dealsComparison.highest?.agentName || '—'}
+                                    sub={dealsComparison.highest?.agentName || '-'}
                                     accent={theme.success}
                                 />
                             </div>
@@ -493,7 +492,7 @@ export default function SalesAgentDashboard() {
                                         }} />
                                         <div style={{ flex: 1, minWidth: 0 }}>
                                             <div style={{ fontSize: 13, fontWeight: 500, color: theme.text }}>{task.time} · {task.type}</div>
-                                            <div style={{ fontSize: 12, color: theme.textMuted, marginTop: 2 }}>{task.company} — {task.contact}</div>
+                                            <div style={{ fontSize: 12, color: theme.textMuted, marginTop: 2 }}>{task.company} - {task.contact}</div>
                                         </div>
                                         <button
                                             type="button"
@@ -502,7 +501,7 @@ export default function SalesAgentDashboard() {
                                                 fontSize: 11,
                                                 fontWeight: 500,
                                                 color: theme.accent,
-                                                background: 'rgba(43,92,230,0.1)',
+                                                background: 'rgba(0,45,114,0.1)',
                                                 border: `0.5px solid ${theme.border}`,
                                                 borderRadius: 6,
                                                 padding: '4px 8px',
@@ -537,7 +536,7 @@ export default function SalesAgentDashboard() {
                                 padding: '16px 12px',
                                 marginBottom: 12,
                                 borderRadius: 10,
-                                background: 'rgba(43,92,230,0.08)',
+                                background: 'rgba(0,45,114,0.08)',
                                 border: `0.5px solid ${theme.border}`,
                             }}>
                                 <div style={{ fontSize: 36, fontWeight: 800, color: theme.accent, lineHeight: 1 }}>#{myRank.rank}</div>

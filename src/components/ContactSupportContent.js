@@ -24,8 +24,8 @@ const PRIORITIES = [
 ];
 
 const DEFAULT_SLA = [
-    { priority: 'Urgent', time: '2–4 hours' },
-    { priority: 'High', time: '8–12 hours' },
+    { priority: 'Urgent', time: '2-4 hours' },
+    { priority: 'High', time: '8-12 hours' },
     { priority: 'Medium', time: '24 hours' },
     { priority: 'Low', time: '48 hours' },
 ];
@@ -39,7 +39,7 @@ const labelStyle = {
 };
 
 const asideCardStyle = {
-    background: 'rgba(255,255,255,0.03)',
+    background: 'rgba(15,23,42,0.03)',
     border: `0.5px solid ${theme.border}`,
     borderRadius: 12,
     padding: 18,
@@ -68,7 +68,7 @@ function ContactMethod({ icon, title, detail, href, onClick }) {
                 width: 40,
                 height: 40,
                 borderRadius: 10,
-                background: 'rgba(56,189,248,0.12)',
+                background: 'rgba(0,45,114,0.12)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -160,7 +160,7 @@ export function ContactSupportContent({ publicMode = false }) {
 
     const supportEmail = supportConfig?.supportEmail || 'support@cyforce.com';
     const supportPhone = supportConfig?.supportPhone || '+234 800 CYFORCE';
-    const liveChatHours = supportConfig?.liveChatHours || 'Available 9 AM – 6 PM (WAT)';
+    const liveChatHours = supportConfig?.liveChatHours || 'Available 9 AM - 6 PM (WAT)';
     const helpCenterPath = publicMode ? '/help' : '/dashboard/knowledge-base';
     const ticketsPath = publicMode ? '/login' : '/customer/tickets';
 
@@ -359,7 +359,7 @@ export function ContactSupportContent({ publicMode = false }) {
                                     marginBottom: 16,
                                     borderRadius: 8,
                                     border: `0.5px solid ${theme.accent}55`,
-                                    background: 'rgba(56,189,248,0.08)',
+                                    background: 'rgba(0,45,114,0.08)',
                                     padding: '10px 12px',
                                     fontSize: 12,
                                     color: theme.textMuted,

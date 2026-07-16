@@ -123,8 +123,8 @@ export function HotDealsStrip({
                     <div key={deal.id || deal.title} style={{
                         borderRadius: 14,
                         overflow: 'hidden',
-                        border: `0.5px solid ${compact ? theme.border : 'rgba(99,179,237,0.2)'}`,
-                        background: compact ? 'rgba(255,255,255,0.03)' : '#0D1830',
+                        border: `0.5px solid ${compact ? theme.border : 'rgba(0,45,114,0.2)'}`,
+                        background: compact ? 'rgba(15,23,42,0.03)' : '#F8FAFC',
                     }}>
                         <div style={{ height: compact ? 140 : 180, overflow: 'hidden' }}>
                             <img
@@ -138,7 +138,7 @@ export function HotDealsStrip({
                                 <span style={{
                                     fontSize: 11,
                                     fontWeight: 700,
-                                    color: '#fff',
+                                    color: '#0F172A',
                                     background: '#EF4444',
                                     padding: '3px 8px',
                                     borderRadius: 6,
@@ -155,7 +155,7 @@ export function HotDealsStrip({
                                 {deal.title}
                             </h3>
                             {deal.description && (
-                                <p style={{ margin: '0 0 12px', fontSize: 13, color: compact ? theme.textDim : 'rgba(255,255,255,0.55)', lineHeight: 1.5 }}>
+                                <p style={{ margin: '0 0 12px', fontSize: 13, color: compact ? theme.textDim : 'rgba(15,23,42,0.55)', lineHeight: 1.5 }}>
                                     {deal.description}
                                 </p>
                             )}
@@ -184,7 +184,7 @@ export function HotDealsStrip({
                                     padding: '8px 14px',
                                     borderRadius: 8,
                                     border: 'none',
-                                    background: 'linear-gradient(135deg, #2B5CE6, #38BDF8)',
+                                    background: 'linear-gradient(135deg, #002D72, #1A4A9E)',
                                     color: '#fff',
                                     fontSize: 12,
                                     fontWeight: 600,

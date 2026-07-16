@@ -41,11 +41,11 @@ export function QuoteChatResume() {
                 <div className="quote-chat-resume-head">
                     <div>
                         <span className="quote-chat-resume-label">Your quote conversation</span>
-                        <h3 style={{ fontFamily: FONT_DISPLAY, color: '#fff', fontSize: 18, margin: '6px 0 4px' }}>
+                        <h3 style={{ fontFamily: FONT_DISPLAY, color: '#0F172A', fontSize: 18, margin: '6px 0 4px' }}>
                             Chat with {agentName}
                         </h3>
                         <p style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.45)' }}>
-                            Continue here anytime — no need to open your email link.
+                            Continue here anytime - no need to open your email link.
                         </p>
                     </div>
                     <button
@@ -68,7 +68,7 @@ export function QuoteChatResume() {
                     font-family: ${FONT_BODY};
                 }
                 .quote-chat-resume-inner {
-                    background: #0D1830;
+                    background: #F8FAFC;
                     border: 0.5px solid rgba(167,139,250,0.28);
                     border-radius: 14px;
                     padding: 22px 20px;
@@ -93,7 +93,7 @@ export function QuoteChatResume() {
                     border-radius: 9px;
                     border: none;
                     background: linear-gradient(135deg, #7C3AED, #A78BFA);
-                    color: #fff;
+                    color: #0F172A;
                     font-size: 13px;
                     font-weight: 600;
                     cursor: pointer;

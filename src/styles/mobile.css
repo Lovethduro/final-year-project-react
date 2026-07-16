@@ -84,7 +84,7 @@ svg {
 .cyforce-public-page {
   min-height: 100vh;
   width: 100%;
-  background: #060b1a;
+  background: #FFFFFF;
   font-family: 'DM Sans', sans-serif;
   padding-top: 100px;
   padding-bottom: 60px;
@@ -97,7 +97,7 @@ svg {
 }
 
 .cyforce-public-card {
-  background: #0d1830;
+  background: #F8FAFC;
   border-radius: 20px;
   border: 0.5px solid rgba(99, 179, 237, 0.1);
   padding: 40px;
@@ -107,7 +107,7 @@ svg {
   font-family: 'Syne', sans-serif;
   font-size: 42px;
   font-weight: 800;
-  color: #fff;
+  color: #0F172A;
   margin: 0 0 16px;
 }
 
@@ -184,10 +184,10 @@ svg {
 
   .cyforce-ai-chat-fab {
     bottom: 16px !important;
-    right: 16px !important;
-    width: 52px !important;
-    height: 52px !important;
-    font-size: 24px !important;
+    left: 16px !important;
+    right: auto !important;
+    height: 48px !important;
+    font-size: 13px !important;
   }
 }
 

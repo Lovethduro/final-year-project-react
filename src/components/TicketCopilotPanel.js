@@ -2,14 +2,18 @@ import { useEffect, useState } from 'react';
 import { supportApi } from '../utils/apiClient';
 import { theme } from '../styles/theme';
 import { PrimaryButton } from './ui';
+import { sanitizeDisplayMessage } from '../utils/sensitiveContent';
 
 function plainAiText(text) {
     if (!text) return '';
-    return text
+    const cleaned = text
         .replace(/\*\*([^*]+)\*\*/g, '$1')
         .replace(/^\s*\*\s+/gm, '• ')
         .replace(/\n{3,}/g, '\n\n')
         .trim();
+    return sanitizeDisplayMessage(cleaned, {
+        placeholder: 'Copilot output was hidden because it may contain payment or bank details.',
+    });
 }
 
 const ACTION_LABELS = {
@@ -70,7 +74,7 @@ export function TicketCopilotPanel({ ticketId, onUseReply, defaultCollapsed = tr
         padding: '10px 12px',
         borderRadius: 10,
         border: `0.5px solid ${theme.primary}44`,
-        background: 'rgba(43,92,230,0.08)',
+        background: 'rgba(0,45,114,0.08)',
     };
 
     const resultStyle = {
@@ -95,7 +99,7 @@ export function TicketCopilotPanel({ ticketId, onUseReply, defaultCollapsed = tr
                         style={{
                             ...actionBtnStyle,
                             borderColor: activeAction === action ? theme.primary : theme.border,
-                            background: activeAction === action ? 'rgba(43,92,230,0.2)' : 'rgba(255,255,255,0.06)',
+                            background: activeAction === action ? 'rgba(0,45,114,0.2)' : 'rgba(255,255,255,0.06)',
                         }}
                     >
                         {loading === action ? '…' : action === 'summarize' ? 'Summarize' : action === 'reply' ? 'Suggest reply' : 'Analyze'}
@@ -157,7 +161,7 @@ export function TicketCopilotPanel({ ticketId, onUseReply, defaultCollapsed = tr
             <details style={panelStyle}>
                 <summary style={{ fontSize: 12, fontWeight: 600, color: theme.primary, cursor: 'pointer', listStyle: 'none' }}>
                     AI Copilot
-                    <span style={{ fontWeight: 400, color: theme.textDim, marginLeft: 6 }}>— summarize, draft, KB</span>
+                    <span style={{ fontWeight: 400, color: theme.textDim, marginLeft: 6 }}>- summarize, draft, KB</span>
                 </summary>
                 {body}
             </details>

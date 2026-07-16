@@ -25,7 +25,7 @@ const ghostButtonStyle = {
     padding: '8px 14px',
     borderRadius: 8,
     border: `0.5px solid ${theme.border}`,
-    background: 'rgba(255,255,255,0.03)',
+    background: 'rgba(15,23,42,0.03)',
     color: theme.text,
     fontSize: 13,
     fontWeight: 500,
@@ -252,7 +252,7 @@ export default function CustomersPage() {
                                 ),
                             },
                             { key: 'tickets', label: 'Tickets' },
-                            { key: 'lastContact', label: 'Last Contact', render: (row) => row.lastContact || '—' },
+                            { key: 'lastContact', label: 'Last Contact', render: (row) => row.lastContact || '-' },
                             {
                                 key: 'actions',
                                 label: 'Actions',

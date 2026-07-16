@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { PageHeader, Card, DataTable, StatusBadge, SearchInput, FilterSelect, PrimaryButton, Alert, Select } from './components/ui';
 import { adminApi, userApi } from './utils/apiClient';
 import { useAuth } from './hooks/useAuth';
-import { inputStyle } from './styles/theme';
+import { inputStyle, theme } from './styles/theme';
 import { Link } from 'react-router-dom';
 import { ROLE_API_VALUES } from './config/roleAccess';
 
@@ -120,7 +120,7 @@ export default function UserManagementPage() {
                     <PageHeader
                 title="User Management"
                 subtitle={auth.isAdmin
-                    ? <>Assign roles here. See the <Link to="/dashboard/roles" style={{ color: '#38BDF8' }}>Roles Overview</Link> for what each role can access.</>
+                    ? <>Assign roles here. See the <Link to="/dashboard/roles" style={{ color: '#1A4A9E' }}>Roles Overview</Link> for what each role can access.</>
                     : 'Manage system users and account status'}
                 action={(
                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -139,24 +139,24 @@ export default function UserManagementPage() {
 
             {showCreate && auth.isAdmin && (
                 <Card title="Create User" style={{ marginBottom: 20 }}>
-                    <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', marginBottom: 16 }}>
+                    <p style={{ fontSize: 13, color: 'rgba(15,23,42,0.55)', marginBottom: 16 }}>
                         A secure temporary password will be generated and emailed to the user. They must change it on first login.
                     </p>
                     <form onSubmit={handleCreateUser} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14 }}>
                         <div>
-                            <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.45)', marginBottom: 6 }}>Full name</label>
+                            <label style={{ display: 'block', fontSize: 12, color: theme.textDim, marginBottom: 6 }}>Full name</label>
                             <input value={createForm.fullName} onChange={handleCreateChange('fullName')} required style={inputStyle} />
                         </div>
                         <div>
-                            <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.45)', marginBottom: 6 }}>Email</label>
+                            <label style={{ display: 'block', fontSize: 12, color: theme.textDim, marginBottom: 6 }}>Email</label>
                             <input type="email" value={createForm.email} onChange={handleCreateChange('email')} required style={inputStyle} />
                         </div>
                         <div>
-                            <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.45)', marginBottom: 6 }}>Phone</label>
+                            <label style={{ display: 'block', fontSize: 12, color: theme.textDim, marginBottom: 6 }}>Phone</label>
                             <input value={createForm.phone} onChange={handleCreateChange('phone')} style={inputStyle} placeholder="+234..." />
                     </div>
                         <div>
-                            <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.45)', marginBottom: 6 }}>Role</label>
+                            <label style={{ display: 'block', fontSize: 12, color: theme.textDim, marginBottom: 6 }}>Role</label>
                             <Select value={createForm.role} onChange={handleCreateChange('role')}>
                                 {CREATE_ROLE_OPTIONS.map((opt) => (
                                     <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -164,11 +164,11 @@ export default function UserManagementPage() {
                             </Select>
                 </div>
                         <div>
-                            <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.45)', marginBottom: 6 }}>Company</label>
+                            <label style={{ display: 'block', fontSize: 12, color: theme.textDim, marginBottom: 6 }}>Company</label>
                             <input value={createForm.companyName} onChange={handleCreateChange('companyName')} style={inputStyle} />
                             </div>
                         <div>
-                            <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.45)', marginBottom: 6 }}>Customer type</label>
+                            <label style={{ display: 'block', fontSize: 12, color: theme.textDim, marginBottom: 6 }}>Customer type</label>
                             <Select value={createForm.customerType} onChange={handleCreateChange('customerType')}>
                                 <option value="individual">Individual</option>
                                 <option value="business">Business</option>
@@ -183,8 +183,8 @@ export default function UserManagementPage() {
                                 type="button"
                                 onClick={() => setShowCreate(false)}
                                 style={{
-                                    padding: '10px 16px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.15)',
-                                    background: 'transparent', color: 'rgba(255,255,255,0.7)', cursor: 'pointer',
+                                    padding: '10px 16px', borderRadius: 8, border: `1px solid ${theme.border}`,
+                                    background: 'transparent', color: theme.textMuted, cursor: 'pointer',
                                 }}
                             >
                                 Cancel
@@ -202,7 +202,7 @@ export default function UserManagementPage() {
                 </div>
 
                 {loading ? (
-                    <p style={{ color: 'rgba(255,255,255,0.5)' }}>Loading users...</p>
+                    <p style={{ color: 'rgba(15,23,42,0.55)' }}>Loading users...</p>
                 ) : (
                     <DataTable
                         columns={[
@@ -237,9 +237,9 @@ export default function UserManagementPage() {
                                 <button
                                     onClick={() => toggleStatus(row)}
                                     style={{
-                                        background: 'rgba(43,92,230,0.15)',
-                                        color: '#38BDF8',
-                                        border: '0.5px solid rgba(56,189,248,0.3)',
+                                        background: 'rgba(0,45,114,0.15)',
+                                        color: '#1A4A9E',
+                                        border: '0.5px solid rgba(0,45,114,0.3)',
                                         borderRadius: 8,
                                         padding: '6px 12px',
                                         cursor: 'pointer',
@@ -248,7 +248,7 @@ export default function UserManagementPage() {
                                 >
                                     {row.active ? 'Deactivate' : 'Activate'}
                                 </button>
-                            ) : '—' },
+                            ) : '-' },
                         ]}
                         rows={filtered}
                         emptyMessage="No users match your filters."

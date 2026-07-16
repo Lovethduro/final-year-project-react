@@ -83,7 +83,7 @@ export function QuoteGuestChat({ token, compact = false, onInvalidToken }) {
 
     const inputStyle = {
         flex: 1,
-        background: 'rgba(255,255,255,0.05)',
+        background: 'rgba(15,23,42,0.04)',
         border: `0.5px solid ${theme.border}`,
         borderRadius: 8,
         padding: '10px 12px',
@@ -170,8 +170,7 @@ export function QuoteGuestChat({ token, compact = false, onInvalidToken }) {
                                     padding: '10px 18px',
                                     borderRadius: 8,
                                     border: 'none',
-                                    background: theme.primary,
-                                    color: '#fff',
+                                    background: theme.primary, color: '#fff',
                                     fontWeight: 600,
                                     cursor: 'pointer',
                                     opacity: sending || !text.trim() ? 0.6 : 1,

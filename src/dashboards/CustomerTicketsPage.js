@@ -91,7 +91,7 @@ export default function CustomerTicketsPage() {
         }
     };
 
-    const inputStyle = { width: '100%', background: 'rgba(255,255,255,0.05)', border: `0.5px solid ${theme.border}`, borderRadius: 8, padding: 10, color: theme.text, fontFamily: theme.fontBody, marginBottom: 12 };
+    const inputStyle = { width: '100%', background: 'rgba(15,23,42,0.04)', border: `0.5px solid ${theme.border}`, borderRadius: 8, padding: 10, color: theme.text, fontFamily: theme.fontBody, marginBottom: 12 };
 
     return (
         <>
@@ -175,7 +175,7 @@ export default function CustomerTicketsPage() {
                                 marginBottom: 12,
                                 borderRadius: 8,
                                 border: `0.5px solid ${theme.accent}55`,
-                                background: 'rgba(56,189,248,0.08)',
+                                background: 'rgba(0,45,114,0.08)',
                                 padding: '10px 12px',
                                 fontSize: 12,
                                 color: theme.textMuted,

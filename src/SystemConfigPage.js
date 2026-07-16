@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { PageHeader, Card, PrimaryButton, Alert } from './components/ui';
 import { adminApi } from './utils/apiClient';
-import { inputStyle } from './styles/theme';
+import { inputStyle, theme } from './styles/theme';
 
-const labelStyle = { display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.45)', marginBottom: 6 };
+const labelStyle = { display: 'block', fontSize: 12, color: theme.textDim, marginBottom: 6 };
 
 export default function SystemConfigPage() {
     const [saved, setSaved] = useState(false);
@@ -13,9 +13,9 @@ export default function SystemConfigPage() {
         appName: 'CyForce CRM',
         supportEmail: 'support@cyforce.com',
         supportPhone: '+234 800 CYFORCE',
-        liveChatHours: 'Available 9 AM – 6 PM (WAT)',
-        slaUrgent: '2–4 hours',
-        slaHigh: '8–12 hours',
+        liveChatHours: 'Available 9 AM - 6 PM (WAT)',
+        slaUrgent: '2-4 hours',
+        slaHigh: '8-12 hours',
         slaMedium: '24 hours',
         slaLow: '48 hours',
         sessionTimeout: '30',
@@ -148,7 +148,7 @@ export default function SystemConfigPage() {
                             { key: 'maintenanceMode', label: 'Maintenance Mode' },
                             { key: 'emailNotifications', label: 'Email Notifications' },
                         ].map((item) => (
-                            <label key={item.key} style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'rgba(255,255,255,0.8)', fontSize: 14 }}>
+                            <label key={item.key} style={{ display: 'flex', alignItems: 'center', gap: 10, color: theme.text, fontSize: 14 }}>
                                 <input type="checkbox" checked={config[item.key]} onChange={handleChange(item.key)} />
                                 {item.label}
                             </label>
